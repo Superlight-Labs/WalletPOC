@@ -51,7 +51,6 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     paddingBottom: 24,
     maxHeight: "80%",
-    marginBottom: 30,
   },
   heading: {
     fontSize: 18,

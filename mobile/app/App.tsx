@@ -20,14 +20,15 @@ import { RecoilRoot } from "recoil";
 import { NavigationRoutes } from "shared/types/navigation";
 
 import EthereumScreen from "ethereum/view/ethereum-screen";
+import TokenUniswapScreen from "ethereum/view/swap/token-uniswap-screen";
+import TokenSendScreen from "ethereum/view/tokens/wallet/send/token-send-screen";
 import TokenWalletScreen from "ethereum/view/tokens/wallet/token-wallet-screen";
 import EthereumReceiveScreen from "ethereum/view/wallet/receive/ethereum-receive-screen";
 import EthereumSendScreen from "ethereum/view/wallet/send/ethereum-send-screen";
 import { EthereumSingleTransactionScreen } from "ethereum/view/wallet/transaction/ethereum-single-transaction-screen";
+import EthereumZkSyncScreen from "ethereum/view/wallet/zk-sync/ethereum-zk-sync-screen";
 import Header from "./shared/header";
 import Home from "./views/home";
-import TokenSendScreen from "ethereum/view/tokens/wallet/send/token-send-screen";
-import TokenUniswapScreen from "ethereum/view/swap/token-uniswap-screen";
 
 const App = () => {
   const isDarkMode = useColorScheme() === "dark";
@@ -53,6 +54,11 @@ const App = () => {
                 name="EthereumSendScreen"
                 component={EthereumSendScreen}
                 options={{ title: "Send Ethereum" }}
+              />
+              <Stack.Screen
+                name="EthereumZkSyncScreen"
+                component={EthereumZkSyncScreen}
+                options={{ title: "Ethereum - ZkSync" }}
               />
               <Stack.Screen
                 name="EthereumReceiveScreen"

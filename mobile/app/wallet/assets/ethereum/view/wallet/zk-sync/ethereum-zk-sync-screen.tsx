@@ -1,40 +1,100 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { config } from "ethereum/config/ethereum-config";
+import { gWeiToEth } from "ethereum/controller/ethereum-utils";
+import { BigNumber, ethers } from "ethers";
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { NavigationRoutes } from "shared/types/navigation";
 import { getDefaultProvider, Wallet } from "zksync";
+import { Network } from "zksync/build/types";
 
 type Props = NativeStackScreenProps<NavigationRoutes, "EthereumZkSyncScreen">;
 
 const EthereumZkSyncScreen = ({ route }: Props) => {
   const [zkWallet, setZkWallet] = useState<Wallet>();
+  const [zkBalance, setZkBalance] = useState<BigNumber>();
+  const [depositVal, setDepositVal] = useState("");
   const signer = route.params.signer;
 
-  const setupZkSync = useCallback(async () => {
-    if (!signer) return;
-
-    const provider = await getDefaultProvider("goerli");
+  const createZkWallet = useCallback(async () => {
+    if (!signer) throw new Error("Signer is undefined, cannot access ZK-Wallet View without Signer");
+    console.log("creating zk");
+    const provider = await getDefaultProvider(config.chain as Network);
     const wallet = await Wallet.fromEthSigner(signer, provider);
-
     setZkWallet(wallet);
+    console.log("Set zkwallet", wallet);
   }, [setZkWallet, signer]);
+
+  const unlockZkAccount = useCallback(async () => {
+    if (zkWallet && !(await zkWallet.isSigningKeySet())) {
+      if ((await zkWallet.getAccountId()) == undefined) {
+        throw new Error("Unknown account");
+      }
+
+      const changePubkey = await zkWallet.setSigningKey({
+        feeToken: "ETH",
+        ethAuthType: "ECDSA",
+      });
+
+      await changePubkey.awaitReceipt();
+    }
+  }, [zkWallet]);
+
+  const setBalance = useCallback(async () => {
+    if (!zkWallet) throw new Error("ZkWallet is undefined, balance refresh is not possible");
+
+    const verifiedETHBalance = await zkWallet.getBalance("ETH", "verified");
+
+    setZkBalance(verifiedETHBalance);
+  }, [setZkBalance, zkWallet]);
+
+  const setupZkSync = useCallback(async () => {
+    await createZkWallet();
+    // await unlockZkAccount();
+    // setBalance();
+  }, [zkWallet]);
 
   useEffect(() => {
     setupZkSync();
   }, []);
 
+  const deposit = useCallback(async () => {
+    if (!zkWallet) throw new Error("ZkWallet is undefined, deposit not possible");
+
+    const gweis = Number.parseInt(depositVal);
+    const eth = gWeiToEth(gweis);
+
+    const deposit = await zkWallet.depositToSyncFromEthereum({
+      depositTo: zkWallet.address(),
+      token: "ETH",
+      amount: ethers.utils.parseEther(eth.toString()),
+    });
+
+    console.log("Depost result", deposit);
+  }, [zkWallet]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>ZK-Sync</Text>
-      <View style={styles.pickerArea}>
-        <Text style={styles.pickerHeading}>From</Text>
-
-        <Text style={styles.availableValueText}>Available: </Text>
+      <View style={styles.area}>
+        <Text style={styles.pickerHeading}>Current Ethereum Balance manged with ZK-Sync</Text>
+        <Text style={styles.availableValueText}>{zkBalance?.toString()}</Text>
       </View>
 
-      <TouchableOpacity style={styles.actionButton}>
-        <Text style={styles.actionButtonText}>Swap</Text>
-      </TouchableOpacity>
+      <View style={styles.area}>
+        <Text>Wallet is defined: {!!zkWallet + ""}</Text>
+      </View>
+
+      <View style={styles.area}>
+        <Text>Transfer Eth to zkSync</Text>
+        <TextInput onChangeText={setDepositVal} value={depositVal} placeholder="Amount to deposit (gWei)" />
+        <TouchableOpacity style={styles.actionButton} onPress={deposit}>
+          <Text style={styles.actionButtonText}>Deposit!</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton} onPress={setBalance}>
+          <Text style={styles.actionButtonText}>Refresh ZkBalance</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -51,52 +111,14 @@ const styles = StyleSheet.create({
     margin: 12,
     paddingBottom: 24,
   },
-  heading: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  pickerArea: {
-    justifyContent: "flex-start",
+  area: {
+    // marginBottom: 100,
   },
   pickerHeading: {
-    position: "absolute",
     marginTop: 20,
     marginLeft: 12,
     fontSize: 18,
     fontWeight: "bold",
-  },
-  tokenPicker: {
-    borderRadius: 12,
-    borderColor: "lightgrey",
-    borderWidth: 1,
-    marginTop: 12,
-  },
-  tokenPickerItem: {
-    height: 120,
-  },
-  arrowDown: {
-    textAlign: "center",
-    marginTop: 12,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  input: {
-    backgroundColor: "#f7f7f7",
-    padding: 12,
-    marginTop: 14,
-    borderRadius: 10,
-    fontSize: 14,
-  },
-  actionButtonDisabled: {
-    opacity: 0.5,
-    height: 42,
-    width: "100%",
-    backgroundColor: "#1a1e3c",
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 14,
   },
   actionButton: {
     height: 42,
@@ -105,7 +127,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 14,
+    marginVertical: 10,
   },
   actionButtonText: {
     color: "white",
@@ -113,17 +135,6 @@ const styles = StyleSheet.create({
   },
   availableValueText: {
     textAlign: "right",
-    marginTop: 4,
-  },
-  routeErrorText: {
-    color: "red",
-    textAlign: "right",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  feesText: {
-    textAlign: "right",
-    fontSize: 12,
     marginTop: 4,
   },
 });

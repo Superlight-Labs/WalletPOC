@@ -2,7 +2,7 @@ import { POSClient, setProofApi, use } from "@maticnetwork/maticjs";
 import Web3ClientPlugin from "@maticnetwork/maticjs-ethers";
 import { PlasmaClient } from "@maticnetwork/maticjs-plasma";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { MPCSigner } from "ethereum/controller/zksync/signer";
+import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { ethers } from "ethers";
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text } from "react-native";
@@ -35,13 +35,13 @@ const EthereumPolygonScreen = ({ route, navigation }: Props) => {
       parent: {
         provider: signer,
         defaultConfig: {
-          from: address,
+          from: address.address,
         },
       },
       child: {
         provider: childSigner,
         defaultConfig: {
-          from: address,
+          from: address.address,
         },
       },
     };

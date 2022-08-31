@@ -3,7 +3,7 @@ import "@ethersproject/shims";
 import { CurrencyAmount, Percent, Token, TradeType } from "@uniswap/sdk-core";
 import { AlphaRouter, SwapRoute } from "@uniswap/smart-order-router";
 import { ERC20Token } from "ethereum/config/token-constants";
-import { MPCSigner } from "ethereum/controller/zksync/signer";
+import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { BigNumber, ethers } from "ethers";
 import JSBI from "jsbi";
 

@@ -2,7 +2,7 @@ import { User } from "api-types/user";
 import { alchemyProviderKey, config } from "ethereum/config/ethereum-config";
 import { ethers } from "ethers";
 import { Address } from "wallet/types/wallet";
-import { MPCSigner } from "../zksync/signer";
+import { MPCSigner } from "./mpc-signer";
 
 /**
  * Prepares mpc Signer with Alchemy Provider

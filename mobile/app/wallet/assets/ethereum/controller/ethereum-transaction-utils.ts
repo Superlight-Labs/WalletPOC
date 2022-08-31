@@ -3,7 +3,7 @@ import { ERC20Token } from "ethereum/config/token-constants";
 import { ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";
 import { EthereumProviderEnum } from "packages/blockchain-api-client/src/blockchains/ethereum/ethereum-factory";
-import { MPCSigner } from "./zksync/signer";
+import { MPCSigner } from "./signers/mpc-signer";
 
 export const buildRawTransaction = (
   to: string,

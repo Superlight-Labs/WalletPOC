@@ -5,7 +5,7 @@ import {
   EthereumSwappingService,
 } from "packages/blockchain-api-client/src/blockchains/ethereum/ethereum-swapping-service";
 import { ZeroExSwapQuote } from "packages/blockchain-api-client/src/provider/0x/ethereum/0x-ethereum-types";
-import { MPCSigner } from "../zksync/signer";
+import { MPCSigner } from "../signers/mpc-signer";
 
 export const getSwapQuote = async (
   tokenFrom: ERC20Token,

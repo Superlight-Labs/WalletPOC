@@ -19,7 +19,7 @@ const PolygonTokenWalletScreen = ({ route, navigation }: Props) => {
         <Text style={styles.heading}>{token.name} Wallet</Text>
       </View>
 
-      <TokenBalanceView address={address} childErc20={childErc20} token={token} />
+      <TokenBalanceView address={address.address} childErc20={childErc20} token={token} />
 
       <View style={styles.actionArea}>
         <TouchableOpacity
@@ -30,7 +30,7 @@ const PolygonTokenWalletScreen = ({ route, navigation }: Props) => {
         </TouchableOpacity>
       </View>
 
-      <TokenTransactionsView address={address} token={token} />
+      <TokenTransactionsView address={address.address} token={token} />
     </ScrollView>
   );
 };

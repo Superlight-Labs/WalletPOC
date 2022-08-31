@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { config } from "ethereum/config/ethereum-config";
 import { EthereumAccountBuilder } from "ethereum/controller/ethereum-account-creation";
-import { MPCSigner } from "ethereum/controller/zksync/signer";
+import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { EthereumWalletsState, ethereumWalletsState } from "ethereum/state/ethereum-atoms";
 import { ethers } from "ethers";
 import React, { useCallback, useEffect, useState } from "react";
@@ -85,7 +85,7 @@ const EthereumScreen = ({ navigation, route }: Props) => {
                 style={styles.polygonButton}
                 onPress={() =>
                   navigation.navigate("EthereumPolygonScreen", {
-                    address: wallet.external.addresses[0].address,
+                    address: wallet.external.addresses[0],
                     signer,
                   })
                 }

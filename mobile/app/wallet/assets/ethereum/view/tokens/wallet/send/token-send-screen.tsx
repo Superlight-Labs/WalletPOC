@@ -6,7 +6,7 @@ import {
   gaslessOneTimeApprove,
 } from "ethereum/controller/gasless/ethereum-gasless-expensiv-utils";
 import { gaslessTransfer, gaslessTransferWithAuthorization } from "ethereum/controller/gasless/ethereum-gasless-utils";
-import { MPCSigner } from "ethereum/controller/zksync/signer";
+import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import { BigNumber, ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";

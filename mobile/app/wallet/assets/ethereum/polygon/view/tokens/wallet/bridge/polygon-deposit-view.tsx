@@ -1,7 +1,7 @@
 import { POSClient } from "@maticnetwork/maticjs";
 import { Picker } from "@react-native-picker/picker";
 import { erc20Tokens, ethereum, PolygonERC20Token } from "ethereum/polygon/config/tokens";
-import { depositToken, getTokenBalance } from "ethereum/polygon/controller/polygon-token-utils";
+import { depositToken, getEthereumTokenBalance } from "ethereum/polygon/controller/polygon-token-utils";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { styles } from "./polygon-bridge-style";
@@ -35,9 +35,7 @@ const PolygonDepositView = ({ address, polygonClient }: Props) => {
   const updateBalance = async (token: PolygonERC20Token) => {
     setLoadingBalance(true);
 
-    const balance = await getTokenBalance(polygonClient, token.ethereumAddress, address);
-
-    console.log(balance);
+    const balance = await getEthereumTokenBalance(token, address);
 
     setAvailableBalance(balance);
     setLoadingBalance(false);
@@ -47,7 +45,7 @@ const PolygonDepositView = ({ address, polygonClient }: Props) => {
     const receipt = await depositToken(
       polygonClient,
       allTokens[selectedInputTokenIndex].ethereumAddress,
-      address,
+      address.address,
       parseInt(inputValue, 10)
     );
 

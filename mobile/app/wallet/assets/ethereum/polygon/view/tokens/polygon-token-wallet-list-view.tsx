@@ -5,13 +5,15 @@ import { erc20Tokens } from "ethereum/polygon/config/tokens";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { NavigationRoutes } from "shared/types/navigation";
+import { Address } from "wallet/types/wallet";
 import { styles } from "../ethereum-polygon-styles";
+
 type Props = NativeStackScreenProps<NavigationRoutes, "TokenWalletScreen">;
 
 type PolygonTokenWalletListViewProps = {
   posClient: POSClient;
   plasmaClient: PlasmaClient;
-  address: string;
+  address: Address;
   navigation: NativeStackNavigationProp<NavigationRoutes, "EthereumPolygonScreen", undefined>;
 };
 

@@ -4,12 +4,13 @@ import { ERC20 } from "@maticnetwork/maticjs/dist/ts/pos/erc20";
 import { User } from "api-types/user";
 import { BitcoinWallet } from "bitcoin/types/bitcoin";
 import { ERC20Token } from "ethereum/config/token-constants";
-import { MPCSigner } from "ethereum/controller/zksync/signer";
+import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import { EthereumService } from "packages/blockchain-api-client/src";
 import { BitcoinTransaction } from "packages/blockchain-api-client/src/blockchains/bitcoin/types";
 import { EthereumTransaction } from "packages/blockchain-api-client/src/blockchains/ethereum/types";
+import { Address } from "wallet/types/wallet";
 
 type NavigationRoutes = {
   Home: undefined;
@@ -32,15 +33,14 @@ type NavigationRoutes = {
   TokenSwapScreen: { wallet: EthereumWallet };
 
   //Ethereum Polygon Screens
-  EthereumPolygonScreen: { address: string; signer?: MPCSigner };
+  EthereumPolygonScreen: { address: Address; signer?: MPCSigner };
 
-  PolygonTokenWalletScreen: { address: string; token: PolygonERC20Token; polygonClient: POSClient };
+  PolygonTokenWalletScreen: { address: Address; token: PolygonERC20Token; polygonClient: POSClient };
   PolygonTokenSendScreen: { childErc20: ERC20; token: PolygonERC20Token };
 
-  PolygonBridgeScreen: { address: string; posClient: POSClient; plasmaClient: PlasmaClient };
+  PolygonBridgeScreen: { address: Address; posClient: POSClient; plasmaClient: PlasmaClient };
 
   //Ramp it on
 
   RampOn: { userAddress: string; token: string };
-
 };

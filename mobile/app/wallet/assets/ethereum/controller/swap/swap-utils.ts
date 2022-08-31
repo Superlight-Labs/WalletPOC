@@ -1,8 +1,8 @@
-import { ERC20Token } from "ethereum/config/token-constants";
-import { BigNumberish, ethers, BigNumber } from "ethers";
-import { MPCSigner } from "../zksync/signer";
-import { abi as ERC20ABI } from "@uniswap/v2-core/build/ERC20.json";
 import { Provider } from "@ethersproject/abstract-provider";
+import { abi as ERC20ABI } from "@uniswap/v2-core/build/ERC20.json";
+import { ERC20Token } from "ethereum/config/token-constants";
+import { BigNumber, BigNumberish, ethers } from "ethers";
+import { MPCSigner } from "../signers/mpc-signer";
 
 /**
  * Approves amount of token to be used for swapping

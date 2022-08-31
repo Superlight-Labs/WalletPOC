@@ -4,8 +4,8 @@ import { ERC20Token } from "ethereum/config/token-constants";
 import { BigNumber, ethers } from "ethers";
 import { fetchFromApi, HttpMethod } from "lib/http";
 import { Address } from "wallet/types/wallet";
-import { getPreparedMpcSigner, getPreparedProvider } from "../signers/alchemy-signer";
-import { usdcAbi } from "./usdc-abi";
+import { usdcAbi } from "../../config/abi/usdc-abi";
+import { getPreparedMpcSigner, getPreparedProvider } from "../signers/ethereum-alchemy-signer";
 
 export const gaslessOneTimeApprove = async (address: Address, user: User, token: ERC20Token) => {
   const mpcSigner = getPreparedMpcSigner(address, user);

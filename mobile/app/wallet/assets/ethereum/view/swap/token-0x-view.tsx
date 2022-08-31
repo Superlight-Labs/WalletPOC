@@ -1,9 +1,9 @@
 import { Picker } from "@react-native-picker/picker";
 import { ERC20Token, erc20Tokens } from "ethereum/config/token-constants";
 import { getBalanceFromEthereumTokenBalance, weiToEth } from "ethereum/controller/ethereum-utils";
+import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { getSwapQuote, swapWithQuote } from "ethereum/controller/swap/0x-utils";
 import { approveAmount, checkAllowance } from "ethereum/controller/swap/swap-utils";
-import { MPCSigner } from "ethereum/controller/zksync/signer";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import { ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";

@@ -33,10 +33,15 @@ type NavigationRoutes = {
   TokenSwapScreen: { wallet: EthereumWallet };
 
   //Ethereum Polygon Screens
-  EthereumPolygonScreen: { address: Address; signer?: MPCSigner };
+  EthereumPolygonScreen: { wallet: EthereumWallet; address: Address; signer?: MPCSigner };
 
-  PolygonTokenWalletScreen: { address: Address; token: PolygonERC20Token; polygonClient: POSClient };
-  PolygonTokenSendScreen: { childErc20: ERC20; token: PolygonERC20Token };
+  PolygonTokenWalletScreen: {
+    wallet: EthereumWallet;
+    address: Address;
+    token: PolygonERC20Token;
+    polygonClient: POSClient;
+  };
+  PolygonTokenSendScreen: { wallet: EthereumWallet; childErc20: ERC20; token: PolygonERC20Token };
 
   PolygonBridgeScreen: { address: Address; posClient: POSClient; plasmaClient: PlasmaClient };
 

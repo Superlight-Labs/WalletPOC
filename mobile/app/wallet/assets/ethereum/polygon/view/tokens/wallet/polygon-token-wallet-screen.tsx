@@ -9,7 +9,7 @@ import TokenTransactionsView from "./transaction/polygon-token-transactions-view
 type Props = NativeStackScreenProps<NavigationRoutes, "PolygonTokenWalletScreen">;
 
 const PolygonTokenWalletScreen = ({ route, navigation }: Props) => {
-  const { token, address, polygonClient } = route.params;
+  const { token, address, polygonClient, wallet } = route.params;
 
   const childErc20 = polygonClient.erc20(token.polygonAddress, false);
 
@@ -24,7 +24,7 @@ const PolygonTokenWalletScreen = ({ route, navigation }: Props) => {
       <View style={styles.actionArea}>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => navigation.navigate("PolygonTokenSendScreen", { token, childErc20 })}
+          onPress={() => navigation.navigate("PolygonTokenSendScreen", { wallet, token, childErc20 })}
         >
           <Text style={styles.actionButtonText}>Send</Text>
         </TouchableOpacity>

@@ -85,6 +85,7 @@ const EthereumScreen = ({ navigation, route }: Props) => {
                 style={styles.polygonButton}
                 onPress={() =>
                   navigation.navigate("EthereumPolygonScreen", {
+                    wallet: wallet,
                     address: wallet.external.addresses[0],
                     signer,
                   })

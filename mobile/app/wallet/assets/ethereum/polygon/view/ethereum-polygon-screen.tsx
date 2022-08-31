@@ -16,7 +16,7 @@ type Props = NativeStackScreenProps<NavigationRoutes, "EthereumPolygonScreen">;
 const EthereumPolygonScreen = ({ route, navigation }: Props) => {
   const [posClient, setPosClient] = useState<POSClient>();
   const [plasmaClient, setPlasmaClient] = useState<PlasmaClient>();
-  const { signer, address } = route.params;
+  const { signer, address, wallet } = route.params;
 
   const createPolygonAccount = useCallback(async () => {
     if (!signer) throw new Error("Signer is undefined, cannot access Polygon Client View without Signer");
@@ -77,13 +77,14 @@ const EthereumPolygonScreen = ({ route, navigation }: Props) => {
       }}
     >
       <PolygonTokenWalletListView
+        wallet={wallet}
         address={address}
         navigation={navigation}
         plasmaClient={plasmaClient}
         posClient={posClient}
       />
-      <PolygonPendingWithdrawList posClient={posClient} plasmaClient={plasmaClient} address={address} />
-      <PolygonCheckTransaction polygonClient={posClient} />
+      <PolygonPendingWithdrawList polygonClient={polygonClient} address={address} />
+      <PolygonCheckTransaction polygonClient={polygonClient} />
     </ScrollView>
   );
 };

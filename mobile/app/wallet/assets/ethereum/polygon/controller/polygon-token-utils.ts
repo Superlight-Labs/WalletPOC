@@ -83,7 +83,7 @@ export const getEthereumErc20Balance = async (address: Address, token: PolygonER
 
 export const getPolygonErc20Balance = async (address: Address, token: PolygonERC20Token): Promise<string> => {
   const provider = getPreparedPolygonProvider();
-  const tokenContract = new ethers.Contract(token.ethereumAddress, usdcAbi, provider);
+  const tokenContract = new ethers.Contract(token.polygonAddress, usdcAbi, provider);
   const balance = await tokenContract.balanceOf(address.address);
   return balance.toString();
 };

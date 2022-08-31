@@ -16,7 +16,7 @@ type PolygonTokenWalletListViewProps = {
   plasmaClient: PlasmaClient;
   address: Address;
   wallet: EthereumWallet;
-  navigation: NativeStackNavigationProp<NavigationRoutes, "EthereumPolygonScreen", undefined>;
+  navigation: NativeStackNavigationProp<NavigationRoutes, "PolygonScreen", undefined>;
 };
 
 const PolygonTokenWalletListView = ({
@@ -37,19 +37,22 @@ const PolygonTokenWalletListView = ({
           <Text style={styles.headerButtonText}>Polygon Bridge</Text>
         </TouchableOpacity>
       </View>
+
       {erc20Tokens.map((token) => {
         return (
-          <TouchableOpacity
-            style={styles.actionButton}
-            key={token.polygonAddress}
-            onPress={() =>
-              navigation.navigate("PolygonTokenWalletScreen", { wallet, token, polygonClient: posClient, address })
-            }
-          >
-            <Text style={styles.actionButtonText}>
-              {token.name} Wallet {"\u2192"}
-            </Text>
-          </TouchableOpacity>
+          token.isToken != false && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              key={token.polygonAddress}
+              onPress={() =>
+                navigation.navigate("PolygonTokenWalletScreen", { wallet, token, polygonClient: posClient, address })
+              }
+            >
+              <Text style={styles.actionButtonText}>
+                {token.name} Wallet {"\u2192"}
+              </Text>
+            </TouchableOpacity>
+          )
         );
       })}
     </View>

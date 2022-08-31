@@ -84,7 +84,7 @@ const EthereumScreen = ({ navigation, route }: Props) => {
               <TouchableOpacity
                 style={styles.polygonButton}
                 onPress={() =>
-                  navigation.navigate("EthereumPolygonScreen", {
+                  navigation.navigate("PolygonScreen", {
                     wallet: wallet,
                     address: wallet.external.addresses[0],
                     signer,

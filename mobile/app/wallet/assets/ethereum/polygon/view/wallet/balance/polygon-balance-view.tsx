@@ -1,44 +1,36 @@
-import { ERC20 } from "@maticnetwork/maticjs/dist/ts/pos/erc20";
-import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
+import { erc20Tokens } from "ethereum/polygon/config/tokens";
+import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
 import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Address } from "wallet/types/wallet";
 
-type TokenBalanceProps = {
-  address: string;
-  childErc20: ERC20;
-  token: PolygonERC20Token;
+type PolygonBalanceProps = {
+  address: Address;
 };
 
-export const TokenBalanceView = ({ address, token, childErc20 }: TokenBalanceProps) => {
+export const PolygonBalanceView = ({ address }: PolygonBalanceProps) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [tokenBalance, setTokenBalance] = useState<string>();
+  const [balance, setBalance] = useState<string>("0");
 
   useEffect(() => {
-    updateBalance();
+    updateBalanceFunction();
   }, []);
 
-  const updateBalance = () => {
-    const loadBalance = async () => {
-      setLoading(true);
-
-      const balance = await childErc20.getBalance(address);
-
-      setTokenBalance(balance);
-      setLoading(false);
-    };
-    loadBalance();
+  const updateBalanceFunction = async () => {
+    setLoading(true);
+    const balance = await getPolygonErc20Balance(address, erc20Tokens[0]);
+    setBalance(balance);
+    setLoading(false);
   };
 
   return (
     <View style={styles.balanceContainer}>
       <View style={{ flexDirection: "row" }}>
-        <Text style={styles.balanceText}>
-          {tokenBalance ? ethers.utils.formatUnits(tokenBalance, token.decimals) : "0"} {token.symbol}
-        </Text>
+        <Text style={styles.balanceText}>{ethers.utils.formatUnits(balance, erc20Tokens[0].decimals)} Matic</Text>
         {loading && <ActivityIndicator />}
       </View>
-      <TouchableOpacity onPress={updateBalance}>
+      <TouchableOpacity onPress={updateBalanceFunction}>
         <Image
           style={styles.reloadIcon}
           source={{

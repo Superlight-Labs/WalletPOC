@@ -5,13 +5,15 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { ethers } from "ethers";
 import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView, Text } from "react-native";
+import { Text } from "react-native";
 import { NavigationRoutes } from "shared/types/navigation";
+import Wallets from "wallet/view/generic-wallet-screen";
 import PolygonCheckTransaction from "./polygon-check-transaction";
 import PolygonTokenWalletListView from "./tokens/polygon-token-wallet-list-view";
 import PolygonPendingWithdrawList from "./tokens/wallet/bridge/withdraw/polygon-pending-withdraw-list-view";
+import PolygonWalletView from "./wallet/polygon-wallet";
 
-type Props = NativeStackScreenProps<NavigationRoutes, "EthereumPolygonScreen">;
+type Props = NativeStackScreenProps<NavigationRoutes, "PolygonScreen">;
 
 const EthereumPolygonScreen = ({ route, navigation }: Props) => {
   const [posClient, setPosClient] = useState<POSClient>();
@@ -70,12 +72,7 @@ const EthereumPolygonScreen = ({ route, navigation }: Props) => {
   }
 
   return (
-    <ScrollView
-      scrollEnabled={true}
-      style={{
-        maxHeight: "80%",
-      }}
-    >
+    <Wallets style={{ backgroundColor: "#8fa2ff" }} name="Polygon">
       <PolygonTokenWalletListView
         wallet={wallet}
         address={address}
@@ -83,9 +80,10 @@ const EthereumPolygonScreen = ({ route, navigation }: Props) => {
         plasmaClient={plasmaClient}
         posClient={posClient}
       />
-      <PolygonPendingWithdrawList polygonClient={polygonClient} address={address} />
+      <PolygonWalletView wallet={wallet} navigation={navigation} />
+      <PolygonPendingWithdrawList polygonClient={polygonClient} address={address.address} />
       <PolygonCheckTransaction polygonClient={polygonClient} />
-    </ScrollView>
+    </Wallets>
   );
 };
 

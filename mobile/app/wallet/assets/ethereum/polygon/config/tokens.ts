@@ -9,6 +9,16 @@ export const etherAddress = "0";
 
 const main: PolygonERC20Token[] = [
   {
+    name: "Matic Token",
+    symbol: "MATIC",
+    polygonAddress: "0x0000000000000000000000000000000000001010",
+    ethereumAddress: "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
+    decimals: 18,
+    hasPermit: false,
+    hasTransferWithAuthorization: false,
+    isToken: false,
+  },
+  {
     name: "Wrapped Ether",
     symbol: "WETH",
     polygonAddress: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
@@ -28,19 +38,19 @@ const main: PolygonERC20Token[] = [
     hasTransferWithAuthorization: true,
     isToken: true,
   },
+];
+
+const test: PolygonERC20Token[] = [
   {
     name: "Matic Token",
     symbol: "MATIC",
     polygonAddress: "0x0000000000000000000000000000000000001010",
-    ethereumAddress: "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
+    ethereumAddress: "0x499d11E0b6eAC7c0593d8Fb292DCBbF815Fb29Ae",
     decimals: 18,
     hasPermit: false,
     hasTransferWithAuthorization: false,
     isToken: false,
   },
-];
-
-const test: PolygonERC20Token[] = [
   {
     name: "Wrapped Ether",
     symbol: "WETH",
@@ -60,16 +70,6 @@ const test: PolygonERC20Token[] = [
     hasPermit: false,
     hasTransferWithAuthorization: false,
     isToken: true,
-  },
-  {
-    name: "Matic Token",
-    symbol: "MATIC",
-    polygonAddress: "0x0000000000000000000000000000000000001010",
-    ethereumAddress: "0x499d11E0b6eAC7c0593d8Fb292DCBbF815Fb29Ae",
-    decimals: 18,
-    hasPermit: false,
-    hasTransferWithAuthorization: false,
-    isToken: false,
   },
   {
     name: "USDC",

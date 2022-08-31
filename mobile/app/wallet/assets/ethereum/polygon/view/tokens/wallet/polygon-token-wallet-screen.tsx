@@ -14,29 +14,34 @@ const PolygonTokenWalletScreen = ({ route, navigation }: Props) => {
   const childErc20 = polygonClient.erc20(token.polygonAddress, false);
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.headingArea}>
-        <Text style={styles.heading}>{token.name} Wallet</Text>
+    <ScrollView style={styles.scrollview}>
+      <View style={styles.container}>
+        <View style={styles.headingArea}>
+          <Text style={styles.heading}>{token.name} Wallet</Text>
+        </View>
+
+        <TokenBalanceView address={address.address} childErc20={childErc20} token={token} />
+
+        <View style={styles.actionArea}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => navigation.navigate("PolygonTokenSendScreen", { wallet, token, childErc20 })}
+          >
+            <Text style={styles.actionButtonText}>Send</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TokenTransactionsView address={address.address} token={token} />
       </View>
-
-      <TokenBalanceView address={address.address} childErc20={childErc20} token={token} />
-
-      <View style={styles.actionArea}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => navigation.navigate("PolygonTokenSendScreen", { wallet, token, childErc20 })}
-        >
-          <Text style={styles.actionButtonText}>Send</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TokenTransactionsView address={address.address} token={token} />
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   ...polygonStyles,
+  scrollview: {
+    backgroundColor: "#8fa2ff",
+  },
   actionArea: {
     flex: 1,
     flexDirection: "row",

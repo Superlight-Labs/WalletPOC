@@ -12,12 +12,18 @@ export interface GaslessTransactionResponse {
   transaction: any;
 }
 
+export interface GaslessGetRequest {
+  network: string;
+}
+
 export interface GaslessApproveRequest {
+  network: string;
   contractAddress: string;
   receiver: string;
 }
 
 export interface GaslessPermitRequest {
+  network: string;
   contractAddress: string;
   owner: string;
   spender: string;
@@ -29,6 +35,7 @@ export interface GaslessPermitRequest {
 }
 
 export interface GaslessTransferRequest {
+  network: string;
   contractAddress: string;
   from: string;
   to: string;
@@ -36,6 +43,7 @@ export interface GaslessTransferRequest {
 }
 
 export interface GaslessTransferWithAuthorizationRequest {
+  network: string;
   contractAddress: string;
   from: string;
   to: string;

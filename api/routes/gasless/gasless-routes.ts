@@ -2,6 +2,7 @@ import { nonceRoute } from "@lib/route";
 import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
 import {
   GaslessApproveRequest,
+  GaslessGetRequest,
   GaslessPermitRequest,
   GaslessTransactionResponse,
   GaslessTransferRequest,
@@ -12,18 +13,18 @@ import {
 import {
   fetchTankAddress,
   fetchTankBalance,
+  gaslessApprove,
   relayGaslessPermit,
   relayGaslessTransfer,
   relayGaslessTransferWithAuthorization,
-  gaslessApprove,
 } from "./gasless.service";
 
-const getTankBalance = async (): Promise<TankBalanceResponse> => {
-  return await fetchTankBalance();
+const getTankBalance = async (req: FastifyRequest): Promise<TankBalanceResponse> => {
+  return await fetchTankBalance(req.query as GaslessGetRequest);
 };
 
-const getTankAddress = (): TankAddressResponse => {
-  return fetchTankAddress();
+const getTankAddress = (req: FastifyRequest): TankAddressResponse => {
+  return fetchTankAddress(req.query as GaslessGetRequest);
 };
 
 const postRelayGaslessApprove = nonceRoute<GaslessTransactionResponse>((req: FastifyRequest) => {
@@ -43,8 +44,8 @@ const postRelayGaslessTransferWithAuthorization = nonceRoute<GaslessTransactionR
 });
 
 const registerGaslessRoutes = (server: FastifyInstance) => {
-  server.get("/gasless/tankBalance", getTankBalance);
-  server.get("/gasless/tankAddress", getTankAddress);
+  server.get("/gasless/tankBalance", { schema: gaslessGetSchema }, getTankBalance);
+  server.get("/gasless/tankAddress", { schema: gaslessGetSchema }, getTankAddress);
   server.post("/gasless/approve", { schema: relayGaslessApproveSchema }, postRelayGaslessApprove);
   server.post("/gasless/relayPermit", { schema: relayGaslessPermitSchema }, postRelayGaslessPermit);
   server.post("/gasless/relayTransfer", { schema: relayGaslessTransferSchema }, postRelayGaslessTransfer);
@@ -55,11 +56,22 @@ const registerGaslessRoutes = (server: FastifyInstance) => {
   );
 };
 
+const gaslessGetSchema: FastifySchema = {
+  querystring: {
+    type: "object",
+    required: ["network"],
+    properties: {
+      network: { type: "string" },
+    },
+  },
+};
+
 const relayGaslessApproveSchema: FastifySchema = {
   body: {
     type: "object",
-    required: ["contractAddress", "receiver"],
+    required: ["network", "contractAddress", "receiver"],
     properties: {
+      network: { type: "string" },
       contractAddress: { type: "string", maxLength: 44, minLength: 20 },
       receiver: { type: "string", maxLength: 44, minLength: 40 },
     },
@@ -69,8 +81,9 @@ const relayGaslessApproveSchema: FastifySchema = {
 const relayGaslessPermitSchema: FastifySchema = {
   body: {
     type: "object",
-    required: ["contractAddress", "owner", "spender", "value", "deadline", "v", "r", "s"],
+    required: ["network", "contractAddress", "owner", "spender", "value", "deadline", "v", "r", "s"],
     properties: {
+      network: { type: "string" },
       contractAddress: { type: "string", maxLength: 44, minLength: 20 },
       owner: { type: "string", maxLength: 44, minLength: 40 },
       spender: { type: "string", maxLength: 44, minLength: 40 },
@@ -86,8 +99,9 @@ const relayGaslessPermitSchema: FastifySchema = {
 const relayGaslessTransferSchema: FastifySchema = {
   body: {
     type: "object",
-    required: ["contractAddress", "from", "to", "value"],
+    required: ["network", "contractAddress", "from", "to", "value"],
     properties: {
+      network: { type: "string" },
       contractAddress: { type: "string", maxLength: 44, minLength: 20 },
       from: { type: "string", maxLength: 44, minLength: 40 },
       to: { type: "string", maxLength: 44, minLength: 40 },
@@ -99,8 +113,21 @@ const relayGaslessTransferSchema: FastifySchema = {
 const relayGaslessTransferWithAuthorizationSchema: FastifySchema = {
   body: {
     type: "object",
-    required: ["contractAddress", "from", "to", "value", "validAfter", "validBefore", "nonce", "v", "r", "s"],
+    required: [
+      "network",
+      "contractAddress",
+      "from",
+      "to",
+      "value",
+      "validAfter",
+      "validBefore",
+      "nonce",
+      "v",
+      "r",
+      "s",
+    ],
     properties: {
+      network: { type: "string" },
       contractAddress: { type: "string", maxLength: 44, minLength: 20 },
       from: { type: "string", maxLength: 44, minLength: 40 },
       to: { type: "string", maxLength: 44, minLength: 40 },

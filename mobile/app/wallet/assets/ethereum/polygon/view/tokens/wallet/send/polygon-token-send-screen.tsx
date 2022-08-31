@@ -1,6 +1,14 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { gaslessPolygonTransferWithAuthorization } from "ethereum/polygon/controller/gasless/polygon-gasless-utils";
+import {
+  checkPolygonPaymastersAllowance,
+  gaslessPolygonOneTimeApprove,
+} from "ethereum/polygon/controller/gasless/polygon-gasless-expensiv-utils";
+import {
+  gaslessPolygonTransfer,
+  gaslessPolygonTransferWithAuthorization,
+} from "ethereum/polygon/controller/gasless/polygon-gasless-utils";
 import { styles as polygonStyles } from "ethereum/polygon/view/ethereum-polygon-styles";
+import { BigNumber } from "ethers";
 import React, { useCallback, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useRecoilValue } from "recoil";
@@ -68,17 +76,17 @@ const PolygonTokenSendScreen = ({ route }: Props) => {
       if (token.hasPermit) {
         const result = await gaslessPolygonTransferWithAuthorization(address, user, to, value, token);
       } else {
-        // const allowance: BigNumber = await checkPaymastersAllowance(token, address.address);
-        // //check if unlimited is not set yet
-        // if (allowance.eq(0)) {
-        //   const approval = await gaslessOneTimeApprove(address, user, token);
-        //   console.log("Unlimited amount approved: ", approval);
-        //   const transfer = await gaslessTransfer(address, to, value, token);
-        //   console.log("Sent transfer: ", transfer);
-        // } else {
-        //   const transfer = await gaslessTransfer(address, to, value, token);
-        //   console.log("Sent transfer: ", transfer);
-        // }
+        const allowance: BigNumber = await checkPolygonPaymastersAllowance(token, address.address);
+        //check if unlimited is not set yet
+        if (allowance.eq(0)) {
+          const approval = await gaslessPolygonOneTimeApprove(address, user, token);
+          console.log("Unlimited amount approved: ", approval);
+          const transfer = await gaslessPolygonTransfer(address, to, value, token);
+          console.log("Sent transfer: ", transfer);
+        } else {
+          const transfer = await gaslessPolygonTransfer(address, to, value, token);
+          console.log("Sent transfer: ", transfer);
+        }
       }
 
       Alert.alert("Successfully sent.");

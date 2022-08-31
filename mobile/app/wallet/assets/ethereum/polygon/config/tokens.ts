@@ -77,8 +77,8 @@ const test: PolygonERC20Token[] = [
     polygonAddress: "0x0fa8781a83e46826621b3bc094ea2a0212e71b23",
     ethereumAddress: "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
     decimals: 6,
-    hasPermit: true,
-    hasTransferWithAuthorization: true,
+    hasPermit: false,
+    hasTransferWithAuthorization: false,
     isToken: true,
   },
 ];

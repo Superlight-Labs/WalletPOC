@@ -3,7 +3,6 @@ import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasle
 import { User } from "api-types/user";
 import { randomBytes } from "crypto";
 import { usdcAbi } from "ethereum/config/abi/usdc-abi";
-import { ERC20Token } from "ethereum/config/token-constants";
 import { polygonConfig } from "ethereum/polygon/config/polygon-config";
 import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { BigNumber, BigNumberish, ethers } from "ethers";
@@ -83,12 +82,13 @@ export const gasslessPolygonPermit = async (address: Address, user: User, value:
  * @param token
  * @returns
  */
-export const gaslessTransfer = async (from: Address, to: string, value: string, token: ERC20Token) => {
+export const gaslessPolygonTransfer = async (from: Address, to: string, value: string, token: PolygonERC20Token) => {
   // Let api approve it
   const { transaction } = await fetchFromApi<GaslessTransactionResponse>("/gasless/relayTransfer", {
     method: HttpMethod.POST,
     body: {
-      contractAddress: token.contractAddress,
+      network: polygonConfig.chain,
+      contractAddress: token.polygonAddress,
       from: from.address,
       to,
       value: ethers.utils.parseUnits(value, token.decimals).toString(),
@@ -116,7 +116,7 @@ export const gaslessPolygonTransferWithAuthorization = async (
 ) => {
   const mpcSigner = getPreparedPolygonMpcSigner(from, user);
   console.log("yes right");
-  return;
+
   //token contract connected with our mpcSigner
   const tokenContractMpcSigner = new ethers.Contract(token.polygonAddress, usdcAbi, mpcSigner);
 
@@ -135,11 +135,12 @@ export const gaslessPolygonTransferWithAuthorization = async (
   //const nonce is unique random byte32 when using transferWithAuth
   let isNonceUsed = true;
   let nonce;
+  console.log("yes right 2: ", token.polygonAddress);
   do {
     nonce = BigNumber.from(randomBytes(32));
     isNonceUsed = await tokenContractMpcSigner.authorizationState(from.address, nonce);
   } while (isNonceUsed);
-
+  console.log("yes right 3");
   // Get the EIP712 digest
   const digest = getTransferDigest(
     await tokenContractMpcSigner.name(),

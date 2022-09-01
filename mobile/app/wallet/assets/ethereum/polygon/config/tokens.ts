@@ -42,7 +42,7 @@ const main: PolygonERC20Token[] = [
 
 const test: PolygonERC20Token[] = [
   {
-    name: "Matic Token",
+    name: "Matic",
     symbol: "MATIC",
     polygonAddress: "0x0000000000000000000000000000000000001010",
     ethereumAddress: "0x499d11E0b6eAC7c0593d8Fb292DCBbF815Fb29Ae",
@@ -51,6 +51,16 @@ const test: PolygonERC20Token[] = [
     hasTransferWithAuthorization: false,
     isToken: false,
   },
+  // {
+  //   name: "Wrapped Matic Token",
+  //   symbol: "WMATIC",
+  //   polygonAddress: "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
+  //   ethereumAddress: "",
+  //   decimals: 18,
+  //   hasPermit: false,
+  //   hasTransferWithAuthorization: false,
+  //   isToken: true,
+  // },
   {
     name: "Wrapped Ether",
     symbol: "WETH",

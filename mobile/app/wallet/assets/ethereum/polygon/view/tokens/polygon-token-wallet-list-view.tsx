@@ -36,6 +36,12 @@ const PolygonTokenWalletListView = ({
         >
           <Text style={styles.headerButtonText}>Polygon Bridge</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => navigation.navigate("PolygonTokenSwapScreen", { wallet })}
+        >
+          <Text style={styles.headerButtonText}>Swap Tokens</Text>
+        </TouchableOpacity>
       </View>
 
       {erc20Tokens.map((token) => {

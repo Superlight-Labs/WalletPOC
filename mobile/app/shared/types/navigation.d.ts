@@ -34,6 +34,7 @@ type NavigationRoutes = {
 
   //Ethereum Polygon Screens
   PolygonScreen: { wallet: EthereumWallet; address: Address; signer?: MPCSigner };
+  PolygonTokenSwapScreen: { wallet: EthereumWallet };
 
   PolygonTokenWalletScreen: {
     wallet: EthereumWallet;

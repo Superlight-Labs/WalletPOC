@@ -21,6 +21,7 @@ import { RecoilRoot } from "recoil";
 import { NavigationRoutes } from "shared/types/navigation";
 
 import EthereumPolygonScreen from "ethereum/polygon/view/polygon-screen";
+import PolygonTokenSwapScreen from "ethereum/polygon/view/swap/polygon-token-swap-screen";
 import PolygonBridgeScreen from "ethereum/polygon/view/tokens/wallet/bridge/polygon-bridge-screen";
 import PolygonTokenWalletScreen from "ethereum/polygon/view/tokens/wallet/polygon-token-wallet-screen";
 import PolygonTokenSendScreen from "ethereum/polygon/view/tokens/wallet/send/polygon-token-send-screen";
@@ -65,6 +66,11 @@ const App = () => {
                 name="PolygonScreen"
                 component={EthereumPolygonScreen}
                 options={{ title: "Ethereum - Polygon" }}
+              />
+              <Stack.Screen
+                name="PolygonTokenSwapScreen"
+                component={PolygonTokenSwapScreen}
+                options={{ title: "Swap Polygon Tokens" }}
               />
 
               <Stack.Screen

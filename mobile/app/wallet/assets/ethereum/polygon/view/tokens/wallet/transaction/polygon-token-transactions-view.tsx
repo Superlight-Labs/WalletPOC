@@ -51,7 +51,7 @@ const TokenTransactionsView = ({ address, token }: TokenTransactionProps) => {
 
       {transactions &&
         transactions.map((transaction, index) => {
-          const isPlus = transaction.to === address;
+          const isPlus = transaction.to.toLowerCase() === address.toLowerCase();
           const colorBackground = !isPlus ? "#fcf2f2" : "#f3fcf2";
 
           const pre = isPlus ? "+" : "-";

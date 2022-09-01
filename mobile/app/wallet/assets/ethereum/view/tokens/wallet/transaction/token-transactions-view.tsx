@@ -1,6 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ERC20Token } from "ethereum/config/token-constants";
-import { gWeiToEth } from "ethereum/controller/ethereum-utils";
 import { EthereumWallet } from "ethereum/types/Ethereum";
 import { EthereumService } from "packages/blockchain-api-client/src";
 import { EthereumProviderEnum } from "packages/blockchain-api-client/src/blockchains/ethereum/ethereum-factory";
@@ -59,7 +58,7 @@ const TokenTransactionsView = ({ wallet, address, token, navigation }: TokenTran
 
       {transactions &&
         transactions.map((transaction) => {
-          const isPlus = transaction.to === wallet.external.addresses[0].address;
+          const isPlus = transaction.to.toLowerCase() === wallet.external.addresses[0].address.toLowerCase();
           const colorBackground = !isPlus ? "#fcf2f2" : "#f3fcf2";
 
           const pre = isPlus ? "+" : "-";

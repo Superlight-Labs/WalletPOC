@@ -57,7 +57,7 @@ const EthereumTransactionsView = ({ wallet, address, navigation, updateTransacti
         })}
 
       {transactions.map((transaction) => {
-        const isPlus = transaction.to === address.address;
+        const isPlus = transaction.to.toLowerCase() === address.address.toLowerCase();
         const colorBackground = !isPlus ? "#fcf2f2" : "#f3fcf2";
 
         const pre = isPlus ? "+" : "-";

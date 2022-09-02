@@ -34,6 +34,18 @@ export interface GaslessPermitRequest {
   s: string;
 }
 
+export interface GaslessTransactionRequest {
+  network: string;
+  transaction: any;
+}
+
+export interface GaslessMetaTransactionRequest {
+  network: string;
+  metaTx: object;
+  signature: object;
+  contractAddress: string;
+}
+
 export interface GaslessTransferRequest {
   network: string;
   contractAddress: string;

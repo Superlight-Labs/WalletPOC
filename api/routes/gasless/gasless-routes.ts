@@ -3,7 +3,9 @@ import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
 import {
   GaslessApproveRequest,
   GaslessGetRequest,
+  GaslessMetaTransactionRequest,
   GaslessPermitRequest,
+  GaslessTransactionRequest,
   GaslessTransactionResponse,
   GaslessTransferRequest,
   GaslessTransferWithAuthorizationRequest,
@@ -14,7 +16,9 @@ import {
   fetchTankAddress,
   fetchTankBalance,
   gaslessApprove,
+  relayGaslessMetaTransaction,
   relayGaslessPermit,
+  relayGaslessTransaction,
   relayGaslessTransfer,
   relayGaslessTransferWithAuthorization,
 } from "./gasless.service";
@@ -43,17 +47,44 @@ const postRelayGaslessTransferWithAuthorization = nonceRoute<GaslessTransactionR
   return relayGaslessTransferWithAuthorization(req.body as GaslessTransferWithAuthorizationRequest);
 });
 
+const postRelayGaslessTransaction = nonceRoute<GaslessTransactionResponse>((req: FastifyRequest) => {
+  return relayGaslessTransaction(req.body as GaslessTransactionRequest);
+});
+
+const postRelayGaslessMetaTransactionSchema = nonceRoute<GaslessTransactionResponse>((req: FastifyRequest) => {
+  return relayGaslessMetaTransaction(req.body as GaslessMetaTransactionRequest);
+});
+
 const registerGaslessRoutes = (server: FastifyInstance) => {
   server.get("/gasless/tankBalance", { schema: gaslessGetSchema }, getTankBalance);
   server.get("/gasless/tankAddress", { schema: gaslessGetSchema }, getTankAddress);
   server.post("/gasless/approve", { schema: relayGaslessApproveSchema }, postRelayGaslessApprove);
   server.post("/gasless/relayPermit", { schema: relayGaslessPermitSchema }, postRelayGaslessPermit);
   server.post("/gasless/relayTransfer", { schema: relayGaslessTransferSchema }, postRelayGaslessTransfer);
+  server.post("/gasless/relayTransaction", { schema: relayGaslessTransactionSchema }, postRelayGaslessTransaction);
   server.post(
     "/gasless/relayTransferWithAuthorization",
     { schema: relayGaslessTransferWithAuthorizationSchema },
     postRelayGaslessTransferWithAuthorization
   );
+  server.post(
+    "/gasless/relayMetaTx",
+    { schema: relayGaslessMetaTransactionSchema },
+    postRelayGaslessMetaTransactionSchema
+  );
+};
+
+const relayGaslessMetaTransactionSchema: FastifySchema = {
+  body: {
+    type: "object",
+    required: ["network", "metaTx", "signature", "contractAddress"],
+    properties: {
+      network: { type: "string" },
+      metaTx: { type: "object" },
+      signature: { type: "object" },
+      contractAddress: { type: "string" },
+    },
+  },
 };
 
 const gaslessGetSchema: FastifySchema = {
@@ -62,6 +93,17 @@ const gaslessGetSchema: FastifySchema = {
     required: ["network"],
     properties: {
       network: { type: "string" },
+    },
+  },
+};
+
+const relayGaslessTransactionSchema: FastifySchema = {
+  body: {
+    type: "object",
+    required: ["network", "transaction"],
+    properties: {
+      network: { type: "string" },
+      transaction: { type: "object" },
     },
   },
 };

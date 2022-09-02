@@ -1,16 +1,18 @@
 import { Picker } from "@react-native-picker/picker";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { erc20Tokens, PolygonERC20Token } from "ethereum/polygon/config/tokens";
+import { metaTxTest, swapGaslessPolygonWithQuote } from "ethereum/polygon/controller/gasless/polygon-gasless-0x-utils";
+import { approveGaslessPolygonAmount } from "ethereum/polygon/controller/gasless/polygon-gasless-swap-utils";
 import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
 import { getPreparedPolygonMpcSigner } from "ethereum/polygon/controller/signers/polygon-alchemy-signer";
-import { getPolygonSwapQuote, swapPolygonWithQuote } from "ethereum/polygon/controller/swap/polygon-0x-utils";
-import { approvePolygonAmount, checkPolygonAllowance } from "ethereum/polygon/controller/swap/polygon-swap-utils";
+import { getPolygonSwapQuote } from "ethereum/polygon/controller/swap/polygon-0x-utils";
+import { checkPolygonAllowance } from "ethereum/polygon/controller/swap/polygon-swap-utils";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import { ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";
 import { ZeroExSwapQuote } from "packages/blockchain-api-client/src/provider/0x/ethereum/0x-ethereum-types";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Button, Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useRecoilValue } from "recoil";
 import { authState, AuthState } from "state/atoms";
 import { Address } from "wallet/types/wallet";
@@ -158,10 +160,11 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
         setApprovalModalVisible(true);
         try {
           if (
-            !(await approvePolygonAmount(
+            !(await approveGaslessPolygonAmount(
               erc20Tokens[selectedInputTokenIndex],
               inputAmountWei.sub(allowedAmount),
-              signer!,
+              address,
+              user,
               quote.allowanceTarget
             ))
           )
@@ -175,7 +178,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
     }
 
     try {
-      const swapped = await swapPolygonWithQuote(quote, address.address, signer!);
+      const swapped = await swapGaslessPolygonWithQuote(quote, address.address, signer!);
       console.log(swapped);
       Alert.alert(
         "Successfully swapped!",
@@ -214,6 +217,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
 
   return (
     <View style={styles.container}>
+      <Button title="test meta tx" onPress={() => metaTxTest(address, user)} />
       {renderApprovalModal()}
       <Text style={styles.heading}>Swap Polygon with 0x</Text>
       <View style={styles.pickerArea}>

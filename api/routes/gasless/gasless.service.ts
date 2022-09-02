@@ -6,13 +6,16 @@ import { erc20Abi } from "./erc20-abi";
 import {
   GaslessApproveRequest,
   GaslessGetRequest,
+  GaslessMetaTransactionRequest,
   GaslessPermitRequest,
+  GaslessTransactionRequest,
   GaslessTransactionResponse,
   GaslessTransferRequest,
   GaslessTransferWithAuthorizationRequest,
   TankAddressResponse,
   TankBalanceResponse,
 } from "./gasless";
+import * as ZeroExAbi from "./IZeroExAbi.json";
 
 export const fetchTankBalance = async (request: GaslessGetRequest): Promise<TankBalanceResponse> => {
   return { balance: await getPaymaster(request.network).getBalance() };
@@ -58,6 +61,37 @@ export const relayGaslessPermit = (
   });
 };
 
+export const relayGaslessTransaction = (
+  request: GaslessTransactionRequest
+): ResultAsync<GaslessTransactionResponse, RouteError> => {
+  console.log("trans: ", request.transaction);
+  return ResultAsync.fromPromise(getPaymaster(request.network).sendTransaction(request.transaction), (e) =>
+    other("Err while relaying gasless transaction", e as Error)
+  ).map((transaction) => {
+    console.log("Broadcast transaction: ", transaction);
+    return { transaction };
+  });
+};
+
+export const relayGaslessMetaTransaction = (
+  request: GaslessMetaTransactionRequest
+): ResultAsync<GaslessTransactionResponse, RouteError> => {
+  console.log("meta trans: ", request.metaTx);
+  console.log("sig: ", request.signature);
+  console.log("contract adress: ", request.contractAddress);
+
+  return ResultAsync.fromPromise(
+    getZeroExContract(request.contractAddress, request.network).executeMetaTransaction(
+      request.metaTx,
+      request.signature
+    ),
+    (e) => other("Err while relaying gasless meta transaction", e as Error)
+  ).map((transaction) => {
+    console.log("Broadcast meta transaction: ", transaction);
+    return { transaction };
+  });
+};
+
 export const relayGaslessTransfer = (
   request: GaslessTransferRequest
 ): ResultAsync<GaslessTransactionResponse, RouteError> => {
@@ -98,6 +132,10 @@ const paymasterAccount = ethers.utils.HDNode.fromMnemonic(
 
 const getContract = (contractAddress: string, network: string) => {
   return new ethers.Contract(contractAddress, erc20Abi, getPaymaster(network));
+};
+
+const getZeroExContract = (contractAddress: string, network: string) => {
+  return new ethers.Contract(contractAddress, ZeroExAbi.compilerOutput.abi, getPaymaster(network));
 };
 
 const getPaymaster = (network: string) => {

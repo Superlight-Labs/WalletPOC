@@ -19,6 +19,10 @@ export const approvePolygonAmount = async (
   signer: MPCSigner,
   contractAddress: string
 ): Promise<boolean> => {
+  console.log("try approval for: ");
+  console.log(token);
+  console.log(amount);
+  console.log(contractAddress);
   const approvalResponse = await new ethers.Contract(token.polygonAddress, ERC20ABI, signer).approve(
     contractAddress,
     amount.toString()

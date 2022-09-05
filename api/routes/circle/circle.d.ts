@@ -7,8 +7,8 @@ export interface CircleCreateAddressRequest {
 
 export interface CircleWallet {
   walletId: string;
-  entitiyId: string;
-  addresses: CircleAddress[];
+  entityId: string;
+  addresses?: CircleAddress[];
 }
 
 export interface CircleAddress {

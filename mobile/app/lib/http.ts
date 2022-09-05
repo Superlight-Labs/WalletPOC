@@ -1,4 +1,5 @@
 import { CreateNonceResponse } from "api-types/auth";
+import { User } from "api-types/user";
 import { Platform } from "react-native";
 import { apiKeys } from "../wallet/assets/bitcoin/blockchain/endpoints";
 import { signWithDeviceKeyNoAuth } from "./auth";
@@ -19,6 +20,27 @@ export const fetchFromApi = async <T>(path: string, params?: HttpParams): Promis
       headers: {
         ...params?.args?.headers,
         deviceSignature,
+      },
+    },
+  };
+
+  return fetchFrom(getApiUrl("http") + path, paramsWithSignature);
+};
+
+export const fetchFromApiAuthenticated = async <T>(path: string, user: User, params?: HttpParams): Promise<T> => {
+  const { id: userId, devicePublicKey } = user;
+  const { nonce } = await fetchFrom<CreateNonceResponse>(getApiUrl("http") + "/getNonce");
+  const deviceSignature = await signWithDeviceKeyNoAuth(nonce);
+
+  const paramsWithSignature = {
+    ...params,
+    args: {
+      ...params?.args,
+      headers: {
+        ...params?.args?.headers,
+        deviceSignature,
+        userId,
+        devicePublicKey,
       },
     },
   };

@@ -10,7 +10,9 @@ import { EthereumProviderEnum } from "packages/blockchain-api-client/src/blockch
 import { EthereumTransaction } from "packages/blockchain-api-client/src/blockchains/ethereum/types";
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRecoilValue } from "recoil";
 import { NavigationRoutes } from "shared/types/navigation";
+import { authState } from "state/atoms";
 import { useUpdateAccount } from "wallet/state/wallet-state-utils";
 import { Transaction } from "wallet/types/wallet";
 import { EthereumBalanceView } from "./balance/ethereum-balance-view";
@@ -101,9 +103,10 @@ const EthereumWalletView = ({ wallet, index, navigation, signer }: EthereumWalle
     walletUpdate().then(() => mempoolUpdate());
   }, [index, updateWallet, service, deleteMempoolTransaction]);
 
+  const user = useRecoilValue(authState);
   return (
     <View style={styles.container}>
-      <Button title="CircleTest" onPress={() => createCircleWallet()} />
+      <Button title="CircleTest" onPress={() => createCircleWallet(user)} />
       <View style={styles.headingArea}>
         <Image
           style={styles.icon}

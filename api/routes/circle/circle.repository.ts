@@ -1,6 +1,6 @@
 import { client } from "@server";
 import { User } from "../user/user";
-import { CircleWallet } from "./circle";
+import { CircleAddress, CircleWallet } from "./circle";
 
 export const storeCircleWallet = (user: User, walletId: string, entityId: string): Promise<CircleWallet> => {
   return client.circleWallet.create({
@@ -19,6 +19,25 @@ export const storeCircleWallet = (user: User, walletId: string, entityId: string
   });
 };
 
+export const storeCircleAddress = (
+  user: User,
+  circleWallet: CircleWallet,
+  circleAddress: CircleAddress
+): Promise<CircleAddress> => {
+  return client.circleAddress.create({
+    data: {
+      address: circleAddress.address,
+      currency: circleAddress.currency,
+      chain: circleAddress.chain,
+      circleWallet: {
+        connect: {
+          walletId: circleWallet.walletId,
+        },
+      },
+    },
+  });
+};
+
 export const getCircleWallet = async (user: User): Promise<CircleWallet | null> => {
   return await client.circleWallet.findFirst({
     where: {
@@ -26,4 +45,20 @@ export const getCircleWallet = async (user: User): Promise<CircleWallet | null> 
       userDevicePublicKey: user.devicePublicKey,
     },
   });
+};
+
+export const getCircleWalletAddress = async (
+  circleWallet: CircleWallet,
+  currency: string,
+  chain: string
+): Promise<CircleAddress | null> => {
+  const circleAddress = await client.circleAddress.findFirst({
+    where: {
+      walletId: circleWallet.walletId,
+      currency: currency,
+      chain: chain,
+    },
+  });
+
+  return circleAddress;
 };

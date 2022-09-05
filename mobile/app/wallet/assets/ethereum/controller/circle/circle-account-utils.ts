@@ -14,3 +14,11 @@ export const createCircleWallet = async (user: User) => {
   });
   console.log(newCircleWallet);
 };
+
+export const createCircleAddress = async (user: User) => {
+  const newCircleAddress = await fetchFromApiAuthenticated("/circle/create-address", user, {
+    method: HttpMethod.POST,
+    body: { currency: "USD", chain: "MATIC" },
+  });
+  console.log(newCircleAddress);
+};

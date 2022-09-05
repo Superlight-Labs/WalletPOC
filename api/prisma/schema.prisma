@@ -11,6 +11,7 @@ model User {
     id              String        @default(uuid())
     devicePublicKey String
     keyShares       MpcKeyShare[] @relation("KeySharesForUser")
+    circleWallet    CircleWallet? @relation("CircleWalletForUser")
 
     @@unique([id, devicePublicKey])
 }
@@ -32,4 +33,28 @@ model AccountAddressToTatumId {
     accountAddress String @id
     //external id from tatum
     tatumId        String
+}
+
+model CircleWallet {
+    user                User   @relation("CircleWalletForUser", fields: [userId, userDevicePublicKey], references: [id, devicePublicKey])
+    userId              String
+    userDevicePublicKey String
+
+    walletId  String          @unique
+    entityId  String
+    addresses CircleAddress[] @relation("CircleAddressForCircleWallet")
+
+    @@unique([userId, userDevicePublicKey])
+}
+
+model CircleAddress {
+    circleWallet CircleWallet @relation("CircleAddressForCircleWallet", fields: [walletId], references: [walletId])
+    walletId     String
+
+    addressId String @id @default(uuid())
+    address   String
+    curreny   String
+    chain     String
+
+    @@unique([walletId, addressId])
 }

@@ -1,9 +1,10 @@
 import { FastifyInstance } from "fastify";
 import registerAuthRoutes from "./auth/auth-routes";
-import registerMcpRoutes from "./mpc/mpc-routes";
-import registerUserRoutes from "./user/user-routes";
-import registerTatumRoutes from "./tatum/tatum-routes";
+import registerCircleRoutes from "./circle/circle-routes";
 import registerGaslessRoutes from "./gasless/gasless-routes";
+import registerMcpRoutes from "./mpc/mpc-routes";
+import registerTatumRoutes from "./tatum/tatum-routes";
+import registerUserRoutes from "./user/user-routes";
 
 export const registerRoutes = (server: FastifyInstance): void => {
   registerUserRoutes(server);
@@ -11,4 +12,5 @@ export const registerRoutes = (server: FastifyInstance): void => {
   registerAuthRoutes(server);
   registerTatumRoutes(server);
   registerGaslessRoutes(server);
+  registerCircleRoutes(server);
 };

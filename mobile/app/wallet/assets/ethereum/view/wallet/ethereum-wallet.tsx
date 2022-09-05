@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { getCircleConfiguration } from "ethereum/controller/circle/circle-account-utils";
+import { createCircleWallet } from "ethereum/controller/circle/circle-account-utils";
 import { weiToGwei } from "ethereum/controller/ethereum-utils";
 import { MPCSigner } from "ethereum/controller/zksync/signer";
 import { ethereumWalletsState } from "ethereum/state/ethereum-atoms";
@@ -103,7 +103,7 @@ const EthereumWalletView = ({ wallet, index, navigation, signer }: EthereumWalle
 
   return (
     <View style={styles.container}>
-      <Button title="CircleTest" onPress={() => getCircleConfiguration()} />
+      <Button title="CircleTest" onPress={() => createCircleWallet()} />
       <View style={styles.headingArea}>
         <Image
           style={styles.icon}

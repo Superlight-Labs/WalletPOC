@@ -1,4 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { getCircleConfiguration } from "ethereum/controller/circle/circle-account-utils";
 import { weiToGwei } from "ethereum/controller/ethereum-utils";
 import { MPCSigner } from "ethereum/controller/zksync/signer";
 import { ethereumWalletsState } from "ethereum/state/ethereum-atoms";
@@ -8,7 +9,7 @@ import { EthereumService } from "packages/blockchain-api-client/src";
 import { EthereumProviderEnum } from "packages/blockchain-api-client/src/blockchains/ethereum/ethereum-factory";
 import { EthereumTransaction } from "packages/blockchain-api-client/src/blockchains/ethereum/types";
 import React, { useCallback, useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Button, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { NavigationRoutes } from "shared/types/navigation";
 import { useUpdateAccount } from "wallet/state/wallet-state-utils";
 import { Transaction } from "wallet/types/wallet";
@@ -102,6 +103,7 @@ const EthereumWalletView = ({ wallet, index, navigation, signer }: EthereumWalle
 
   return (
     <View style={styles.container}>
+      <Button title="CircleTest" onPress={() => getCircleConfiguration()} />
       <View style={styles.headingArea}>
         <Image
           style={styles.icon}

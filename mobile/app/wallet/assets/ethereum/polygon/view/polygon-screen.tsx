@@ -81,8 +81,8 @@ const EthereumPolygonScreen = ({ route, navigation }: Props) => {
         posClient={posClient}
       />
       <PolygonWalletView wallet={wallet} navigation={navigation} />
-      <PolygonPendingWithdrawList polygonClient={polygonClient} address={address.address} />
-      <PolygonCheckTransaction polygonClient={polygonClient} />
+      <PolygonPendingWithdrawList posClient={posClient} plasmaClient={plasmaClient} address={address.address} />
+      <PolygonCheckTransaction polygonClient={posClient} />
     </Wallets>
   );
 };

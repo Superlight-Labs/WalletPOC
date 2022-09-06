@@ -1,3 +1,4 @@
+import { RevertError } from "@0x/utils";
 import { GaslessTransactionResponse } from "api-types/gasless";
 import { User } from "api-types/user";
 import { erc20Tokens } from "ethereum/config/token-constants";
@@ -144,8 +145,9 @@ export const metaTxTest = async (address: Address, user: User) => {
       encodedSignature
     );
     console.log("valid?: ", valid);
-  } catch (err) {
-    console.error(err);
+  } catch (err: any) {
+    console.error("Error data: ", RevertError.decode(err.data));
+    console.error("Full Error", { err });
   }
 
   return;

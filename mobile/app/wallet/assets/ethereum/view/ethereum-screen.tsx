@@ -79,7 +79,25 @@ const EthereumScreen = ({ navigation, route }: Props) => {
         <>
           {ethereumState.accounts.map((wallet, index: number) => (
             <View key={"EthereumWalletHolder-" + index}>
-              <TokenWalletListView wallet={wallet} navigation={navigation} />
+              <EthereumWalletView
+                key={"EthereumWallet-" + index}
+                wallet={wallet}
+                signer={signer}
+                index={index}
+                navigation={navigation}
+              />
+
+              <TouchableOpacity
+                style={styles.fiatButton}
+                onPress={() =>
+                  navigation.navigate("FiatManagementScreen", {
+                    address: wallet.external.addresses[0].address,
+                    user,
+                  })
+                }
+              >
+                <Text style={styles.polygonButtonText}>Manage Fiat Crypto Interface</Text>
+              </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.polygonButton}
@@ -104,14 +122,7 @@ const EthereumScreen = ({ navigation, route }: Props) => {
               >
                 <Text style={styles.polygonButtonText}>Ramp it on son</Text>
               </TouchableOpacity>
-
-              <EthereumWalletView
-                key={"EthereumWallet-" + index}
-                wallet={wallet}
-                signer={signer}
-                index={index}
-                navigation={navigation}
-              />
+              <TokenWalletListView wallet={wallet} navigation={navigation} />
             </View>
           ))}
 
@@ -153,6 +164,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 45,
     marginTop: 12,
+  },
+  fiatButton: {
+    flex: 1,
+    height: 42,
+    backgroundColor: "#1aa3ff",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    color: "white",
+    margin: 20,
   },
   polygonButton: {
     flex: 1,

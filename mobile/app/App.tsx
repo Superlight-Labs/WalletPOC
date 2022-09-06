@@ -31,6 +31,7 @@ import TokenWalletScreen from "ethereum/view/tokens/wallet/token-wallet-screen";
 import EthereumReceiveScreen from "ethereum/view/wallet/receive/ethereum-receive-screen";
 import EthereumSendScreen from "ethereum/view/wallet/send/ethereum-send-screen";
 import { EthereumSingleTransactionScreen } from "ethereum/view/wallet/transaction/ethereum-single-transaction-screen";
+import FiatManagementScreen from "wallet/assets/fiat-management/view/fiat-management-screen";
 import Header from "./shared/header";
 import Home from "./views/home";
 import RampOn from "./views/ramp-on";
@@ -55,6 +56,9 @@ const App = () => {
               <Stack.Screen name="Home" component={Home} />
 
               <Stack.Screen name="EthereumScreen" component={EthereumScreen} />
+
+              <Stack.Screen name="FiatManagementScreen" component={FiatManagementScreen} />
+
               <Stack.Screen
                 name="EthereumSendScreen"
                 component={EthereumSendScreen}

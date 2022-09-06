@@ -1,5 +1,4 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { createCircleAddress } from "ethereum/controller/circle/circle-account-utils";
 import { weiToGwei } from "ethereum/controller/ethereum-utils";
 import { MPCSigner } from "ethereum/controller/zksync/signer";
 import { ethereumWalletsState } from "ethereum/state/ethereum-atoms";
@@ -13,6 +12,7 @@ import { Button, Image, StyleSheet, Text, TouchableOpacity, View } from "react-n
 import { useRecoilValue } from "recoil";
 import { NavigationRoutes } from "shared/types/navigation";
 import { authState } from "state/atoms";
+import { createCircleAddress } from "wallet/assets/fiat-management/controller/circle-account-utils";
 import { useUpdateAccount } from "wallet/state/wallet-state-utils";
 import { Transaction } from "wallet/types/wallet";
 import { EthereumBalanceView } from "./balance/ethereum-balance-view";

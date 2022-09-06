@@ -51,7 +51,25 @@ export const mapRouteError = (err: RouteError): HttpError => {
       };
     }
 
+    case "ThirdPartyError": {
+      logger.error({ err }, "Error in Third Party API Occured");
+
+      return {
+        statusCode: 503,
+        errorMsg: err.context || "Our Partners are not reachable",
+      };
+    }
+
     case "Other": {
+      return {
+        statusCode: 500,
+        errorMsg: err.context || "An Internal Error Occurred :(",
+      };
+    }
+
+    default: {
+      logger.error({ err }, "Other Error occured");
+
       return {
         statusCode: 500,
         errorMsg: "An Internal Error Occurred :(",
@@ -60,46 +78,68 @@ export const mapRouteError = (err: RouteError): HttpError => {
   }
 };
 
+enum ErrorTypes {
+  NotFound = "NotFound",
+  Conflict = "Conflict",
+  Other = "Other",
+  MissingHeader = "MissingHeader",
+  InvalidToken = "InvalidToken",
+  InvalidSession = "InvalidSession",
+  BadRequest = "BadRequest",
+  ThirdPartyError = "ThirdPartyError",
+}
+
 export type RouteError =
-  | { type: "NotFound"; context?: string }
-  | { type: "Conflict"; context?: string }
-  | { type: "Other"; error?: Error; context?: string }
-  | { type: "MissingHeader" }
-  | { type: "InvalidToken" }
-  | { type: "InvalidSession" }
-  | { type: "BadRequest"; context: string };
+  | { type: ErrorTypes.NotFound; context?: string }
+  | { type: ErrorTypes.Conflict; context?: string }
+  | { type: ErrorTypes.Other; error?: unknown; context?: string }
+  | { type: ErrorTypes.ThirdPartyError; error?: unknown; context?: string }
+  | { type: ErrorTypes.MissingHeader }
+  | { type: ErrorTypes.InvalidToken }
+  | { type: ErrorTypes.InvalidSession }
+  | { type: ErrorTypes.BadRequest; context: string };
+
+export const isRouteError = (error: any): error is RouteError => {
+  return error.type && Object.values(ErrorTypes).includes(error.type);
+};
 
 export const notFound = (context?: string): RouteError => ({
-  type: "NotFound",
+  type: ErrorTypes.NotFound,
   context,
 });
 
 export const conflict = (context?: string): RouteError => ({
-  type: "Conflict",
+  type: ErrorTypes.Conflict,
   context,
 });
 
-export const other = (context: string, error?: Error): RouteError => ({
-  type: "Other",
+export const other = (context: string, error?: unknown): RouteError => ({
+  type: ErrorTypes.Other,
   context,
   error,
 });
 
 export const missingHeader = (): RouteError => ({
-  type: "MissingHeader",
+  type: ErrorTypes.MissingHeader,
 });
 
 export const invalidToken = (): RouteError => ({
-  type: "InvalidToken",
+  type: ErrorTypes.InvalidToken,
 });
 
 export const invalidSession = (): RouteError => ({
-  type: "InvalidSession",
+  type: ErrorTypes.InvalidSession,
 });
 
 export const badRequest = (context: string): RouteError => ({
-  type: "BadRequest",
+  type: ErrorTypes.BadRequest,
   context,
+});
+
+export const thirdPartyError = (context: string, error?: unknown) => ({
+  type: ErrorTypes.ThirdPartyError,
+  context,
+  error,
 });
 
 export const invalidAuthRequest = ResultAsync.fromPromise(Promise.reject(), (_) =>

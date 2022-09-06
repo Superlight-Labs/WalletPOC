@@ -2,7 +2,7 @@ import { buildPubKey } from "@lib/auth";
 import { isNonceValid } from "@lib/nonce";
 import crypto from "crypto";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { getUser } from "../user/user.repository";
+import { readUser } from "../user/user.repository";
 
 export const authenticate = async (req: FastifyRequest, res: FastifyReply) => {
   const { devicesignature, devicepublickey, userid } = req.headers;
@@ -14,7 +14,7 @@ export const authenticate = async (req: FastifyRequest, res: FastifyReply) => {
     throw new Error("Invalid Request to Mpc Endpoint");
   }
 
-  const user = await getUser({
+  const user = await readUser({
     userId: userid as string,
     devicePublicKey: devicepublickey as string,
   });

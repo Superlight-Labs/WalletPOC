@@ -2,9 +2,7 @@ import { notFound, other } from "@lib/error";
 import { client } from "./../../server";
 import { CreateUserRequest, User } from "./user";
 
-export const persistUserCreation = async (
-  request: CreateUserRequest
-): Promise<User> => {
+export const saveUser = async (request: CreateUserRequest): Promise<User> => {
   const user = await client.user.create({
     data: { ...request },
     include: { keyShares: true },
@@ -15,7 +13,7 @@ export const persistUserCreation = async (
   return user;
 };
 
-export const getUser = async (request: GetUser): Promise<User> => {
+export const readUser = async (request: GetUser): Promise<User> => {
   const { userId, devicePublicKey } = request;
 
   const user = await client.user.findUnique({

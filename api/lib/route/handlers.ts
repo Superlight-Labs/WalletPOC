@@ -1,10 +1,9 @@
 import logger from "@lib/logger";
 import { invalidAuthRequest, mapRouteError } from "@lib/route/error";
-import { isNonceValid } from "@lib/utils/auth";
+import { authenticate, isNonceValid } from "@lib/utils/auth";
 import crypto from "crypto";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { NonceRouteHandler, RouteHandler } from "./types";
-
+import { AuthenticatedRouteHandler, NonceRouteHandler, RouteHandler } from "./types";
 
 /*
  * Sends appropriate HTTP FastifyReplys for a RouteHandler<T>
@@ -55,5 +54,13 @@ export const setNonceRoute = <T>(handler: NonceRouteHandler<T>) => {
     });
 
     wrapHandler(handler(req, nonce), res);
+  };
+};
+
+export const authenticatedRoute = <T>(handlder: AuthenticatedRouteHandler<T>) => {
+  return (req: FastifyRequest, res: FastifyReply) => {
+    const authResult = authenticate(req);
+
+    authResult.map((user) => wrapHandler(handlder(req, user), res));
   };
 };

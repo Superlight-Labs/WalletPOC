@@ -1,7 +1,7 @@
 import { SocketStream } from "@fastify/websocket";
 import logger from "@lib/logger";
+import { authenticate } from "@lib/utils/auth";
 import { FastifyInstance, FastifyRequest } from "fastify";
-import { authenticate } from "../auth/auth-middleware";
 import { User } from "../user/user";
 import { deriveBIP32 } from "./ecdsa/derive/deriveBIP32";
 import { generateEcdsaKey } from "./ecdsa/generateEcdsa";
@@ -16,7 +16,14 @@ const route = "/mpc/ecdsa";
 const registerMcpRoutes = (server: FastifyInstance): void => {
   // Routes that need Authentication
   server.register(async function plugin(privatePlugin, opts) {
-    privatePlugin.addHook("onRequest", authenticate);
+    privatePlugin.addHook("onRequest", async (req) => {
+      const userResult = await authenticate(req);
+
+      if (userResult.isErr()) throw userResult.error;
+
+      req["user"] = userResult.value;
+    });
+
     privatePlugin.addHook("onError", async (request, reply, error) => {
       request.log.error({ request: request.body, error }, "Error on MPC Route");
     });

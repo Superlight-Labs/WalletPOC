@@ -1,4 +1,4 @@
-import { notFound, other } from "@lib/route/error";
+import { notFound, other, RouteError } from "@lib/route/error";
 import { client } from "./../../server";
 import { CreateUserRequest, User } from "./user";
 
@@ -13,7 +13,7 @@ export const saveUser = async (request: CreateUserRequest): Promise<User> => {
   return user;
 };
 
-export const readUser = async (request: GetUser): Promise<User> => {
+export const readUser = async (request: GetUser): Promise<User | RouteError> => {
   const { userId, devicePublicKey } = request;
 
   const user = await client.user.findUnique({
@@ -26,7 +26,7 @@ export const readUser = async (request: GetUser): Promise<User> => {
     include: { keyShares: true },
   });
 
-  if (!user) throw notFound("User not found");
+  if (!user) return notFound("User not found");
 
   return user;
 };

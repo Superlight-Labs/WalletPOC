@@ -7,10 +7,10 @@ interface HttpError {
 
 export const mapRouteError = (err: RouteError): HttpError => {
   switch (err.type) {
-    case "InvalidToken": {
+    case "InvalidAuthentication": {
       return {
-        statusCode: 400,
-        errorMsg: "Invalid Token Format",
+        statusCode: 401,
+        errorMsg: err.context || "Invalid Authentication",
       };
     }
 
@@ -52,7 +52,6 @@ export const mapRouteError = (err: RouteError): HttpError => {
     }
 
     case "ThirdPartyError": {
-
       return {
         statusCode: 503,
         errorMsg: err.context || "Our Partners are not reachable",
@@ -67,7 +66,6 @@ export const mapRouteError = (err: RouteError): HttpError => {
     }
 
     default: {
-
       return {
         statusCode: 500,
         errorMsg: "An Internal Error Occurred :(",
@@ -81,7 +79,7 @@ enum ErrorTypes {
   Conflict = "Conflict",
   Other = "Other",
   MissingHeader = "MissingHeader",
-  InvalidToken = "InvalidToken",
+  InvalidAuthentication = "InvalidAuthentication",
   InvalidSession = "InvalidSession",
   BadRequest = "BadRequest",
   ThirdPartyError = "ThirdPartyError",
@@ -93,7 +91,7 @@ export type RouteError =
   | { type: ErrorTypes.Other; error?: unknown; context?: string }
   | { type: ErrorTypes.ThirdPartyError; error?: unknown; context?: string }
   | { type: ErrorTypes.MissingHeader }
-  | { type: ErrorTypes.InvalidToken }
+  | { type: ErrorTypes.InvalidAuthentication; context?: string }
   | { type: ErrorTypes.InvalidSession }
   | { type: ErrorTypes.BadRequest; context: string };
 
@@ -121,8 +119,9 @@ export const missingHeader = (): RouteError => ({
   type: ErrorTypes.MissingHeader,
 });
 
-export const invalidToken = (): RouteError => ({
-  type: ErrorTypes.InvalidToken,
+export const invalidAuthentication = (context?: string): RouteError => ({
+  type: ErrorTypes.InvalidAuthentication,
+  context,
 });
 
 export const invalidSession = (): RouteError => ({

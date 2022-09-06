@@ -1,5 +1,6 @@
 import { FastifyRequest } from "fastify";
 import { ResultAsync } from "neverthrow";
+import { User } from "../../routes/user/user";
 import { RouteError } from "./error";
 
 /**
@@ -16,4 +17,6 @@ export type JSONObject = { [k: string]: JSONValues } & { password?: never };
 type RouteResult<T> = ResultAsync<T, RouteError>;
 
 type RouteHandler<T> = (req: FastifyRequest) => RouteResult<T>;
+type AuthenticatedRouteHandler<T> = (req: FastifyRequest, user: User) => RouteResult<T>;
+
 type NonceRouteHandler<T> = (req: FastifyRequest, nonce: string) => RouteResult<T>;

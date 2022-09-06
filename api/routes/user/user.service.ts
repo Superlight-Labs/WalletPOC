@@ -1,7 +1,8 @@
 import { other, RouteError } from "@lib/route/error";
 import { buildPubKey } from "@lib/utils/auth";
+import { getSafeResultAsync } from "@lib/utils/neverthrow";
 import crypto from "crypto";
-import { ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
 import { CreateUserRequest, CreateUserResponse, VerifyUserRequest } from "./user";
 import { readUser, saveUser } from "./user.repository";
 
@@ -17,7 +18,9 @@ export const createUser = (request: CreateUserRequest, nonce: string): ResultAsy
 export const verifyUser = (request: VerifyUserRequest, message: string): ResultAsync<boolean, RouteError> => {
   const { deviceSignature } = request;
 
-  return ResultAsync.fromPromise(readUser(request), (e) => e as RouteError).map((user) => {
+  const readUserResult = getSafeResultAsync(readUser(request), (e) => other("Error while reading User from DB", e));
+
+  return readUserResult.andThen((user) => {
     const verifier = crypto.createVerify("SHA256").update(message, "utf-8");
     const result = verifier.verify(
       {
@@ -27,6 +30,6 @@ export const verifyUser = (request: VerifyUserRequest, message: string): ResultA
       },
       Buffer.from(deviceSignature, "base64")
     );
-    return result;
+    return okAsync(result);
   });
 };

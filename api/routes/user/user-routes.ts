@@ -1,23 +1,15 @@
-import { nonceRoute, setNonceRoute } from "@lib/route";
+import { nonceRoute, setNonceRoute } from "@lib/route/handlers";
 import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
-import {
-  CreateUserRequest,
-  CreateUserResponse,
-  VerifyUserRequest,
-} from "./user";
+import { CreateUserRequest, CreateUserResponse, VerifyUserRequest } from "./user";
 import { createUser, verifyUser } from "./user.service";
 
-const postCreateUser = setNonceRoute<CreateUserResponse>(
-  (req: FastifyRequest, nonce: string) => {
-    return createUser(req.body as CreateUserRequest, nonce);
-  }
-);
+const postCreateUser = setNonceRoute<CreateUserResponse>((req: FastifyRequest, nonce: string) => {
+  return createUser(req.body as CreateUserRequest, nonce);
+});
 
-const postVerifyUser = nonceRoute<boolean>(
-  (req: FastifyRequest, nonce: string) => {
-    return verifyUser(req.body as VerifyUserRequest, nonce);
-  }
-);
+const postVerifyUser = nonceRoute<boolean>((req: FastifyRequest, nonce: string) => {
+  return verifyUser(req.body as VerifyUserRequest, nonce);
+});
 
 const registerUserRoutes = (server: FastifyInstance) => {
   server.post("/user/create", { schema: createUserSchema }, postCreateUser);

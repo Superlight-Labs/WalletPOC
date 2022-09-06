@@ -1,4 +1,6 @@
-export interface CircleCreateWalletRequest {}
+export interface CircleCreateWalletRequest {
+  data: any;
+}
 
 export interface CircleAddressRequest {
   currency: string;
@@ -17,3 +19,7 @@ export interface CircleAddress {
   currency: string;
   chain: string;
 }
+
+export type CircleResponse<T> = {
+  data: T;
+};

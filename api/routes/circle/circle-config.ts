@@ -1,4 +1,5 @@
-import fetch, { RequestInit } from "node-fetch";
+import fetch, { RequestInit } from "@lib/utils/fetch";
+import { CircleResponse } from "./circle";
 
 export const cirlceKey =
   "QVBJX0tFWTpmZjUxMGE3ZWZjODk3ODhmNGQ1MDg0MGZkMDA1ZjdlMjo5MTJmZDIxNjJjOTg5ZWY3N2Y4YmFkZjY2ZjQ5N2EwMQ";
@@ -18,7 +19,7 @@ export const fetchFromCircle = async <T>(path: string, params?: HttpParams): Pro
 
   const res = await fetch(baseUrl + path, paramsWithApiKey);
   console.log("params ", paramsWithApiKey);
-  const content: T = await res.json();
+  const content: CircleResponse<T> = await res.json();
   if (!res.ok) {
     console.error("Error from Circle API, possibly show snackbar", content);
   }

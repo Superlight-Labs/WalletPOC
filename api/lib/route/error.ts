@@ -52,7 +52,6 @@ export const mapRouteError = (err: RouteError): HttpError => {
     }
 
     case "ThirdPartyError": {
-      logger.error({ err }, "Error in Third Party API Occured");
 
       return {
         statusCode: 503,
@@ -68,7 +67,6 @@ export const mapRouteError = (err: RouteError): HttpError => {
     }
 
     default: {
-      logger.error({ err }, "Other Error occured");
 
       return {
         statusCode: 500,

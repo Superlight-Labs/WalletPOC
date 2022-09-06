@@ -1,4 +1,4 @@
-import { nonceRoute } from "@lib/route";
+import { nonceRoute } from "@lib/route/handlers";
 import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
 import {
   CreateTatumConnectionRequest,
@@ -8,29 +8,17 @@ import {
 } from "./tatum";
 import { createTatumConnection, findTatumConnection } from "./tatum.service";
 
-const postCreateTatumConnection = nonceRoute<CreateTatumConnectionResponse>(
-  (req: FastifyRequest) => {
-    return createTatumConnection(req.body as CreateTatumConnectionRequest);
-  }
-);
+const postCreateTatumConnection = nonceRoute<CreateTatumConnectionResponse>((req: FastifyRequest) => {
+  return createTatumConnection(req.body as CreateTatumConnectionRequest);
+});
 
-const getTatumConnection = nonceRoute<GetTatumConnectionResponse>(
-  (req: FastifyRequest) => {
-    return findTatumConnection(req.query as GetTatumConnectionRequest);
-  }
-);
+const getTatumConnection = nonceRoute<GetTatumConnectionResponse>((req: FastifyRequest) => {
+  return findTatumConnection(req.query as GetTatumConnectionRequest);
+});
 
 const registerTatumRoutes = (server: FastifyInstance) => {
-  server.post(
-    "/tatum/connection/create",
-    { schema: createTatumConnectionSchema },
-    postCreateTatumConnection
-  );
-  server.get(
-    "/tatum/connection/get",
-    { schema: getTatumConnectionSchema },
-    getTatumConnection
-  );
+  server.post("/tatum/connection/create", { schema: createTatumConnectionSchema }, postCreateTatumConnection);
+  server.get("/tatum/connection/get", { schema: getTatumConnectionSchema }, getTatumConnection);
 };
 
 const createTatumConnectionSchema: FastifySchema = {

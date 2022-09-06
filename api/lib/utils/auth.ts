@@ -8,3 +8,5 @@ export const buildPubKey = (encoded: string) => {
   // concatenating all public keys
   return l1 + encoded + l3;
 };
+
+export const isNonceValid = (nonce: string | null) => nonce && nonce.length === 24;

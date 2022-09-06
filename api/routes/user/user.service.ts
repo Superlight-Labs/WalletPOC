@@ -1,5 +1,5 @@
-import { buildPubKey } from "@lib/auth";
-import { other, RouteError } from "@lib/error";
+import { other, RouteError } from "@lib/route/error";
+import { buildPubKey } from "@lib/utils/auth";
 import crypto from "crypto";
 import { ResultAsync } from "neverthrow";
 import { CreateUserRequest, CreateUserResponse, VerifyUserRequest } from "./user";

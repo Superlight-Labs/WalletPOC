@@ -1,4 +1,4 @@
-import { isRouteError, other, RouteError, thirdPartyError } from "@lib/error";
+import { isRouteError, other, RouteError, thirdPartyError } from "@lib/route/error";
 import crypto from "crypto";
 import { okAsync, ResultAsync } from "neverthrow";
 import { User } from "../user/user";

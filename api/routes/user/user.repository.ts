@@ -1,4 +1,4 @@
-import { notFound, other } from "@lib/error";
+import { notFound, other } from "@lib/route/error";
 import { client } from "./../../server";
 import { CreateUserRequest, User } from "./user";
 

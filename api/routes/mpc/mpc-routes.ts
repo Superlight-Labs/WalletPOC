@@ -8,16 +8,12 @@ import { generateEcdsaKey } from "./ecdsa/generateEcdsa";
 import { generateGenericSecret } from "./ecdsa/generateSecret";
 import { importGenericSecret } from "./ecdsa/importSecret";
 import { signWithEcdsaShare } from "./ecdsa/sign";
-import { verifyEcdsaSignature } from "./ecdsa/verify";
 
 export type ActionStatus = "Init" | "Stepping";
 
 const route = "/mpc/ecdsa";
 
 const registerMcpRoutes = (server: FastifyInstance): void => {
-  // Open Routes
-  server.post(route + "/verify", verifyEcdsaSignature);
-
   // Routes that need Authentication
   server.register(async function plugin(privatePlugin, opts) {
     privatePlugin.addHook("onRequest", authenticate);

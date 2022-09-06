@@ -1,4 +1,4 @@
-import { notFound, RouteError } from "@lib/error";
+import { notFound, RouteError } from "@lib/route/error";
 import { client } from "@server";
 import { User } from "../user/user";
 import { CircleAddress, CircleWallet } from "./circle";

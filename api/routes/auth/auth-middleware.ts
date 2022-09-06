@@ -1,5 +1,4 @@
-import { buildPubKey } from "@lib/auth";
-import { isNonceValid } from "@lib/nonce";
+import { buildPubKey, isNonceValid } from "@lib/utils/auth";
 import crypto from "crypto";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { readUser } from "../user/user.repository";

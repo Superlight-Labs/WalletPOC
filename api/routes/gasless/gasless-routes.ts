@@ -1,4 +1,4 @@
-import { nonceRoute } from "@lib/route";
+import { nonceRoute } from "@lib/route/handlers";
 import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
 import {
   GaslessApproveRequest,
@@ -12,10 +12,10 @@ import {
 import {
   fetchTankAddress,
   fetchTankBalance,
+  gaslessApprove,
   relayGaslessPermit,
   relayGaslessTransfer,
   relayGaslessTransferWithAuthorization,
-  gaslessApprove,
 } from "./gasless.service";
 
 const getTankBalance = async (): Promise<TankBalanceResponse> => {

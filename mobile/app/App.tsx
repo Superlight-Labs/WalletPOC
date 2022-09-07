@@ -32,6 +32,7 @@ import EthereumReceiveScreen from "ethereum/view/wallet/receive/ethereum-receive
 import EthereumSendScreen from "ethereum/view/wallet/send/ethereum-send-screen";
 import { EthereumSingleTransactionScreen } from "ethereum/view/wallet/transaction/ethereum-single-transaction-screen";
 import FiatManagementScreen from "wallet/assets/fiat-management/view/fiat-management-screen";
+import FiatCardPaymentScreen from "wallet/assets/fiat-management/view/payment/card/fiat-card-payment";
 import Header from "./shared/header";
 import Home from "./views/home";
 import RampOn from "./views/ramp-on";
@@ -55,71 +56,89 @@ const App = () => {
             <Stack.Navigator initialRouteName="Home">
               <Stack.Screen name="Home" component={Home} />
 
-              <Stack.Screen name="EthereumScreen" component={EthereumScreen} />
+              {/* Ethereum Base Screens */}
+              <Stack.Group>
+                <Stack.Screen name="EthereumScreen" component={EthereumScreen} />
 
-              <Stack.Screen name="FiatManagementScreen" component={FiatManagementScreen} />
+                <Stack.Screen
+                  name="EthereumSendScreen"
+                  component={EthereumSendScreen}
+                  options={{ title: "Send Ethereum" }}
+                />
 
-              <Stack.Screen
-                name="EthereumSendScreen"
-                component={EthereumSendScreen}
-                options={{ title: "Send Ethereum" }}
-              />
+                <Stack.Screen
+                  name="EthereumPolygonScreen"
+                  component={EthereumPolygonScreen}
+                  options={{ title: "Ethereum - Polygon" }}
+                />
+              </Stack.Group>
 
-              <Stack.Screen
-                name="EthereumPolygonScreen"
-                component={EthereumPolygonScreen}
-                options={{ title: "Ethereum - Polygon" }}
-              />
+              {/* Fiat Management Screens */}
+              <Stack.Group>
+                <Stack.Screen name="FiatManagementScreen" component={FiatManagementScreen} />
+                <Stack.Screen name="FiatCardPaymentScreen" component={FiatCardPaymentScreen} />
+              </Stack.Group>
 
-              <Stack.Screen
-                name="PolygonTokenWalletScreen"
-                component={PolygonTokenWalletScreen}
-                options={{ title: "ERC-20 Token Polygon Wallet" }}
-              />
-              <Stack.Screen
-                name="PolygonTokenSendScreen"
-                component={PolygonTokenSendScreen}
-                options={{ title: "Send Token on Polygon" }}
-              />
-              <Stack.Screen
-                name="PolygonBridgeScreen"
-                component={PolygonBridgeScreen}
-                options={{ title: "Deposit Tokens to Polygon" }}
-              />
-              <Stack.Screen
-                name="EthereumReceiveScreen"
-                component={EthereumReceiveScreen}
-                options={{ title: "Receive Ethereum" }}
-              />
-              <Stack.Screen
-                name="EthereumSingleTransactionScreen"
-                component={EthereumSingleTransactionScreen}
-                options={{ title: "Transaction Details" }}
-              />
-              <Stack.Screen
-                name="TokenWalletScreen"
-                component={TokenWalletScreen}
-                options={{ title: "ERC-20 Token Wallet" }}
-              />
-              <Stack.Screen name="TokenSendScreen" component={TokenSendScreen} options={{ title: "Send Token" }} />
-              <Stack.Screen name="TokenSwapScreen" component={TokenSwapScreen} options={{ title: "Swap Tokens" }} />
+              {/* Polygon Screens */}
+              <Stack.Group>
+                <Stack.Screen
+                  name="PolygonTokenWalletScreen"
+                  component={PolygonTokenWalletScreen}
+                  options={{ title: "ERC-20 Token Polygon Wallet" }}
+                />
+                <Stack.Screen
+                  name="PolygonTokenSendScreen"
+                  component={PolygonTokenSendScreen}
+                  options={{ title: "Send Token on Polygon" }}
+                />
+                <Stack.Screen
+                  name="PolygonBridgeScreen"
+                  component={PolygonBridgeScreen}
+                  options={{ title: "Deposit Tokens to Polygon" }}
+                />
+                <Stack.Screen
+                  name="EthereumReceiveScreen"
+                  component={EthereumReceiveScreen}
+                  options={{ title: "Receive Ethereum" }}
+                />
+                <Stack.Screen
+                  name="EthereumSingleTransactionScreen"
+                  component={EthereumSingleTransactionScreen}
+                  options={{ title: "Transaction Details" }}
+                />
+              </Stack.Group>
 
-              <Stack.Screen name="BitcoinScreen" component={BitcoinScreen} options={{ title: "All wallets" }} />
-              <Stack.Screen
-                name="BitcoinSendScreen"
-                component={BitcoinSendScreen}
-                options={{ title: "Send Bitcoin" }}
-              />
-              <Stack.Screen
-                name="BitcoinReceiveScreen"
-                component={BitcoinReceiveScreen}
-                options={{ title: "Receive Bitcoin" }}
-              />
-              <Stack.Screen
-                name="BitcoinSingleTransactionScreen"
-                component={BitcoinSingleTransactionScreen}
-                options={{ title: "Transaction Details" }}
-              />
+              {/* ERC-20 Token Screens */}
+              <Stack.Group>
+                <Stack.Screen
+                  name="TokenWalletScreen"
+                  component={TokenWalletScreen}
+                  options={{ title: "ERC-20 Token Wallet" }}
+                />
+                <Stack.Screen name="TokenSendScreen" component={TokenSendScreen} options={{ title: "Send Token" }} />
+                <Stack.Screen name="TokenSwapScreen" component={TokenSwapScreen} options={{ title: "Swap Tokens" }} />
+
+                <Stack.Screen name="BitcoinScreen" component={BitcoinScreen} options={{ title: "All wallets" }} />
+              </Stack.Group>
+
+              {/* Bitcoin Screens */}
+              <Stack.Group>
+                <Stack.Screen
+                  name="BitcoinSendScreen"
+                  component={BitcoinSendScreen}
+                  options={{ title: "Send Bitcoin" }}
+                />
+                <Stack.Screen
+                  name="BitcoinReceiveScreen"
+                  component={BitcoinReceiveScreen}
+                  options={{ title: "Receive Bitcoin" }}
+                />
+                <Stack.Screen
+                  name="BitcoinSingleTransactionScreen"
+                  component={BitcoinSingleTransactionScreen}
+                  options={{ title: "Transaction Details" }}
+                />
+              </Stack.Group>
               <Stack.Screen name="RampOn" component={RampOn} options={{ title: "Ramp it or swamp it" }} />
             </Stack.Navigator>
           </View>

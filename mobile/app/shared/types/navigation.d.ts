@@ -33,6 +33,7 @@ type NavigationRoutes = {
 
   // Fiat Management
   FiatManagementScreen: { address: string; user: User };
+  FiatCardPaymentScreen: undefined;
 
   // Ethereum Polygon Screens
   EthereumPolygonScreen: { address: string; signer?: MPCSigner };

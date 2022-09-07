@@ -1,13 +1,11 @@
 import { RevertError } from "@0x/utils";
 import { GaslessTransactionResponse } from "api-types/gasless";
 import { User } from "api-types/user";
-import { erc20Tokens } from "ethereum/config/token-constants";
 import { getPreparedMpcSigner, getPreparedProvider } from "ethereum/controller/signers/ethereum-alchemy-signer";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
-import { getSwapQuote } from "ethereum/controller/swap/0x-utils";
 import { polygonConfig } from "ethereum/polygon/config/polygon-config";
 import { ecrecover, importPublic } from "ethereumjs-util";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { BigNumberish } from "ethers/lib/ethers";
 import { defaultAbiCoder, keccak256, solidityPack, toUtf8Bytes } from "ethers/lib/utils";
 import ec from "lib/elliptic";
@@ -15,8 +13,12 @@ import { fetchFromApi, HttpMethod } from "lib/http";
 import { ZeroExSwapQuote } from "packages/blockchain-api-client/src/provider/0x/ethereum/0x-ethereum-types";
 import { getPublicKey } from "react-native-blockchain-crypto-mpc";
 
+import { RfqOrder } from "@0x/protocol-utils";
+import { usdcAbi } from "ethereum/config/abi/usdc-abi";
+import { erc20Tokens } from "ethereum/config/token-constants";
+import { getSwapQuote } from "ethereum/controller/swap/0x-utils";
 import { Address } from "wallet/types/wallet";
-import * as ExchangeAbi from "./IExchangeAbi.json";
+import * as ExchangeAbi from "./IZeroExAbi.json";
 
 export const swapGaslessPolygonWithQuote = async (quote: ZeroExSwapQuote, address: string, signer: MPCSigner) => {
   const transactionBody = {
@@ -40,11 +42,356 @@ export const swapGaslessPolygonWithQuote = async (quote: ZeroExSwapQuote, addres
 const genRanHex = (size: any) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
 
 export const metaTxTest = async (address: Address, user: User) => {
-  console.log("herej ");
   const mpcSigner = getPreparedMpcSigner(address, user);
 
-  const quote = await getSwapQuote(erc20Tokens[1], erc20Tokens[2], "", "100000000000000000");
+  // try {
+  //   const testFetch = await fetch(
+  //     `https://api.0x.org/meta_transaction/v1/quote?sellToken=DAI&buyToken=WETH&sellAmount=100000000000000000000&takerAddress=${address.address}`
+  //   );
+  //   console.log(await testFetch.json());
+  // } catch (err) {
+  //   console.error("error: ", { err });
+  // }
+  // try {
+  //   const testFetch = await fetch(
+  //     `https://api.0x.org/swap/v1/quote?sellToken=DAI&buyToken=WETH&sellAmount=100000000000000000000`
+  //   );
+  //   console.log(await testFetch.json());
+  // } catch (err) {
+  //   console.error("error: ", { err });
+  // }
+  // return;
+
+  // --------------------------------------------------------------------------------------------------------------
+
+  // const quote = await getSwapQuote(erc20Tokens[1], erc20Tokens[2], "", "100000000000000000");
+  // console.log("Quote: ", quote);
+
+  console.log("Execute metatransaction with a fillRfqOrder call");
+  // Note that anyone can submit a Taker-Signed Order on-chain.
+  // We fetch usable addresses for the parties to the trade (maker and taker)
+  // as well as a separate address that actually sends the transaction.
+  const taker = address.address;
+  const sender = address.address;
+  const exchangeProxyAddress = "0xf91bb752490473b8342a3e964e855b9f9a2a668e";
+  const usdcTokenAddress = "0x07865c6e87b9f70255377e024ace6630c1eaa37f";
+  const etherTokenAddress = "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6";
+  console.log("------------------------------------------------------");
+  console.log("Exchange Proxy: ", exchangeProxyAddress);
+  console.log("USDC Token: ", usdcTokenAddress);
+  console.log("WETH Token: ", etherTokenAddress);
+  console.log("------------------------------------------------------");
+  console.log("Taker: ", taker);
+  console.log("Sender: ", sender);
+  console.log("------------------------------------------------------");
+
+  // the amount of ether the taker is selling
+  const etherAmount = ethers.utils.parseEther("0.1");
+  console.log("ETH to swap in WEI: ", etherAmount.toString());
+
+  // Print out the Allowances
+  const exchangeAllowanceUSDC = await new ethers.Contract(usdcTokenAddress, usdcAbi, mpcSigner).allowance(
+    address.address,
+    exchangeProxyAddress
+  );
+  const exchangeAllowanceWETH = await new ethers.Contract(etherTokenAddress, usdcAbi, mpcSigner).allowance(
+    address.address,
+    exchangeProxyAddress
+  );
+  console.log("Allowance USDC: ", exchangeAllowanceUSDC.toString());
+  console.log("Allowance WETH:", exchangeAllowanceWETH.toString());
+  console.log("------------------------------------------------------");
+  //Approve amounts to send on behalf of user (us)
+  if ((exchangeAllowanceUSDC as BigNumber).isZero())
+    console.log(
+      "Approval USDC: ",
+      await new ethers.Contract(usdcTokenAddress, usdcAbi, mpcSigner).approve(exchangeProxyAddress, "1000000000")
+    );
+  if ((exchangeAllowanceWETH as BigNumber).isZero())
+    console.log(
+      "Approval WETH: ",
+      await new ethers.Contract(etherTokenAddress, usdcAbi, mpcSigner).approve(
+        exchangeProxyAddress,
+        "1000000000000000000"
+      )
+    );
+  console.log("Approved Tokens");
+  console.log("------------------------------------------------------");
+
+  const quote = await getSwapQuote(erc20Tokens[1], erc20Tokens[2], "", etherAmount.toString());
   console.log("Quote: ", quote);
+  console.log("------------------------------------------------------");
+
+  return;
+
+  // Set up the Order and fill it
+  const randomExpiration = getRandomFutureDateInSeconds();
+  const pool = hexUtils.leftPad(1);
+
+  // Create the order
+  const rfqOrder: RfqOrder = new RfqOrder({
+    chainId: 5,
+    verifyingContract: exchangeProxyAddress,
+    maker,
+    taker,
+    makerToken: usdcTokenAddress,
+    takerToken: etherTokenAddress,
+    makerAmount: makerTokenAmount,
+    takerAmount: takerTokenAmount,
+    // This needs to be the sender of the meta-transaction.
+    txOrigin: sender,
+    expiry: randomExpiration,
+    pool,
+    salt: new BigNumber(Date.now()),
+  });
+
+  // Print order
+  printUtils.printOrder(rfqOrder);
+
+  // Print out the Balances and Allowances
+  await printUtils.fetchAndPrintContractAllowancesAsync(contractWrappers.contractAddresses.exchangeProxy);
+  await printUtils.fetchAndPrintContractBalancesAsync();
+
+  // Have the maker sign the order
+  const makerSignature = await rfqOrder.getSignatureWithProviderAsync(
+    web3Wrapper.getProvider(),
+    SignatureType.EthSign,
+    maker
+  );
+
+  const [{ orderHash, status }, remainingFillableAmount, isValidSignature] = await contractWrappers.exchangeProxy
+    .getRfqOrderRelevantState(rfqOrder, makerSignature)
+    .callAsync();
+  if (status === OrderStatus.Fillable && remainingFillableAmount.isGreaterThan(0) && isValidSignature) {
+    // Order is fillable
+  }
+
+  // Create a metatransaction
+  // We'll encode the the fillRfqOrder call to be signed in the metaTx wrapper
+  const fillRfqOrderCalldata = contractWrappers.exchangeProxy
+    .fillRfqOrder(rfqOrder, makerSignature, takerTokenAmount)
+    .getABIEncodedTransactionData();
+  const metaTxFields: MetaTransactionFields = {
+    chainId: NETWORK_CONFIGS.chainId,
+    verifyingContract: exchangeProxyAddress,
+    signer: taker,
+    sender,
+    minGasPrice: new BigNumber(TX_DEFAULTS.gasPrice),
+    maxGasPrice: new BigNumber(TX_DEFAULTS.gasPrice),
+    // In theory this could be different, but we'll use the same expiration
+    // as the order.
+    expirationTimeSeconds: randomExpiration,
+    salt: new BigNumber(Date.now()),
+    callData: fillRfqOrderCalldata,
+    value: new BigNumber(0),
+    // A few can be specified in terms of any erc20 token
+    // to go to the sender, but we'll leave it feeless
+    feeToken: NULL_ADDRESS,
+    feeAmount: new BigNumber(0),
+  };
+  const metaTx = new MetaTransaction(metaTxFields);
+  const metaTxSignature = await metaTx.getSignatureWithProviderAsync(web3Wrapper.getProvider());
+
+  const metaTxHash = await contractWrappers.exchangeProxy.getMetaTransactionHash(metaTx).callAsync();
+
+  // Fill the Order via 0x Exchange Proxy contract
+  txHash = await contractWrappers.exchangeProxy.executeMetaTransaction(metaTx, metaTxSignature).sendTransactionAsync({
+    from: sender,
+    ...TX_DEFAULTS,
+  });
+  txReceipt = await printUtils.awaitTransactionMinedSpinnerAsync("executeMetaTransaction", txHash);
+  printUtils.printTransaction("executeMetaTransaction", txReceipt, [
+    ["Meta-Transaction hash", metaTxHash],
+    ["RFQ order hash", orderHash],
+  ]);
+
+  // --------------------------------------------------------------------------------------------------------------
+
+  // console.log("Start Meta Transaction try");
+  // // Initialize the ContractWrappers, this provides helper functions around calling
+  // // 0x contracts as well as ERC20/ERC721 token contracts on the blockchain
+  // // // Initialize the Web3Wrapper, this provides helper functions around fetching
+  // // // account information, balances, general contract logs
+  // // const web3Wrapper = new Web3Wrapper(providerEngine);
+  // // const [maker, taker] = await web3Wrapper.getAvailableAddressesAsync();
+  // const exchangeProxyAddress = "0xf91bb752490473b8342a3e964e855b9f9a2a668e";
+  // const usdcTokenAddress = "0x07865c6e87b9f70255377e024ace6630c1eaa37f";
+  // const etherTokenAddress = "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6";
+  // console.log("Exchange Proxy: ", exchangeProxyAddress);
+  // console.log("USDC Token: ", usdcTokenAddress);
+  // console.log("WETH Token: ", etherTokenAddress);
+
+  // // the amount of ether the taker is selling
+  // const etherAmount = ethers.utils.parseEther("0.1");
+
+  // // Print out the Allowances
+  // const exchangeAllowanceUSDC = await new ethers.Contract(usdcTokenAddress, usdcAbi, mpcSigner).allowance(
+  //   address.address,
+  //   exchangeProxyAddress
+  // );
+  // const exchangeAllowanceWETH = await new ethers.Contract(etherTokenAddress, usdcAbi, mpcSigner).allowance(
+  //   address.address,
+  //   exchangeProxyAddress
+  // );
+  // console.log("Allowance USDC: ", exchangeAllowanceUSDC);
+  // console.log("Allowance WETH:", exchangeAllowanceWETH);
+  // //Approve amounts to send on behalf of user (us)
+  // if ((exchangeAllowanceUSDC as BigNumber).isZero())
+  //   console.log(
+  //     "Approval USDC: ",
+  //     await new ethers.Contract(usdcTokenAddress, usdcAbi, mpcSigner).approve(exchangeProxyAddress, "1000000000")
+  //   );
+  // if ((exchangeAllowanceWETH as BigNumber).isZero())
+  //   console.log(
+  //     "Approval WETH: ",
+  //     await new ethers.Contract(etherTokenAddress, usdcAbi, mpcSigner).approve(
+  //       exchangeProxyAddress,
+  //       "1000000000000000000"
+  //     )
+  //   );
+
+  // const limitOrder = {
+  //   chainId: 5,
+  //   verifyingContract: quote.to,
+  //   maker: quote.buyTokenAddress,
+  //   taker: quote.sellTokenAddress,
+  //   makerToken: erc20Tokens[1].contractAddress,
+  //   takerToken: erc20Tokens[2].contractAddress,
+  //   makerAmount: BigNumber.from(quote.buyAmount),
+  //   takerAmount: BigNumber.from(quote.sellAmount),
+  //   takerTokenFeeAmount: BigNumber.from(0),
+  //   sender: "0x0000000000000000000000000000000000000000",
+  //   feeRecipient: "0x0000000000000000000000000000000000000000",
+  //   expiry: BigNumber.from(Date.now() + 1000 * 60 * 10).div(1000 * 60),
+  //   pool: toUtf8Bytes(ethers.utils.hexZeroPad(ethers.utils.hexlify(0), 32).slice(34)),
+  //   salt: BigNumber.from(Date.now()),
+  // };
+  // // const limitOrder = new LimitOrder(limitOrderFields);
+  // console.log("after limitorder:");
+  // console.log("data: ", getMetaLimitDigest(limitOrder));
+  // console.log("weiter");
+
+  // // Create a metatransaction
+  // // We'll encode the the fillRfqOrder call to be signed in the metaTx wrapper
+  // // const metaTxFields: MetaTransactionFields = {
+  // //   signer: address.address,
+  // //   sender: "0x0000000000000000000000000000000000000000",
+  // //   chainId: 5,
+  // //   verifyingContract: exchangeProxyAddress,
+  // //   minGasPrice: new BigNumber(1),
+  // //   maxGasPrice: new BigNumber(2).pow(48),
+  // //   // In theory this could be different, but we'll use the same expiration
+  // //   // as the order.
+  // //   expirationTimeSeconds: new BigNumber(Date.now() + 10000),
+  // //   salt: new BigNumber(Date.now()),
+  // //   callData: getMetaLimitDigest(limitOrder),
+  // //   value: new BigNumber(0),
+  // //   // A few can be specified in terms of any erc20 token
+  // //   // to go to the sender, but we'll leave it feeless
+  // //   feeToken: "0x0000000000000000000000000000000000000000",
+  // //   feeAmount: new BigNumber(0),
+  // // };
+  // const metaTxFieldsWoType = {
+  //   signer: address.address,
+  //   sender: "0x0000000000000000000000000000000000000000",
+  //   minGasPrice: "20000000000",
+  //   maxGasPrice: "20000001000",
+  //   // In theory this could be different, but we'll use the same expiration
+  //   // as the order.
+  //   expirationTimeSeconds: (Date.now() + 10000).toString(),
+  //   salt: Date.now().toString(),
+  //   callData: getMetaLimitDigest(limitOrder),
+  //   value: "0",
+  //   // A few can be specified in terms of any erc20 token
+  //   // to go to the sender, but we'll leave it feeless
+  //   feeToken: "0x0000000000000000000000000000000000000000",
+  //   feeAmount: "0",
+  // };
+  // // const metaTx = new MetaTransaction(metaTxFields);
+  // console.log("Ready MetaTransaction to be signed: ", metaTxFieldsWoType);
+  // console.log("MetaTransaction hash: ", getMetaTxDigest(metaTxFieldsWoType));
+
+  // const metaTxSignature = await mpcSigner.signHashedMessage(getMetaTxDigest(metaTxFieldsWoType));
+  // // const metaTxSignature = await metaTx.getSignatureWithProviderAsync(web3Wrapper.getProvider());
+  // console.log("Signature: ", metaTxSignature);
+
+  // const typedSignature = {
+  //   // How to validate the signature.
+  //   signatureType: 3,
+  //   // EC Signature data.
+  //   v: metaTxSignature.v,
+  //   // EC Signature data.
+  //   r: metaTxSignature.r,
+  //   // EC Signature data.
+  //   s: metaTxSignature.s,
+  // };
+  // console.log("Typed Signature: ", typedSignature);
+
+  // // Fill the Order via 0x Exchange Proxy contract
+  // try {
+  //   const txHash = await new ethers.Contract(
+  //     exchangeProxyAddress,
+  //     ExchangeAbi.compilerOutput.abi,
+  //     mpcSigner
+  //   ).executeMetaTransaction(metaTxFieldsWoType, typedSignature);
+  //   console.log("Tx Hash: ", txHash);
+  // } catch (err: any) {
+  //   console.error("Error data: ", { err });
+  // }
+  // return;
+  // return defaultAbiCoder.encode(
+  //   bytes4(keccak256("MetaTransactionGasPriceError(bytes32,uint256,uint256,uint256)")),
+  //   mtxHash,
+  //   gasPrice,
+  //   minGasPrice,
+  //   maxGasPrice
+  // );
+
+  // return keccak256(
+  //   defaultAbiCoder.encode(
+  //     ["bytes32", "bytes32", "bytes32", "uint256", "address"],
+  //     [
+  //       keccak256(toUtf8Bytes("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")),
+  //       keccak256(toUtf8Bytes("ZeroEx")),
+  //       keccak256(toUtf8Bytes("1.0.0")),
+  //       80001,
+  //       "0xf471d32cb40837bf24529fcf17418fc1a4807626",
+  //     ]
+  //   )
+  // );
+
+  // txHash = await contractWrappers.exchangeProxy
+  //       .executeMetaTransaction(metaTx, metaTxSignature)
+  //       .sendTransactionAsync({
+  //           from: sender,
+  //           ...TX_DEFAULTS,
+  //       });
+
+  //console.log("Transaction hash: ", txHash);
+  // const metaTxSignature = await metaTx.getSignatureWithProviderAsync(web3Wrapper.getProvider());
+  //   // Print the Balances
+  //   await printUtils.fetchAndPrintContractBalancesAsync();
+
+  // --------------------------------------------------------------------------------------------------------------
+
+  return;
+
+  const transformData = {
+    side: "",
+    sellToken: "",
+    buyToken: "",
+    orders: [],
+    signatures: [],
+    maxOrderFillAmounts: [],
+    fillAmount: "number",
+    refundReceiver: "address",
+    rfqtTakerAddress: "address",
+  };
+
+  const erc20Transformation = {
+    deploymentNonce: 9,
+    data: transformData,
+  };
 
   // const limitOrder = {
   //   chainId: polygonConfig.chainId,

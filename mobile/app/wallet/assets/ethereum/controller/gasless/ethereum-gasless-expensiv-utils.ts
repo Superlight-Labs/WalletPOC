@@ -1,7 +1,7 @@
 import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasless";
 import { User } from "api-types/user";
 import { config } from "ethereum/config/ethereum-config";
-import { ERC20Token } from "ethereum/config/token-constants";
+import { ERC20Token } from "ethereum/config/tokens";
 import { BigNumber, ethers } from "ethers";
 import { fetchFromApi, HttpMethod } from "lib/http";
 import { Address } from "wallet/types/wallet";
@@ -18,13 +18,13 @@ export const gaslessOneTimeApprove = async (address: Address, user: User, token:
   const { transaction } = await fetchFromApi<GaslessTransactionResponse>("/gasless/approve", {
     method: HttpMethod.POST,
     body: {
-      contractAddress: token.contractAddress,
+      contractAddress: token.ethereumContract.address,
       receiver: address.address,
     },
   });
 
   //approve token for unlimited amount
-  const approvalResponse = await new ethers.Contract(token.contractAddress, usdcAbi, mpcSigner).approve(
+  const approvalResponse = await new ethers.Contract(token.ethereumContract.address, usdcAbi, mpcSigner).approve(
     tankAddress.address,
     "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
   );
@@ -44,9 +44,10 @@ export const checkPaymastersAllowance = async (token: ERC20Token, address: strin
   const provider = getPreparedProvider(config);
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress");
-  const allowanceResponce: BigNumber = await new ethers.Contract(token.contractAddress, usdcAbi, provider).allowance(
-    address,
-    tankAddress.address
-  );
+  const allowanceResponce: BigNumber = await new ethers.Contract(
+    token.ethereumContract.address,
+    usdcAbi,
+    provider
+  ).allowance(address, tankAddress.address);
   return allowanceResponce;
 };

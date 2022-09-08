@@ -1,4 +1,4 @@
-import { erc20Tokens } from "ethereum/polygon/config/tokens";
+import { findContractAddressBySymbol } from "ethereum/config/tokens";
 import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
 import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
@@ -19,7 +19,7 @@ export const PolygonBalanceView = ({ address }: PolygonBalanceProps) => {
 
   const updateBalanceFunction = async () => {
     setLoading(true);
-    const balance = await getPolygonErc20Balance(address, erc20Tokens[0]);
+    const balance = await getPolygonErc20Balance(address, findContractAddressBySymbol("WMATIC")!);
     setBalance(balance);
     setLoading(false);
   };
@@ -27,7 +27,9 @@ export const PolygonBalanceView = ({ address }: PolygonBalanceProps) => {
   return (
     <View style={styles.balanceContainer}>
       <View style={{ flexDirection: "row" }}>
-        <Text style={styles.balanceText}>{ethers.utils.formatUnits(balance, erc20Tokens[0].decimals)} Matic</Text>
+        <Text style={styles.balanceText}>
+          {ethers.utils.formatUnits(balance, findContractAddressBySymbol("WMATIC")!.polygonContract.decimals)} Matic
+        </Text>
         {loading && <ActivityIndicator />}
       </View>
       <TouchableOpacity onPress={updateBalanceFunction}>

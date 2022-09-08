@@ -1,4 +1,4 @@
-import { ERC20Token } from "ethereum/config/token-constants";
+import { ERC20Token } from "ethereum/config/tokens";
 import { ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";
 import { EthereumProviderEnum } from "packages/blockchain-api-client/src/blockchains/ethereum/ethereum-factory";
@@ -28,7 +28,7 @@ export const TokenBalanceView = ({ address, token }: TokenBalanceProps) => {
     const loadBalance = async () => {
       setLoading(true);
       let tokenAddr: string[] = [];
-      tokenAddr.push(token.contractAddress);
+      tokenAddr.push(token.ethereumContract.address);
       const tokenBalances: EthereumTokenBalances = await service.getTokenBalances(
         address.address,
         tokenAddr,
@@ -44,7 +44,9 @@ export const TokenBalanceView = ({ address, token }: TokenBalanceProps) => {
     <View style={styles.balanceContainer}>
       <View style={{ flexDirection: "row" }}>
         <Text style={styles.balanceText}>
-          {tokenBalance?.tokenBalance ? ethers.utils.formatUnits(tokenBalance.tokenBalance, token.decimals) : "0"}{" "}
+          {tokenBalance?.tokenBalance
+            ? ethers.utils.formatUnits(tokenBalance.tokenBalance, token.ethereumContract.decimals)
+            : "0"}{" "}
           {token.symbol}
         </Text>
         {loading && <ActivityIndicator />}

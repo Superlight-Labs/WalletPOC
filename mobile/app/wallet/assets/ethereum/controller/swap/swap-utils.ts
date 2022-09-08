@@ -1,6 +1,6 @@
 import { Provider } from "@ethersproject/abstract-provider";
 import { abi as ERC20ABI } from "@uniswap/v2-core/build/ERC20.json";
-import { ERC20Token } from "ethereum/config/token-constants";
+import { ERC20Token } from "ethereum/config/tokens";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { MPCSigner } from "../signers/mpc-signer";
 
@@ -19,7 +19,7 @@ export const approveAmount = async (
   signer: MPCSigner,
   contractAddress: string
 ): Promise<boolean> => {
-  const approvalResponse = await new ethers.Contract(token.contractAddress, ERC20ABI, signer).approve(
+  const approvalResponse = await new ethers.Contract(token.ethereumContract.address, ERC20ABI, signer).approve(
     contractAddress,
     amount.toString()
   );
@@ -42,9 +42,10 @@ export const checkAllowance = async (
   provider: Provider,
   contractAddress: string
 ): Promise<BigNumber> => {
-  const allowanceResponce: BigNumber = await new ethers.Contract(token.contractAddress, ERC20ABI, provider).allowance(
-    address,
-    contractAddress
-  );
+  const allowanceResponce: BigNumber = await new ethers.Contract(
+    token.ethereumContract.address,
+    ERC20ABI,
+    provider
+  ).allowance(address, contractAddress);
   return allowanceResponce;
 };

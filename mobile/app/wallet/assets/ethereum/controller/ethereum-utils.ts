@@ -1,6 +1,5 @@
 import { Signature, SignatureLike } from "@ethersproject/bytes";
-import { ERC20Token } from "ethereum/config/token-constants";
-import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
+import { ERC20Token } from "ethereum/config/tokens";
 import { BigNumber, ethers } from "ethers";
 import { EthereumBalance, EthereumTokenBalance } from "packages/blockchain-api-client/src/blockchains/ethereum/types";
 
@@ -24,9 +23,9 @@ export const ethToWei = (eth: number): BigNumber => BigNumber.from(eth).mul("100
 
 export const getBalanceFromEthereumTokenBalance = (
   ethereumBalance: EthereumTokenBalance,
-  token: ERC20Token | PolygonERC20Token
+  token: ERC20Token
 ): EthereumBalance => {
-  return { value: Number.parseInt(ethereumBalance.tokenBalance, 16) / 10 ** token.decimals };
+  return { value: Number.parseInt(ethereumBalance.tokenBalance, 16) / 10 ** token.ethereumContract.decimals };
 };
 
 /**

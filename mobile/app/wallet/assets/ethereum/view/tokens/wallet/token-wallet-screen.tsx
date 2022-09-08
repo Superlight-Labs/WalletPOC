@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ERC20Token } from "ethereum/config/token-constants";
+import { ERC20Token } from "ethereum/config/tokens";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";

@@ -18,7 +18,7 @@ type Props = {
 
 const PolygonPendingWithdrawItem = ({ posClient, plasmaClient, pendingTransaction }: Props) => {
   const setPolygonState = useSetRecoilState(polygonState);
-  const polygonClient = pendingTransaction.token.isToken ? posClient : plasmaClient;
+  const polygonClient = pendingTransaction.token.polygonContract.isToken ? posClient : plasmaClient;
 
   const check = useCallback(async () => {
     setProofApi("https://apis.matic.network/");
@@ -49,19 +49,19 @@ const PolygonPendingWithdrawItem = ({ posClient, plasmaClient, pendingTransactio
     [setPolygonState]
   );
 
-  const contract = pendingTransaction.token.isToken
-    ? posClient.erc20(pendingTransaction.token.ethereumAddress, true)
-    : plasmaClient.erc20(pendingTransaction.token.ethereumAddress, true);
+  const contract = pendingTransaction.token.polygonContract.isToken
+    ? posClient.erc20(pendingTransaction.token.ethereumContract.address, true)
+    : plasmaClient.erc20(pendingTransaction.token.ethereumContract.address, true);
 
   return (
     <View style={styles.container}>
       <Text>{pendingTransaction.hash.slice(0, 23) + "..."}</Text>
       <Text>
-        {Number.parseInt(pendingTransaction.amount, 10) / 10 ** pendingTransaction.token.decimals +
+        {Number.parseInt(pendingTransaction.amount, 10) / 10 ** pendingTransaction.token.polygonContract.decimals +
           " " +
           pendingTransaction.token.symbol}
       </Text>
-      {pendingTransaction.token.isToken ? (
+      {pendingTransaction.token.polygonContract.isToken ? (
         <PolygonPendingPosItemView
           contract={contract as ERC20}
           pendingTransaction={pendingTransaction}

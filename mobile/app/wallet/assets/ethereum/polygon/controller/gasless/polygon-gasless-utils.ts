@@ -3,9 +3,9 @@ import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasle
 import { User } from "api-types/user";
 import { randomBytes } from "crypto";
 import { usdcAbi } from "ethereum/config/abi/usdc-abi";
+import { ERC20Token } from "ethereum/config/tokens";
 import { getPreparedMpcSigner } from "ethereum/controller/signers/alchemy-signer";
 import { polygonConfig } from "ethereum/polygon/config/polygon-config";
-import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { defaultAbiCoder, keccak256, solidityPack, toUtf8Bytes } from "ethers/lib/utils";
 import { fetchFromApi, HttpMethod } from "lib/http";
@@ -20,11 +20,11 @@ import { Address } from "wallet/types/wallet";
  * @returns
  */
 //TODO dynamic check if token has permit function
-export const gasslessPolygonPermit = async (address: Address, user: User, value: string, token: PolygonERC20Token) => {
+export const gasslessPolygonPermit = async (address: Address, user: User, value: string, token: ERC20Token) => {
   const mpcSigner = getPreparedMpcSigner(address, user, polygonConfig);
 
   //token contract connected with our mpcSigner
-  const tokenContractMpcSigner = new ethers.Contract(token.polygonAddress, ERC20ABI, mpcSigner);
+  const tokenContractMpcSigner = new ethers.Contract(token.polygonContract.address, ERC20ABI, mpcSigner);
 
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress");
@@ -33,7 +33,7 @@ export const gasslessPolygonPermit = async (address: Address, user: User, value:
   const approve = {
     owner: address.address,
     spender: tankAddress.address,
-    value: ethers.utils.parseUnits(value, token.decimals),
+    value: ethers.utils.parseUnits(value, token.polygonContract.decimals),
   };
 
   // deadline as much as you want in the future
@@ -60,7 +60,7 @@ export const gasslessPolygonPermit = async (address: Address, user: User, value:
     method: HttpMethod.POST,
     body: {
       network: polygonConfig.chain,
-      contractAddress: token.polygonAddress,
+      contractAddress: token.polygonContract.address,
       owner: approve.owner,
       spender: approve.spender,
       value: approve.value.toString(),
@@ -82,16 +82,16 @@ export const gasslessPolygonPermit = async (address: Address, user: User, value:
  * @param token
  * @returns
  */
-export const gaslessPolygonTransfer = async (from: Address, to: string, value: string, token: PolygonERC20Token) => {
+export const gaslessPolygonTransfer = async (from: Address, to: string, value: string, token: ERC20Token) => {
   // Let api approve it
   const { transaction } = await fetchFromApi<GaslessTransactionResponse>("/gasless/relayTransfer", {
     method: HttpMethod.POST,
     body: {
       network: polygonConfig.chain,
-      contractAddress: token.polygonAddress,
+      contractAddress: token.polygonContract.address,
       from: from.address,
       to,
-      value: ethers.utils.parseUnits(value, token.decimals).toString(),
+      value: ethers.utils.parseUnits(value, token.polygonContract.decimals).toString(),
     },
   });
 
@@ -112,19 +112,19 @@ export const gaslessPolygonTransferWithAuthorization = async (
   user: User,
   to: string,
   value: string,
-  token: PolygonERC20Token
+  token: ERC20Token
 ) => {
   const mpcSigner = getPreparedMpcSigner(from, user, polygonConfig);
   console.log("yes right");
 
   //token contract connected with our mpcSigner
-  const tokenContractMpcSigner = new ethers.Contract(token.polygonAddress, usdcAbi, mpcSigner);
+  const tokenContractMpcSigner = new ethers.Contract(token.polygonContract.address, usdcAbi, mpcSigner);
 
   // Create the approval request
   const approve = {
     from: from.address,
     to: to,
-    value: ethers.utils.parseUnits(value, token.decimals),
+    value: ethers.utils.parseUnits(value, token.polygonContract.decimals),
   };
 
   // Create validation time
@@ -135,7 +135,7 @@ export const gaslessPolygonTransferWithAuthorization = async (
   //const nonce is unique random byte32 when using transferWithAuth
   let isNonceUsed = true;
   let nonce;
-  console.log("yes right 2: ", token.polygonAddress);
+  console.log("yes right 2: ", token.polygonContract.address);
   do {
     nonce = BigNumber.from(randomBytes(32));
     isNonceUsed = await tokenContractMpcSigner.authorizationState(from.address, nonce);
@@ -159,7 +159,7 @@ export const gaslessPolygonTransferWithAuthorization = async (
     method: HttpMethod.POST,
     body: {
       network: polygonConfig.chain,
-      contractAddress: token.polygonAddress,
+      contractAddress: token.polygonContract.address,
       from: approve.from,
       to: approve.to,
       value: approve.value.toString(),

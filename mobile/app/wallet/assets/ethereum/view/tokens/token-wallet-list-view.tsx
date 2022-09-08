@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
-import { erc20Tokens } from "ethereum/config/token-constants";
+import { erc20Tokens } from "ethereum/config/tokens";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -25,9 +25,9 @@ const TokenWalletListView = ({ wallet, navigation }: TokenWalletListViewProps) =
       </View>
       {erc20Tokens.map((token) => {
         return (
-          token.isToken != false && (
+          token.ethereumContract.isToken != false && (
             <TouchableOpacity
-              key={token.contractAddress}
+              key={token.ethereumContract.address}
               style={styles.actionButton}
               onPress={() => navigation.navigate("TokenWalletScreen", { wallet: wallet, token: token })}
             >

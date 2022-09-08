@@ -1,7 +1,7 @@
+import { ERC20Token } from "ethereum/config/tokens";
 import { atom } from "recoil";
 import { recoilPersist } from "recoil-persist";
 import { CustomStorage } from "state/storage";
-import { PolygonERC20Token } from "../config/tokens";
 
 const { persistAtom } = recoilPersist({
   storage: CustomStorage,
@@ -10,7 +10,7 @@ const { persistAtom } = recoilPersist({
 
 export type PendingTransaction = {
   hash: string;
-  token: PolygonERC20Token;
+  token: ERC20Token;
   amount: string;
   checkpointed: boolean;
 };

@@ -1,14 +1,14 @@
 import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasless";
 import { User } from "api-types/user";
 import { usdcAbi } from "ethereum/config/abi/usdc-abi";
+import { ERC20Token } from "ethereum/config/tokens";
 import { getPreparedMpcSigner, getPreparedProvider } from "ethereum/controller/signers/alchemy-signer";
 import { polygonConfig } from "ethereum/polygon/config/polygon-config";
-import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { BigNumber, ethers } from "ethers";
 import { fetchFromApi, HttpMethod } from "lib/http";
 import { Address } from "wallet/types/wallet";
 
-export const gaslessPolygonOneTimeApprove = async (address: Address, user: User, token: PolygonERC20Token) => {
+export const gaslessPolygonOneTimeApprove = async (address: Address, user: User, token: ERC20Token) => {
   const mpcSigner = getPreparedMpcSigner(address, user, polygonConfig);
 
   //fetch apis tank address
@@ -19,13 +19,13 @@ export const gaslessPolygonOneTimeApprove = async (address: Address, user: User,
     method: HttpMethod.POST,
     body: {
       network: polygonConfig.chain,
-      contractAddress: token.polygonAddress,
+      contractAddress: token.polygonContract.address,
       receiver: address.address,
     },
   });
 
   //approve token for unlimited amount
-  const approvalResponse = await new ethers.Contract(token.polygonAddress, usdcAbi, mpcSigner).approve(
+  const approvalResponse = await new ethers.Contract(token.polygonContract.address, usdcAbi, mpcSigner).approve(
     tankAddress.address,
     "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
   );
@@ -41,16 +41,14 @@ export const gaslessPolygonOneTimeApprove = async (address: Address, user: User,
  * @param address
  * @returns
  */
-export const checkPolygonPaymastersAllowance = async (
-  token: PolygonERC20Token,
-  address: string
-): Promise<BigNumber> => {
+export const checkPolygonPaymastersAllowance = async (token: ERC20Token, address: string): Promise<BigNumber> => {
   const provider = getPreparedProvider(polygonConfig);
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress?network=" + polygonConfig.chain);
-  const allowanceResponce: BigNumber = await new ethers.Contract(token.polygonAddress, usdcAbi, provider).allowance(
-    address,
-    tankAddress.address
-  );
+  const allowanceResponce: BigNumber = await new ethers.Contract(
+    token.polygonContract.address,
+    usdcAbi,
+    provider
+  ).allowance(address, tankAddress.address);
   return allowanceResponce;
 };

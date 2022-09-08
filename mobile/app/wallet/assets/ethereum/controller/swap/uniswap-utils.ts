@@ -2,7 +2,7 @@ import { Provider } from "@ethersproject/abstract-provider";
 import "@ethersproject/shims";
 import { CurrencyAmount, Percent, Token, TradeType } from "@uniswap/sdk-core";
 import { AlphaRouter, SwapRoute } from "@uniswap/smart-order-router";
-import { ERC20Token } from "ethereum/config/token-constants";
+import { ERC20Token } from "ethereum/config/tokens";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { BigNumber, ethers } from "ethers";
 import JSBI from "jsbi";
@@ -29,8 +29,13 @@ export const findRouteExactInput = async (
   amount: string,
   provider: Provider
 ): Promise<SwapRoute> => {
-  const TokenA = new Token(5, tokenFrom.contractAddress, tokenFrom.decimals, tokenFrom.symbol);
-  const TokenB = new Token(5, tokenTo.contractAddress, tokenTo.decimals, tokenTo.symbol);
+  const TokenA = new Token(
+    5,
+    tokenFrom.ethereumContract.address,
+    tokenFrom.ethereumContract.decimals,
+    tokenFrom.symbol
+  );
+  const TokenB = new Token(5, tokenTo.ethereumContract.address, tokenTo.ethereumContract.decimals, tokenTo.symbol);
 
   const currencyAmount = CurrencyAmount.fromRawAmount(TokenA, JSBI.BigInt(amount));
 

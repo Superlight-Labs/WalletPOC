@@ -3,7 +3,7 @@ import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasle
 import { User } from "api-types/user";
 import { randomBytes } from "crypto";
 import { config } from "ethereum/config/ethereum-config";
-import { ERC20Token } from "ethereum/config/token-constants";
+import { ERC20Token } from "ethereum/config/tokens";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { defaultAbiCoder, keccak256, solidityPack, toUtf8Bytes } from "ethers/lib/utils";
 import { fetchFromApi, HttpMethod } from "lib/http";
@@ -24,7 +24,7 @@ export const gasslessPermit = async (address: Address, user: User, value: string
   const mpcSigner = getPreparedMpcSigner(address, user, config);
 
   //token contract connected with our mpcSigner
-  const tokenContractMpcSigner = new ethers.Contract(token.contractAddress, ERC20ABI, mpcSigner);
+  const tokenContractMpcSigner = new ethers.Contract(token.ethereumContract.address, ERC20ABI, mpcSigner);
 
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress");
@@ -33,7 +33,7 @@ export const gasslessPermit = async (address: Address, user: User, value: string
   const approve = {
     owner: address.address,
     spender: tankAddress.address,
-    value: ethers.utils.parseUnits(value, token.decimals),
+    value: ethers.utils.parseUnits(value, token.ethereumContract.decimals),
   };
 
   // deadline as much as you want in the future
@@ -59,7 +59,7 @@ export const gasslessPermit = async (address: Address, user: User, value: string
   const { transaction } = await fetchFromApi<GaslessTransactionResponse>("/gasless/relayPermit", {
     method: HttpMethod.POST,
     body: {
-      contractAddress: token.contractAddress,
+      contractAddress: token.ethereumContract.address,
       owner: approve.owner,
       spender: approve.spender,
       value: approve.value.toString(),
@@ -86,10 +86,10 @@ export const gaslessTransfer = async (from: Address, to: string, value: string, 
   const { transaction } = await fetchFromApi<GaslessTransactionResponse>("/gasless/relayTransfer", {
     method: HttpMethod.POST,
     body: {
-      contractAddress: token.contractAddress,
+      contractAddress: token.ethereumContract.address,
       from: from.address,
       to,
-      value: ethers.utils.parseUnits(value, token.decimals).toString(),
+      value: ethers.utils.parseUnits(value, token.ethereumContract.decimals).toString(),
     },
   });
 
@@ -115,13 +115,13 @@ export const gaslessTransferWithAuthorization = async (
   const mpcSigner = getPreparedMpcSigner(from, user, config);
 
   //token contract connected with our mpcSigner
-  const tokenContractMpcSigner = new ethers.Contract(token.contractAddress, usdcAbi, mpcSigner);
+  const tokenContractMpcSigner = new ethers.Contract(token.ethereumContract.address, usdcAbi, mpcSigner);
 
   // Create the approval request
   const approve = {
     from: from.address,
     to: to,
-    value: ethers.utils.parseUnits(value, token.decimals),
+    value: ethers.utils.parseUnits(value, token.ethereumContract.decimals),
   };
 
   // Create validation time
@@ -154,7 +154,7 @@ export const gaslessTransferWithAuthorization = async (
   const { transaction } = await fetchFromApi<GaslessTransactionResponse>("/gasless/relayTransferWithAuthorization", {
     method: HttpMethod.POST,
     body: {
-      contractAddress: token.contractAddress,
+      contractAddress: token.ethereumContract.address,
       from: approve.from,
       to: approve.to,
       value: approve.value.toString(),

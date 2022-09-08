@@ -3,7 +3,7 @@ import { PlasmaClient } from "@maticnetwork/maticjs-plasma";
 import { ERC20 } from "@maticnetwork/maticjs/dist/ts/pos/erc20";
 import { User } from "api-types/user";
 import { BitcoinWallet } from "bitcoin/types/bitcoin";
-import { ERC20Token } from "ethereum/config/token-constants";
+import { ERC20Token } from "ethereum/config/tokens";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { EthereumWallet } from "ethereum/types/ethereum";

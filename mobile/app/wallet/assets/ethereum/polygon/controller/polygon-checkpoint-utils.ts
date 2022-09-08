@@ -1,4 +1,4 @@
-import { proxyAddress } from "../config/config";
+import { proxyAddress } from "../config/polygon-config";
 import { PendingTransaction } from "../state/polygon-atoms";
 
 import abiCoder from "web3-eth-abi";

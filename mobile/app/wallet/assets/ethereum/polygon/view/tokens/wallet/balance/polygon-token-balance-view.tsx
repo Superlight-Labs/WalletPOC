@@ -1,5 +1,5 @@
 import { ERC20 } from "@maticnetwork/maticjs/dist/ts/pos/erc20";
-import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
+import { ERC20Token } from "ethereum/config/tokens";
 import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -7,7 +7,7 @@ import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } fr
 type TokenBalanceProps = {
   address: string;
   childErc20: ERC20;
-  token: PolygonERC20Token;
+  token: ERC20Token;
 };
 
 export const TokenBalanceView = ({ address, token, childErc20 }: TokenBalanceProps) => {
@@ -34,7 +34,7 @@ export const TokenBalanceView = ({ address, token, childErc20 }: TokenBalancePro
     <View style={styles.balanceContainer}>
       <View style={{ flexDirection: "row" }}>
         <Text style={styles.balanceText}>
-          {tokenBalance ? ethers.utils.formatUnits(tokenBalance, token.decimals) : "0"} {token.symbol}
+          {tokenBalance ? ethers.utils.formatUnits(tokenBalance, token.polygonContract.decimals) : "0"} {token.symbol}
         </Text>
         {loading && <ActivityIndicator />}
       </View>

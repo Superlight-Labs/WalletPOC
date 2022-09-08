@@ -15,7 +15,7 @@ import { getPublicKey } from "react-native-blockchain-crypto-mpc";
 
 import { RfqOrder } from "@0x/protocol-utils";
 import { usdcAbi } from "ethereum/config/abi/usdc-abi";
-import { erc20Tokens } from "ethereum/config/token-constants";
+import { erc20Tokens } from "ethereum/config/tokens";
 import { getSwapQuote } from "ethereum/controller/swap/0x-utils";
 import { Address } from "wallet/types/wallet";
 import * as ExchangeAbi from "./IZeroExAbi.json";

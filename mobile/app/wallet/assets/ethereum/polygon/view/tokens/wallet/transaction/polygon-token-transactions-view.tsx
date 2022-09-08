@@ -1,4 +1,4 @@
-import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
+import { ERC20Token } from "ethereum/config/tokens";
 import { EthereumService } from "packages/blockchain-api-client/src";
 import { EthereumProviderEnum } from "packages/blockchain-api-client/src/blockchains/ethereum/ethereum-factory";
 import { EthereumTransaction } from "packages/blockchain-api-client/src/blockchains/ethereum/types";
@@ -7,7 +7,7 @@ import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } fr
 
 type TokenTransactionProps = {
   address: string;
-  token: PolygonERC20Token;
+  token: ERC20Token;
 };
 
 const TokenTransactionsView = ({ address, token }: TokenTransactionProps) => {
@@ -27,7 +27,7 @@ const TokenTransactionsView = ({ address, token }: TokenTransactionProps) => {
     );
     setTransactions(
       transactions.filter(
-        (transaction) => transaction.rawContract.address.toLowerCase() == token.polygonAddress.toLowerCase()
+        (transaction) => transaction.rawContract.address.toLowerCase() == token.polygonContract.address.toLowerCase()
       )
     );
     setLoading(false);
@@ -63,7 +63,8 @@ const TokenTransactionsView = ({ address, token }: TokenTransactionProps) => {
                 <Text>{transaction.to.slice(0, 16) + "..."}</Text>
               )}
               <Text key={transaction.hash} style={{ color: isPlus ? "green" : "red" }}>
-                {pre + Number.parseInt(transaction.rawContract.value, 16) / 10 ** token.decimals} {token.symbol}
+                {pre + Number.parseInt(transaction.rawContract.value, 16) / 10 ** token.polygonContract.decimals}{" "}
+                {token.symbol}
               </Text>
             </View>
           );

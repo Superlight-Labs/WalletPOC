@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { ERC20Token } from "ethereum/config/token-constants";
+import { ERC20Token } from "ethereum/config/tokens";
 import { EthereumWallet } from "ethereum/types/Ethereum";
 import { EthereumService } from "packages/blockchain-api-client/src";
 import { EthereumProviderEnum } from "packages/blockchain-api-client/src/blockchains/ethereum/ethereum-factory";
@@ -34,7 +34,7 @@ const TokenTransactionsView = ({ wallet, address, token, navigation }: TokenTran
     );
     setTransactions(
       transactions.filter(
-        (transaction) => transaction.rawContract.address.toLowerCase() == token.contractAddress.toLowerCase()
+        (transaction) => transaction.rawContract.address.toLowerCase() == token.ethereumContract.address.toLowerCase()
       )
     );
     setLoading(false);
@@ -70,7 +70,8 @@ const TokenTransactionsView = ({ wallet, address, token, navigation }: TokenTran
                 <Text>{transaction.to.slice(0, 16) + "..."}</Text>
               )}
               <Text key={transaction.hash} style={{ color: isPlus ? "green" : "red" }}>
-                {pre + Number.parseInt(transaction.rawContract.value, 16) / 10 ** token.decimals} {token.symbol}
+                {pre + Number.parseInt(transaction.rawContract.value, 16) / 10 ** token.ethereumContract.decimals}{" "}
+                {token.symbol}
               </Text>
             </View>
           );

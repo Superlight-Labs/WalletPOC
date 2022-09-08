@@ -1,5 +1,5 @@
 import { swapFeeAddress, swapFeePercentage } from "ethereum/config/ethereum-constants";
-import { ERC20Token } from "ethereum/config/token-constants";
+import { ERC20Token } from "ethereum/config/tokens";
 import {
   EthereumSwappingProviderEnum,
   EthereumSwappingService,
@@ -16,9 +16,9 @@ export const getSwapQuote = async (
   const service = new EthereumSwappingService("TEST", "Ethereum");
   const params =
     "buyToken=" +
-    tokenTo.contractAddress +
+    tokenTo.ethereumContract.address +
     "&sellToken=" +
-    tokenFrom.contractAddress +
+    tokenFrom.ethereumContract.address +
     "&sellAmount=" +
     amount +
     "&feeRecipient=" +

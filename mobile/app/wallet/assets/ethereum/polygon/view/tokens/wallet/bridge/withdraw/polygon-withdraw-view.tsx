@@ -1,7 +1,7 @@
 import { POSClient } from "@maticnetwork/maticjs";
 import { PlasmaClient } from "@maticnetwork/maticjs-plasma";
 import { Picker } from "@react-native-picker/picker";
-import { erc20Tokens, PolygonERC20Token } from "ethereum/polygon/config/tokens";
+import { ERC20Token, erc20Tokens } from "ethereum/config/tokens";
 import { polygonState } from "ethereum/polygon/state/polygon-atoms";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -35,10 +35,10 @@ const PolygonWithdrawView = ({ address, posClient, plasmaClient }: Props) => {
     setInputValue(inputValue);
   };
 
-  const updateBalance = async (token: PolygonERC20Token) => {
+  const updateBalance = async (token: ERC20Token) => {
     setLoadingBalance(true);
 
-    const childErc20 = posClient.erc20(token.polygonAddress, false);
+    const childErc20 = posClient.erc20(token.polygonContract.address, false);
 
     const balance = await childErc20.getBalance(address);
 
@@ -49,9 +49,9 @@ const PolygonWithdrawView = ({ address, posClient, plasmaClient }: Props) => {
   const withdraw = useCallback(async () => {
     const token = erc20Tokens[selectedInputTokenIndex];
 
-    const client = token.isToken ? posClient : plasmaClient;
+    const client = token.polygonContract.isToken ? posClient : plasmaClient;
 
-    const childErc20 = client.erc20(token.polygonAddress, false);
+    const childErc20 = client.erc20(token.polygonContract.address, false);
 
     const withdraw = await childErc20.withdrawStart(inputValue);
     const withdrawStartTransaction = await withdraw.getTransactionHash();
@@ -92,7 +92,8 @@ const PolygonWithdrawView = ({ address, posClient, plasmaClient }: Props) => {
           Available:{" "}
           {availableBalance &&
             !loadingBalance &&
-            Number.parseInt(availableBalance, 10) / 10 ** erc20Tokens[selectedInputTokenIndex].decimals +
+            Number.parseInt(availableBalance, 10) /
+              10 ** erc20Tokens[selectedInputTokenIndex].polygonContract.decimals +
               " " +
               erc20Tokens[selectedInputTokenIndex].symbol}
           {loadingBalance && <ActivityIndicator />}

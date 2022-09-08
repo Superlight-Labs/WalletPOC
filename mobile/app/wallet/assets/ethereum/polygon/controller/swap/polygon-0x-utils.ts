@@ -1,6 +1,6 @@
 import { swapFeeAddress, swapFeePercentage } from "ethereum/config/ethereum-constants";
+import { ERC20Token } from "ethereum/config/tokens";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
-import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import {
   EthereumSwappingProviderEnum,
   EthereumSwappingService,
@@ -8,14 +8,14 @@ import {
 import { ZeroExSwapQuote } from "packages/blockchain-api-client/src/provider/0x/ethereum/0x-ethereum-types";
 
 export const getPolygonSwapQuote = async (
-  tokenFrom: PolygonERC20Token,
-  tokenTo: PolygonERC20Token,
+  tokenFrom: ERC20Token,
+  tokenTo: ERC20Token,
   myAddress: string,
   amount: string
 ): Promise<ZeroExSwapQuote> => {
   const service = new EthereumSwappingService("TEST", "Polygon");
-  const toAddress = tokenTo.isToken ? tokenTo.polygonAddress : tokenTo.symbol;
-  const fromAddress = tokenFrom.isToken ? tokenFrom.polygonAddress : tokenFrom.symbol;
+  const toAddress = tokenTo.polygonContract.isToken ? tokenTo.polygonContract.address : tokenTo.symbol;
+  const fromAddress = tokenFrom.polygonContract.isToken ? tokenFrom.polygonContract.address : tokenFrom.symbol;
   const params =
     "buyToken=" +
     toAddress +

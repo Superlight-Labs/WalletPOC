@@ -1,7 +1,7 @@
 import { Provider } from "@ethersproject/abstract-provider";
 import { abi as ERC20ABI } from "@uniswap/v2-core/build/ERC20.json";
+import { ERC20Token } from "ethereum/config/tokens";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
-import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 
 /**
@@ -14,7 +14,7 @@ import { BigNumber, BigNumberish, ethers } from "ethers";
  * @returns Promise<boolean> true if it succeeded
  */
 export const approvePolygonAmount = async (
-  token: PolygonERC20Token,
+  token: ERC20Token,
   amount: BigNumberish,
   signer: MPCSigner,
   contractAddress: string
@@ -23,7 +23,7 @@ export const approvePolygonAmount = async (
   console.log(token);
   console.log(amount);
   console.log(contractAddress);
-  const approvalResponse = await new ethers.Contract(token.polygonAddress, ERC20ABI, signer).approve(
+  const approvalResponse = await new ethers.Contract(token.polygonContract.address, ERC20ABI, signer).approve(
     contractAddress,
     amount.toString()
   );
@@ -41,14 +41,15 @@ export const approvePolygonAmount = async (
  * @returns
  */
 export const checkPolygonAllowance = async (
-  token: PolygonERC20Token,
+  token: ERC20Token,
   address: string,
   provider: Provider,
   contractAddress: string
 ): Promise<BigNumber> => {
-  const allowanceResponce: BigNumber = await new ethers.Contract(token.polygonAddress, ERC20ABI, provider).allowance(
-    address,
-    contractAddress
-  );
+  const allowanceResponce: BigNumber = await new ethers.Contract(
+    token.polygonContract.address,
+    ERC20ABI,
+    provider
+  ).allowance(address, contractAddress);
   return allowanceResponce;
 };

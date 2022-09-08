@@ -2,7 +2,7 @@ import "@ethersproject/shims";
 import { Picker } from "@react-native-picker/picker";
 import { SwapRoute } from "@uniswap/smart-order-router";
 import { config } from "ethereum/config/ethereum-config";
-import { ERC20Token, erc20Tokens } from "ethereum/config/token-constants";
+import { ERC20Token, erc20Tokens } from "ethereum/config/tokens";
 import { getBalanceFromEthereumTokenBalance } from "ethereum/controller/ethereum-utils";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { approveAmount, checkAllowance } from "ethereum/controller/swap/swap-utils";
@@ -34,7 +34,7 @@ type Props = {
 };
 
 const TokenUniswapView = ({ wallet, address }: Props) => {
-  const erc20TokensLocal = erc20Tokens.filter((token) => token.isToken);
+  const erc20TokensLocal = erc20Tokens.filter((token) => token.ethereumContract.isToken);
   const user = useRecoilValue<AuthState>(authState);
 
   const [selectedInputTokenIndex, setSelectedInputTokenIndex] = useState<number>(0);
@@ -102,7 +102,7 @@ const TokenUniswapView = ({ wallet, address }: Props) => {
   const updateBalance = async (token: ERC20Token) => {
     setLoadingBalance(true);
     let tokenAddr: string[] = [];
-    tokenAddr.push(token.contractAddress);
+    tokenAddr.push(token.ethereumContract.address);
     const tokenBalances: EthereumTokenBalances = await service.getTokenBalances(
       address.address,
       tokenAddr,
@@ -117,7 +117,7 @@ const TokenUniswapView = ({ wallet, address }: Props) => {
 
   const [swapRouteErr, setSwapRouteErr] = useState<boolean>(false);
   const updateSwapRoute = async (inputToken: ERC20Token, outputToken: ERC20Token, inputAmount: string) => {
-    const inputAmountWei = ethers.utils.parseUnits(inputAmount, inputToken.decimals);
+    const inputAmountWei = ethers.utils.parseUnits(inputAmount, inputToken.ethereumContract.decimals);
 
     try {
       const route = await findRouteExactInput(
@@ -166,7 +166,10 @@ const TokenUniswapView = ({ wallet, address }: Props) => {
   const swapTokens = async () => {
     if (!inputValue || !swapRoute) return;
 
-    const inputAmountWei = ethers.utils.parseUnits(inputValue, erc20TokensLocal[selectedInputTokenIndex].decimals);
+    const inputAmountWei = ethers.utils.parseUnits(
+      inputValue,
+      erc20TokensLocal[selectedInputTokenIndex].ethereumContract.decimals
+    );
 
     //check if uniswap has allowance for enough value - else approve new amount
     const allowedAmount = await checkAllowance(

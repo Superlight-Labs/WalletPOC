@@ -1,7 +1,7 @@
 import { POSClient } from "@maticnetwork/maticjs";
 import { PlasmaClient } from "@maticnetwork/maticjs-plasma";
 import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
-import { erc20Tokens } from "ethereum/polygon/config/tokens";
+import { erc20Tokens } from "ethereum/config/tokens";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -46,10 +46,10 @@ const PolygonTokenWalletListView = ({
 
       {erc20Tokens.map((token) => {
         return (
-          token.isToken != false && (
+          token.polygonContract.isToken != false && (
             <TouchableOpacity
               style={styles.actionButton}
-              key={token.polygonAddress}
+              key={token.polygonContract.address}
               onPress={() =>
                 navigation.navigate("PolygonTokenWalletScreen", { wallet, token, polygonClient: posClient, address })
               }

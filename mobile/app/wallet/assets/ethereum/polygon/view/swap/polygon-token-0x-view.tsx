@@ -1,8 +1,8 @@
 import { Picker } from "@react-native-picker/picker";
+import { ERC20Token, erc20Tokens } from "ethereum/config/tokens";
 import { getPreparedMpcSigner } from "ethereum/controller/signers/alchemy-signer";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { polygonConfig } from "ethereum/polygon/config/polygon-config";
-import { erc20Tokens, PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { metaTxTest, swapGaslessPolygonWithQuote } from "ethereum/polygon/controller/gasless/polygon-gasless-0x-utils";
 import { approveGaslessPolygonAmount } from "ethereum/polygon/controller/gasless/polygon-gasless-swap-utils";
 import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
@@ -86,13 +86,13 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
   const [availableBalance, setAvailableBalance] = useState<string>();
   const [loadingBalance, setLoadingBalance] = useState<boolean>(false);
   const [service] = useState(new EthereumService("TEST"));
-  const updateBalance = async (token: PolygonERC20Token) => {
+  const updateBalance = async (token: ERC20Token) => {
     setLoadingBalance(true);
 
     let tokenAddr: string[] = [];
-    tokenAddr.push(token.polygonAddress);
+    tokenAddr.push(token.polygonContract.address);
     const tokenBalance: string = await getPolygonErc20Balance(address, token);
-    setAvailableBalance(ethers.utils.formatUnits(tokenBalance, token.decimals));
+    setAvailableBalance(ethers.utils.formatUnits(tokenBalance, token.polygonContract.decimals));
 
     setLoadingBalance(false);
   };
@@ -100,8 +100,8 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
   const [loadingQuote, setLoadingQuote] = useState<boolean>(false);
   const [quote, setQuote] = useState<ZeroExSwapQuote>();
   const [quoteErr, setQuoteErr] = useState<boolean>();
-  const updateQuote = async (inputToken: PolygonERC20Token, outputToken: PolygonERC20Token, inputAmount: string) => {
-    const inputAmountWei = ethers.utils.parseUnits(inputAmount, inputToken.decimals);
+  const updateQuote = async (inputToken: ERC20Token, outputToken: ERC20Token, inputAmount: string) => {
+    const inputAmountWei = ethers.utils.parseUnits(inputAmount, inputToken.polygonContract.decimals);
     try {
       const quote = await getPolygonSwapQuote(inputToken, outputToken, address.address, inputAmountWei.toString());
       console.log(quote);
@@ -121,7 +121,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
         ethers.utils.formatUnits(
           quote.buyAmount,
           erc20Tokens.filter((token) => token != erc20Tokens[selectedInputTokenIndex])[selectedOutputTokenIndex]
-            .decimals
+            .polygonContract.decimals
         ) +
         " " +
         erc20Tokens.filter((token) => token != erc20Tokens[selectedInputTokenIndex])[selectedOutputTokenIndex].symbol +
@@ -147,10 +147,13 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
   const swapTokens = async () => {
     if (!inputValue || !quote) return;
 
-    const inputAmountWei = ethers.utils.parseUnits(inputValue, erc20Tokens[selectedInputTokenIndex].decimals);
+    const inputAmountWei = ethers.utils.parseUnits(
+      inputValue,
+      erc20Tokens[selectedInputTokenIndex].polygonContract.decimals
+    );
 
     //check if uniswap has allowance for enough value - else approve new amount
-    if (erc20Tokens[selectedInputTokenIndex].isToken) {
+    if (erc20Tokens[selectedInputTokenIndex].polygonContract.isToken) {
       const allowedAmount = await checkPolygonAllowance(
         erc20Tokens[selectedInputTokenIndex],
         address.address,
@@ -187,7 +190,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
           ethers.utils.formatUnits(
             quote.buyAmount,
             erc20Tokens.filter((token) => token != erc20Tokens[selectedInputTokenIndex])[selectedOutputTokenIndex]
-              .decimals
+              .polygonContract.decimals
           ) +
           " " +
           erc20Tokens[selectedOutputTokenIndex].symbol
@@ -268,7 +271,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
               ? ethers.utils.formatUnits(
                   quote.buyAmount,
                   erc20Tokens.filter((token) => token != erc20Tokens[selectedInputTokenIndex])[selectedOutputTokenIndex]
-                    .decimals
+                    .polygonContract.decimals
                 )
               : "?") +
             " " +

@@ -16,9 +16,9 @@ export const getSwapQuote = async (
   const service = new EthereumSwappingService("TEST", "Ethereum");
   const params =
     "buyToken=" +
-    tokenTo.ethereumContract.address +
+    tokenTo.ethereum.address +
     "&sellToken=" +
-    tokenFrom.ethereumContract.address +
+    tokenFrom.ethereum.address +
     "&sellAmount=" +
     amount +
     "&feeRecipient=" +

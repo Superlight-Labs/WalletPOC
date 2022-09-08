@@ -29,13 +29,8 @@ export const findRouteExactInput = async (
   amount: string,
   provider: Provider
 ): Promise<SwapRoute> => {
-  const TokenA = new Token(
-    5,
-    tokenFrom.ethereumContract.address,
-    tokenFrom.ethereumContract.decimals,
-    tokenFrom.symbol
-  );
-  const TokenB = new Token(5, tokenTo.ethereumContract.address, tokenTo.ethereumContract.decimals, tokenTo.symbol);
+  const TokenA = new Token(5, tokenFrom.ethereum.address, tokenFrom.decimals, tokenFrom.symbol);
+  const TokenB = new Token(5, tokenTo.ethereum.address, tokenTo.decimals, tokenTo.symbol);
 
   const currencyAmount = CurrencyAmount.fromRawAmount(TokenA, JSBI.BigInt(amount));
 

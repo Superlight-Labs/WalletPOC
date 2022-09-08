@@ -23,7 +23,7 @@ export const approvePolygonAmount = async (
   console.log(token);
   console.log(amount);
   console.log(contractAddress);
-  const approvalResponse = await new ethers.Contract(token.polygonContract.address, ERC20ABI, signer).approve(
+  const approvalResponse = await new ethers.Contract(token.polygon.address, ERC20ABI, signer).approve(
     contractAddress,
     amount.toString()
   );
@@ -46,10 +46,9 @@ export const checkPolygonAllowance = async (
   provider: Provider,
   contractAddress: string
 ): Promise<BigNumber> => {
-  const allowanceResponce: BigNumber = await new ethers.Contract(
-    token.polygonContract.address,
-    ERC20ABI,
-    provider
-  ).allowance(address, contractAddress);
+  const allowanceResponce: BigNumber = await new ethers.Contract(token.polygon.address, ERC20ABI, provider).allowance(
+    address,
+    contractAddress
+  );
   return allowanceResponce;
 };

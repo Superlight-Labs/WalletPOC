@@ -14,8 +14,8 @@ export const getPolygonSwapQuote = async (
   amount: string
 ): Promise<ZeroExSwapQuote> => {
   const service = new EthereumSwappingService("TEST", "Polygon");
-  const toAddress = tokenTo.polygonContract.isToken ? tokenTo.polygonContract.address : tokenTo.symbol;
-  const fromAddress = tokenFrom.polygonContract.isToken ? tokenFrom.polygonContract.address : tokenFrom.symbol;
+  const toAddress = tokenTo.polygon.isToken ? tokenTo.polygon.address : tokenTo.symbol;
+  const fromAddress = tokenFrom.polygon.isToken ? tokenFrom.polygon.address : tokenFrom.symbol;
   const params =
     "buyToken=" +
     toAddress +

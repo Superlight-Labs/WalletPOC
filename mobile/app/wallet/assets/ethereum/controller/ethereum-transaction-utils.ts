@@ -36,10 +36,7 @@ export const buildRawTokenTransaction = async (
 ): Promise<TransactionRequest> => {
   const erc20_rw = new ethers.Contract(contractAddress, abi, signer);
 
-  const unsignedTrans = await erc20_rw.populateTransaction.transfer(
-    to,
-    (value * 10 ** token.ethereumContract.decimals).toString()
-  );
+  const unsignedTrans = await erc20_rw.populateTransaction.transfer(to, (value * 10 ** token.decimals).toString());
 
   const gas = await service.getEstimatedFees(
     unsignedTrans.from!,

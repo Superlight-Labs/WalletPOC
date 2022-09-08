@@ -35,7 +35,7 @@ const TokenSendScreen = ({ route }: Props) => {
   const handleTokenToSend = (value: string) => {
     let lengthDecimals = 0;
     if (value.includes(".")) lengthDecimals = value.length - value.indexOf(".") - 1;
-    if (lengthDecimals <= token.ethereumContract.decimals) setTokenToSend(value);
+    if (lengthDecimals <= token.decimals) setTokenToSend(value);
   };
 
   const [signer, setSigner] = useState<MPCSigner>();
@@ -54,7 +54,7 @@ const TokenSendScreen = ({ route }: Props) => {
 
   const sendTransaction = useCallback(async (to: string, value: string) => {
     try {
-      if (token.ethereumContract.hasPermit) {
+      if (token.ethereum.hasPermit) {
         const result = await gaslessTransferWithAuthorization(address, user, to, value, token);
       } else {
         const allowance: BigNumber = await checkPaymastersAllowance(token, address.address);

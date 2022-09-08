@@ -25,7 +25,7 @@ export const getBalanceFromEthereumTokenBalance = (
   ethereumBalance: EthereumTokenBalance,
   token: ERC20Token
 ): EthereumBalance => {
-  return { value: Number.parseInt(ethereumBalance.tokenBalance, 16) / 10 ** token.ethereumContract.decimals };
+  return { value: Number.parseInt(ethereumBalance.tokenBalance, 16) / 10 ** token.decimals };
 };
 
 /**

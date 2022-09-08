@@ -27,7 +27,7 @@ const TokenTransactionsView = ({ address, token }: TokenTransactionProps) => {
     );
     setTransactions(
       transactions.filter(
-        (transaction) => transaction.rawContract.address.toLowerCase() == token.polygonContract.address.toLowerCase()
+        (transaction) => transaction.rawContract.address.toLowerCase() == token.polygon.address.toLowerCase()
       )
     );
     setLoading(false);
@@ -63,8 +63,7 @@ const TokenTransactionsView = ({ address, token }: TokenTransactionProps) => {
                 <Text>{transaction.to.slice(0, 16) + "..."}</Text>
               )}
               <Text key={transaction.hash} style={{ color: isPlus ? "green" : "red" }}>
-                {pre + Number.parseInt(transaction.rawContract.value, 16) / 10 ** token.polygonContract.decimals}{" "}
-                {token.symbol}
+                {pre + Number.parseInt(transaction.rawContract.value, 16) / 10 ** token.decimals} {token.symbol}
               </Text>
             </View>
           );

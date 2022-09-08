@@ -34,7 +34,7 @@ type Props = {
 };
 
 const TokenUniswapView = ({ wallet, address }: Props) => {
-  const erc20TokensLocal = erc20Tokens.filter((token) => token.ethereumContract.isToken);
+  const erc20TokensLocal = erc20Tokens.filter((token) => token.ethereum.isToken);
   const user = useRecoilValue<AuthState>(authState);
 
   const [selectedInputTokenIndex, setSelectedInputTokenIndex] = useState<number>(0);
@@ -102,7 +102,7 @@ const TokenUniswapView = ({ wallet, address }: Props) => {
   const updateBalance = async (token: ERC20Token) => {
     setLoadingBalance(true);
     let tokenAddr: string[] = [];
-    tokenAddr.push(token.ethereumContract.address);
+    tokenAddr.push(token.ethereum.address);
     const tokenBalances: EthereumTokenBalances = await service.getTokenBalances(
       address.address,
       tokenAddr,
@@ -117,7 +117,7 @@ const TokenUniswapView = ({ wallet, address }: Props) => {
 
   const [swapRouteErr, setSwapRouteErr] = useState<boolean>(false);
   const updateSwapRoute = async (inputToken: ERC20Token, outputToken: ERC20Token, inputAmount: string) => {
-    const inputAmountWei = ethers.utils.parseUnits(inputAmount, inputToken.ethereumContract.decimals);
+    const inputAmountWei = ethers.utils.parseUnits(inputAmount, inputToken.decimals);
 
     try {
       const route = await findRouteExactInput(
@@ -166,10 +166,7 @@ const TokenUniswapView = ({ wallet, address }: Props) => {
   const swapTokens = async () => {
     if (!inputValue || !swapRoute) return;
 
-    const inputAmountWei = ethers.utils.parseUnits(
-      inputValue,
-      erc20TokensLocal[selectedInputTokenIndex].ethereumContract.decimals
-    );
+    const inputAmountWei = ethers.utils.parseUnits(inputValue, erc20TokensLocal[selectedInputTokenIndex].decimals);
 
     //check if uniswap has allowance for enough value - else approve new amount
     const allowedAmount = await checkAllowance(

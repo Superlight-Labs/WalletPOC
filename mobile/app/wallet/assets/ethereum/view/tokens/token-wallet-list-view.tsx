@@ -25,9 +25,9 @@ const TokenWalletListView = ({ wallet, navigation }: TokenWalletListViewProps) =
       </View>
       {erc20Tokens.map((token) => {
         return (
-          token.ethereumContract.isToken != false && (
+          token.ethereum.isToken != false && (
             <TouchableOpacity
-              key={token.ethereumContract.address}
+              key={token.ethereum.address}
               style={styles.actionButton}
               onPress={() => navigation.navigate("TokenWalletScreen", { wallet: wallet, token: token })}
             >

@@ -19,7 +19,7 @@ export const approveAmount = async (
   signer: MPCSigner,
   contractAddress: string
 ): Promise<boolean> => {
-  const approvalResponse = await new ethers.Contract(token.ethereumContract.address, ERC20ABI, signer).approve(
+  const approvalResponse = await new ethers.Contract(token.ethereum.address, ERC20ABI, signer).approve(
     contractAddress,
     amount.toString()
   );
@@ -42,10 +42,9 @@ export const checkAllowance = async (
   provider: Provider,
   contractAddress: string
 ): Promise<BigNumber> => {
-  const allowanceResponce: BigNumber = await new ethers.Contract(
-    token.ethereumContract.address,
-    ERC20ABI,
-    provider
-  ).allowance(address, contractAddress);
+  const allowanceResponce: BigNumber = await new ethers.Contract(token.ethereum.address, ERC20ABI, provider).allowance(
+    address,
+    contractAddress
+  );
   return allowanceResponce;
 };

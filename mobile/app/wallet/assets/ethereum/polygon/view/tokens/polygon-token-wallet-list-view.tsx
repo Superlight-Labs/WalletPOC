@@ -46,10 +46,10 @@ const PolygonTokenWalletListView = ({
 
       {erc20Tokens.map((token) => {
         return (
-          token.polygonContract.isToken != false && (
+          token.polygon.isToken != false && (
             <TouchableOpacity
               style={styles.actionButton}
-              key={token.polygonContract.address}
+              key={token.polygon.address}
               onPress={() =>
                 navigation.navigate("PolygonTokenWalletScreen", { wallet, token, polygonClient: posClient, address })
               }

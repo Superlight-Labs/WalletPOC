@@ -38,7 +38,7 @@ const PolygonWithdrawView = ({ address, posClient, plasmaClient }: Props) => {
   const updateBalance = async (token: ERC20Token) => {
     setLoadingBalance(true);
 
-    const childErc20 = posClient.erc20(token.polygonContract.address, false);
+    const childErc20 = posClient.erc20(token.polygon.address, false);
 
     const balance = await childErc20.getBalance(address);
 
@@ -49,9 +49,9 @@ const PolygonWithdrawView = ({ address, posClient, plasmaClient }: Props) => {
   const withdraw = useCallback(async () => {
     const token = erc20Tokens[selectedInputTokenIndex];
 
-    const client = token.polygonContract.isToken ? posClient : plasmaClient;
+    const client = token.polygon.isToken ? posClient : plasmaClient;
 
-    const childErc20 = client.erc20(token.polygonContract.address, false);
+    const childErc20 = client.erc20(token.polygon.address, false);
 
     const withdraw = await childErc20.withdrawStart(inputValue);
     const withdrawStartTransaction = await withdraw.getTransactionHash();
@@ -92,8 +92,7 @@ const PolygonWithdrawView = ({ address, posClient, plasmaClient }: Props) => {
           Available:{" "}
           {availableBalance &&
             !loadingBalance &&
-            Number.parseInt(availableBalance, 10) /
-              10 ** erc20Tokens[selectedInputTokenIndex].polygonContract.decimals +
+            Number.parseInt(availableBalance, 10) / 10 ** erc20Tokens[selectedInputTokenIndex].decimals +
               " " +
               erc20Tokens[selectedInputTokenIndex].symbol}
           {loadingBalance && <ActivityIndicator />}

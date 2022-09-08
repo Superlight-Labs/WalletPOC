@@ -34,7 +34,7 @@ export const approveGaslessPolygonAmount = async (
     method: HttpMethod.POST,
     body: {
       network: polygonConfig.chain,
-      contractAddress: token.polygonContract.address,
+      contractAddress: token.polygon.address,
       receiver: address.address,
     },
   });
@@ -45,7 +45,7 @@ export const approveGaslessPolygonAmount = async (
   console.log(contractAddress);
 
   //approve token
-  const approvalResponse = await new ethers.Contract(token.polygonContract.address, ERC20ABI, mpcSigner).approve(
+  const approvalResponse = await new ethers.Contract(token.polygon.address, ERC20ABI, mpcSigner).approve(
     contractAddress,
     amount.toString()
   );

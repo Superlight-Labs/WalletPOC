@@ -19,13 +19,13 @@ export const gaslessPolygonOneTimeApprove = async (address: Address, user: User,
     method: HttpMethod.POST,
     body: {
       network: polygonConfig.chain,
-      contractAddress: token.polygonContract.address,
+      contractAddress: token.polygon.address,
       receiver: address.address,
     },
   });
 
   //approve token for unlimited amount
-  const approvalResponse = await new ethers.Contract(token.polygonContract.address, usdcAbi, mpcSigner).approve(
+  const approvalResponse = await new ethers.Contract(token.polygon.address, usdcAbi, mpcSigner).approve(
     tankAddress.address,
     "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
   );
@@ -45,10 +45,9 @@ export const checkPolygonPaymastersAllowance = async (token: ERC20Token, address
   const provider = getPreparedProvider(polygonConfig);
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress?network=" + polygonConfig.chain);
-  const allowanceResponce: BigNumber = await new ethers.Contract(
-    token.polygonContract.address,
-    usdcAbi,
-    provider
-  ).allowance(address, tankAddress.address);
+  const allowanceResponce: BigNumber = await new ethers.Contract(token.polygon.address, usdcAbi, provider).allowance(
+    address,
+    tankAddress.address
+  );
   return allowanceResponce;
 };

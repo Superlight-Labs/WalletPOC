@@ -1,7 +1,7 @@
 import { Provider, TransactionRequest } from "@ethersproject/abstract-provider";
 import { serialize, UnsignedTransaction } from "@ethersproject/transactions";
 import { User } from "api-types/user";
-import { config } from "ethereum/config/ethereum-config";
+import { Config, config, Network } from "ethereum/config/ethereum-config";
 import { Bytes, getDefaultProvider, Signer } from "ethers";
 import {
   defineReadOnly,
@@ -17,15 +17,28 @@ import { signEcdsa } from "lib/mpc";
 import { getBinSignature } from "react-native-blockchain-crypto-mpc";
 import { Address } from "wallet/types/wallet";
 import { getSignatureWithRecoveryCode } from "../ethereum-utils";
-
 export class MPCSigner extends Signer {
   private address: Address;
   private user: User;
+  private config?: Config;
 
-  constructor(address: Address, user: User) {
+  constructor(address: Address, user: User, config?: Config) {
     super();
     this.address = address;
     this.user = user;
+    this.config = config;
+  }
+
+  getNetwork(): Network {
+    return this.config?.network || "ethereum";
+  }
+
+  getChainIdentifier(): number {
+    return this.config?.chainId || 1;
+  }
+
+  getChain(): string {
+    return this.config?.chain || "mainnet";
   }
 
   getAddress(): Promise<string> {

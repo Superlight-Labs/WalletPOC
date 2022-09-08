@@ -44,7 +44,7 @@ const PolygonDepositView = ({ address, polygonClient }: Props) => {
   const deposit = useCallback(async () => {
     const receipt = await depositToken(
       polygonClient,
-      allTokens[selectedInputTokenIndex].ethereumContract.address,
+      allTokens[selectedInputTokenIndex].ethereum.address,
       address.address,
       parseInt(inputValue, 10)
     );

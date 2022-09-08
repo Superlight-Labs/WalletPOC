@@ -16,7 +16,9 @@ export default function useEthereumSigner() {
   function setSigner() {
     if (!signer)
       setSignerLocal(
-        new MPCSigner(address, user).connect(new ethers.providers.AlchemyProvider(config.chain, alchemyProviderKey))
+        new MPCSigner(address, user, config).connect(
+          new ethers.providers.AlchemyProvider(config.chain, alchemyProviderKey)
+        )
       );
   }
 

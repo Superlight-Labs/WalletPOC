@@ -34,7 +34,7 @@ const TokenTransactionsView = ({ wallet, address, token, navigation }: TokenTran
     );
     setTransactions(
       transactions.filter(
-        (transaction) => transaction.rawContract.address.toLowerCase() == token.ethereumContract.address.toLowerCase()
+        (transaction) => transaction.rawContract.address.toLowerCase() == token.ethereum.address.toLowerCase()
       )
     );
     setLoading(false);
@@ -70,8 +70,7 @@ const TokenTransactionsView = ({ wallet, address, token, navigation }: TokenTran
                 <Text>{transaction.to.slice(0, 16) + "..."}</Text>
               )}
               <Text key={transaction.hash} style={{ color: isPlus ? "green" : "red" }}>
-                {pre + Number.parseInt(transaction.rawContract.value, 16) / 10 ** token.ethereumContract.decimals}{" "}
-                {token.symbol}
+                {pre + Number.parseInt(transaction.rawContract.value, 16) / 10 ** token.decimals} {token.symbol}
               </Text>
             </View>
           );

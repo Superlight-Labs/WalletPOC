@@ -18,13 +18,13 @@ export const gaslessOneTimeApprove = async (address: Address, user: User, token:
   const { transaction } = await fetchFromApi<GaslessTransactionResponse>("/gasless/approve", {
     method: HttpMethod.POST,
     body: {
-      contractAddress: token.ethereumContract.address,
+      contractAddress: token.ethereum.address,
       receiver: address.address,
     },
   });
 
   //approve token for unlimited amount
-  const approvalResponse = await new ethers.Contract(token.ethereumContract.address, usdcAbi, mpcSigner).approve(
+  const approvalResponse = await new ethers.Contract(token.ethereum.address, usdcAbi, mpcSigner).approve(
     tankAddress.address,
     "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
   );
@@ -44,10 +44,9 @@ export const checkPaymastersAllowance = async (token: ERC20Token, address: strin
   const provider = getPreparedProvider(config);
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress");
-  const allowanceResponce: BigNumber = await new ethers.Contract(
-    token.ethereumContract.address,
-    usdcAbi,
-    provider
-  ).allowance(address, tankAddress.address);
+  const allowanceResponce: BigNumber = await new ethers.Contract(token.ethereum.address, usdcAbi, provider).allowance(
+    address,
+    tankAddress.address
+  );
   return allowanceResponce;
 };

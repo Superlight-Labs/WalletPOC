@@ -28,7 +28,7 @@ export const PolygonBalanceView = ({ address }: PolygonBalanceProps) => {
     <View style={styles.balanceContainer}>
       <View style={{ flexDirection: "row" }}>
         <Text style={styles.balanceText}>
-          {ethers.utils.formatUnits(balance, findContractAddressBySymbol("WMATIC")!.polygonContract.decimals)} Matic
+          {ethers.utils.formatUnits(balance, findContractAddressBySymbol("WMATIC")!.decimals)} Matic
         </Text>
         {loading && <ActivityIndicator />}
       </View>

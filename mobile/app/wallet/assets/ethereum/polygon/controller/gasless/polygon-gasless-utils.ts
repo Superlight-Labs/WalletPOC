@@ -24,7 +24,7 @@ export const gasslessPolygonPermit = async (address: Address, user: User, value:
   const mpcSigner = getPreparedMpcSigner(address, user, polygonConfig);
 
   //token contract connected with our mpcSigner
-  const tokenContractMpcSigner = new ethers.Contract(token.polygonContract.address, ERC20ABI, mpcSigner);
+  const tokenContractMpcSigner = new ethers.Contract(token.polygon.address, ERC20ABI, mpcSigner);
 
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress");
@@ -33,7 +33,7 @@ export const gasslessPolygonPermit = async (address: Address, user: User, value:
   const approve = {
     owner: address.address,
     spender: tankAddress.address,
-    value: ethers.utils.parseUnits(value, token.polygonContract.decimals),
+    value: ethers.utils.parseUnits(value, token.decimals),
   };
 
   // deadline as much as you want in the future
@@ -60,7 +60,7 @@ export const gasslessPolygonPermit = async (address: Address, user: User, value:
     method: HttpMethod.POST,
     body: {
       network: polygonConfig.chain,
-      contractAddress: token.polygonContract.address,
+      contractAddress: token.polygon.address,
       owner: approve.owner,
       spender: approve.spender,
       value: approve.value.toString(),
@@ -88,10 +88,10 @@ export const gaslessPolygonTransfer = async (from: Address, to: string, value: s
     method: HttpMethod.POST,
     body: {
       network: polygonConfig.chain,
-      contractAddress: token.polygonContract.address,
+      contractAddress: token.polygon.address,
       from: from.address,
       to,
-      value: ethers.utils.parseUnits(value, token.polygonContract.decimals).toString(),
+      value: ethers.utils.parseUnits(value, token.decimals).toString(),
     },
   });
 
@@ -118,13 +118,13 @@ export const gaslessPolygonTransferWithAuthorization = async (
   console.log("yes right");
 
   //token contract connected with our mpcSigner
-  const tokenContractMpcSigner = new ethers.Contract(token.polygonContract.address, usdcAbi, mpcSigner);
+  const tokenContractMpcSigner = new ethers.Contract(token.polygon.address, usdcAbi, mpcSigner);
 
   // Create the approval request
   const approve = {
     from: from.address,
     to: to,
-    value: ethers.utils.parseUnits(value, token.polygonContract.decimals),
+    value: ethers.utils.parseUnits(value, token.decimals),
   };
 
   // Create validation time
@@ -135,7 +135,7 @@ export const gaslessPolygonTransferWithAuthorization = async (
   //const nonce is unique random byte32 when using transferWithAuth
   let isNonceUsed = true;
   let nonce;
-  console.log("yes right 2: ", token.polygonContract.address);
+  console.log("yes right 2: ", token.polygon.address);
   do {
     nonce = BigNumber.from(randomBytes(32));
     isNonceUsed = await tokenContractMpcSigner.authorizationState(from.address, nonce);
@@ -159,7 +159,7 @@ export const gaslessPolygonTransferWithAuthorization = async (
     method: HttpMethod.POST,
     body: {
       network: polygonConfig.chain,
-      contractAddress: token.polygonContract.address,
+      contractAddress: token.polygon.address,
       from: approve.from,
       to: approve.to,
       value: approve.value.toString(),

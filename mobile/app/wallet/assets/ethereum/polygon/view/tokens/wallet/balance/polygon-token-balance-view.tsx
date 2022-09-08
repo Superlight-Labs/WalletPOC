@@ -34,7 +34,7 @@ export const TokenBalanceView = ({ address, token, childErc20 }: TokenBalancePro
     <View style={styles.balanceContainer}>
       <View style={{ flexDirection: "row" }}>
         <Text style={styles.balanceText}>
-          {tokenBalance ? ethers.utils.formatUnits(tokenBalance, token.polygonContract.decimals) : "0"} {token.symbol}
+          {tokenBalance ? ethers.utils.formatUnits(tokenBalance, token.decimals) : "0"} {token.symbol}
         </Text>
         {loading && <ActivityIndicator />}
       </View>

@@ -17,7 +17,7 @@ export default function usePolygonSigner() {
   function setSigner() {
     if (!signer)
       setSignerLocal(
-        new MPCSigner(address, user).connect(
+        new MPCSigner(address, user, polygonConfig).connect(
           new ethers.providers.AlchemyProvider(polygonConfig.chain, alchemyProviderKey)
         )
       );

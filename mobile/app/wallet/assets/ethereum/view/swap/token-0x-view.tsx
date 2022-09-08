@@ -90,13 +90,13 @@ const Token0xView = ({ wallet, address }: Props) => {
   const [service] = useState(new EthereumService("TEST"));
   const updateBalance = async (token: ERC20Token) => {
     setLoadingBalance(true);
-    if (!token.ethereumContract.isToken) {
+    if (!token.ethereum.isToken) {
       const balance: EthereumBalance = await service.getBalance(address.address, EthereumProviderEnum.ALCHEMY);
       console.log(balance.value, weiToEth(balance.value));
       setAvailableBalance(weiToEth(balance.value).toString());
     } else {
       let tokenAddr: string[] = [];
-      tokenAddr.push(token.ethereumContract.address);
+      tokenAddr.push(token.ethereum.address);
       const tokenBalances: EthereumTokenBalances = await service.getTokenBalances(
         address.address,
         tokenAddr,
@@ -111,7 +111,7 @@ const Token0xView = ({ wallet, address }: Props) => {
   const [quote, setQuote] = useState<ZeroExSwapQuote>();
   const [quoteErr, setQuoteErr] = useState<boolean>();
   const updateQuote = async (inputToken: ERC20Token, outputToken: ERC20Token, inputAmount: string) => {
-    const inputAmountWei = ethers.utils.parseUnits(inputAmount, inputToken.ethereumContract.decimals);
+    const inputAmountWei = ethers.utils.parseUnits(inputAmount, inputToken.decimals);
     try {
       const quote = await getSwapQuote(inputToken, outputToken, address.address, inputAmountWei.toString());
       console.log(quote);
@@ -131,7 +131,7 @@ const Token0xView = ({ wallet, address }: Props) => {
         ethers.utils.formatUnits(
           quote.buyAmount,
           erc20Tokens.filter((token) => token != erc20Tokens[selectedInputTokenIndex])[selectedOutputTokenIndex]
-            .ethereumContract.decimals
+            .decimals
         ) +
         " " +
         erc20Tokens.filter((token) => token != erc20Tokens[selectedInputTokenIndex])[selectedOutputTokenIndex].symbol +
@@ -157,13 +157,10 @@ const Token0xView = ({ wallet, address }: Props) => {
   const swapTokens = async () => {
     if (!inputValue || !quote) return;
 
-    const inputAmountWei = ethers.utils.parseUnits(
-      inputValue,
-      erc20Tokens[selectedInputTokenIndex].ethereumContract.decimals
-    );
+    const inputAmountWei = ethers.utils.parseUnits(inputValue, erc20Tokens[selectedInputTokenIndex].decimals);
 
     //check if uniswap has allowance for enough value - else approve new amount
-    if (erc20Tokens[selectedInputTokenIndex].ethereumContract.isToken) {
+    if (erc20Tokens[selectedInputTokenIndex].ethereum.isToken) {
       const allowedAmount = await checkAllowance(
         erc20Tokens[selectedInputTokenIndex],
         address.address,
@@ -199,7 +196,7 @@ const Token0xView = ({ wallet, address }: Props) => {
           ethers.utils.formatUnits(
             quote.buyAmount,
             erc20Tokens.filter((token) => token != erc20Tokens[selectedInputTokenIndex])[selectedOutputTokenIndex]
-              .ethereumContract.decimals
+              .decimals
           ) +
           " " +
           erc20Tokens[selectedOutputTokenIndex].symbol
@@ -279,7 +276,7 @@ const Token0xView = ({ wallet, address }: Props) => {
               ? ethers.utils.formatUnits(
                   quote.buyAmount,
                   erc20Tokens.filter((token) => token != erc20Tokens[selectedInputTokenIndex])[selectedOutputTokenIndex]
-                    .ethereumContract.decimals
+                    .decimals
                 )
               : "?") +
             " " +

@@ -7,11 +7,15 @@ const { persistAtom } = recoilPersist({
   key: "FiatManagementStatePersist",
 });
 
-const initialState: FiatManagementState = {};
+const initialState: FiatManagementState = {
+  cardId: "",
+};
 
-export type FiatManagementState = {};
+export type FiatManagementState = {
+  cardId: string;
+};
 
-export const ethereumWalletsState = atom({
+export const fiatStateAtom = atom<FiatManagementState>({
   key: "FiatManagement",
   default: initialState,
   effects_UNSTABLE: [persistAtom],

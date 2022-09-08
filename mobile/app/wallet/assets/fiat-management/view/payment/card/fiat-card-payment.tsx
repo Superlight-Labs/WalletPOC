@@ -1,8 +1,8 @@
 import React from "react";
-import { Text } from "react-native";
+import FiatCardForm from "./fiat-card-form";
 
 const FiatCardPaymentScreen = () => {
-  return <Text>Hi</Text>;
+  return <FiatCardForm />;
 };
 
 export default FiatCardPaymentScreen;

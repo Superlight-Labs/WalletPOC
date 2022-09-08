@@ -1,12 +1,12 @@
 import { abi as ERC20ABI } from "@uniswap/v2-core/build/ERC20.json";
 import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasless";
 import { User } from "api-types/user";
+import { getPreparedMpcSigner } from "ethereum/controller/signers/alchemy-signer";
 import { polygonConfig } from "ethereum/polygon/config/polygon-config";
 import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { BigNumberish, ethers } from "ethers";
 import { fetchFromApi, HttpMethod } from "lib/http";
 import { Address } from "wallet/types/wallet";
-import { getPreparedPolygonMpcSigner } from "../signers/polygon-alchemy-signer";
 
 /**
  * Approves amount of token to be used for swapping
@@ -24,7 +24,7 @@ export const approveGaslessPolygonAmount = async (
   user: User,
   contractAddress: string
 ): Promise<boolean> => {
-  const mpcSigner = getPreparedPolygonMpcSigner(address, user);
+  const mpcSigner = getPreparedMpcSigner(address, user, polygonConfig);
 
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress?network=" + polygonConfig.chain);

@@ -1,10 +1,11 @@
 import { Picker } from "@react-native-picker/picker";
+import { getPreparedMpcSigner } from "ethereum/controller/signers/alchemy-signer";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
+import { polygonConfig } from "ethereum/polygon/config/polygon-config";
 import { erc20Tokens, PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { metaTxTest, swapGaslessPolygonWithQuote } from "ethereum/polygon/controller/gasless/polygon-gasless-0x-utils";
 import { approveGaslessPolygonAmount } from "ethereum/polygon/controller/gasless/polygon-gasless-swap-utils";
 import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
-import { getPreparedPolygonMpcSigner } from "ethereum/polygon/controller/signers/polygon-alchemy-signer";
 import { getPolygonSwapQuote } from "ethereum/polygon/controller/swap/polygon-0x-utils";
 import { checkPolygonAllowance } from "ethereum/polygon/controller/swap/polygon-swap-utils";
 import { EthereumWallet } from "ethereum/types/ethereum";
@@ -32,7 +33,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
 
   const [signer, setSigner] = useState<MPCSigner>();
   useEffect(() => {
-    setSigner(getPreparedPolygonMpcSigner(address, user));
+    setSigner(getPreparedMpcSigner(address, user, polygonConfig));
     updateBalance(erc20Tokens[0]);
   }, []);
 

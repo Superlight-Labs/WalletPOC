@@ -2,7 +2,7 @@ const Network: "TEST" | "Main" = "TEST";
 
 const isTestNet = Network === "TEST";
 
-interface Config {
+export interface Config {
   IsTestNet: boolean;
   coinTypeIndex: string;
   chain: string;

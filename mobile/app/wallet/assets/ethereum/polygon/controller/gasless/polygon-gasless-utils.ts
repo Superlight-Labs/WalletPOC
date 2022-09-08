@@ -3,13 +3,13 @@ import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasle
 import { User } from "api-types/user";
 import { randomBytes } from "crypto";
 import { usdcAbi } from "ethereum/config/abi/usdc-abi";
+import { getPreparedMpcSigner } from "ethereum/controller/signers/alchemy-signer";
 import { polygonConfig } from "ethereum/polygon/config/polygon-config";
 import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { defaultAbiCoder, keccak256, solidityPack, toUtf8Bytes } from "ethers/lib/utils";
 import { fetchFromApi, HttpMethod } from "lib/http";
 import { Address } from "wallet/types/wallet";
-import { getPreparedPolygonMpcSigner } from "../signers/polygon-alchemy-signer";
 
 /**
  * Runs an gasless permit call on the token's contract
@@ -21,7 +21,7 @@ import { getPreparedPolygonMpcSigner } from "../signers/polygon-alchemy-signer";
  */
 //TODO dynamic check if token has permit function
 export const gasslessPolygonPermit = async (address: Address, user: User, value: string, token: PolygonERC20Token) => {
-  const mpcSigner = getPreparedPolygonMpcSigner(address, user);
+  const mpcSigner = getPreparedMpcSigner(address, user, polygonConfig);
 
   //token contract connected with our mpcSigner
   const tokenContractMpcSigner = new ethers.Contract(token.polygonAddress, ERC20ABI, mpcSigner);
@@ -75,7 +75,7 @@ export const gasslessPolygonPermit = async (address: Address, user: User, value:
 };
 
 /**
- * Transfers erc20 Token value from -> to (permit has to be called beforehand)
+ * Transfers erc20 Token value from -> to (permit or approve has to be called beforehand)
  * @param from
  * @param to
  * @param value
@@ -114,7 +114,7 @@ export const gaslessPolygonTransferWithAuthorization = async (
   value: string,
   token: PolygonERC20Token
 ) => {
-  const mpcSigner = getPreparedPolygonMpcSigner(from, user);
+  const mpcSigner = getPreparedMpcSigner(from, user, polygonConfig);
   console.log("yes right");
 
   //token contract connected with our mpcSigner

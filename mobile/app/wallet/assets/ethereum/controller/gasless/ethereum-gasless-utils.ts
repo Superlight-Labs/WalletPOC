@@ -9,7 +9,7 @@ import { defaultAbiCoder, keccak256, solidityPack, toUtf8Bytes } from "ethers/li
 import { fetchFromApi, HttpMethod } from "lib/http";
 import { Address } from "wallet/types/wallet";
 import { usdcAbi } from "../../config/abi/usdc-abi";
-import { getPreparedMpcSigner } from "../signers/ethereum-alchemy-signer";
+import { getPreparedMpcSigner } from "../signers/alchemy-signer";
 
 /**
  * Runs an gasless permit call on the token's contract
@@ -21,7 +21,7 @@ import { getPreparedMpcSigner } from "../signers/ethereum-alchemy-signer";
  */
 //TODO dynamic check if token has permit function
 export const gasslessPermit = async (address: Address, user: User, value: string, token: ERC20Token) => {
-  const mpcSigner = getPreparedMpcSigner(address, user);
+  const mpcSigner = getPreparedMpcSigner(address, user, config);
 
   //token contract connected with our mpcSigner
   const tokenContractMpcSigner = new ethers.Contract(token.contractAddress, ERC20ABI, mpcSigner);
@@ -112,7 +112,7 @@ export const gaslessTransferWithAuthorization = async (
   value: string,
   token: ERC20Token
 ) => {
-  const mpcSigner = getPreparedMpcSigner(from, user);
+  const mpcSigner = getPreparedMpcSigner(from, user, config);
 
   //token contract connected with our mpcSigner
   const tokenContractMpcSigner = new ethers.Contract(token.contractAddress, usdcAbi, mpcSigner);

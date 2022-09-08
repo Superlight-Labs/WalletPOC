@@ -1,20 +1,20 @@
 import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasless";
 import { User } from "api-types/user";
 import { usdcAbi } from "ethereum/config/abi/usdc-abi";
+import { getPreparedMpcSigner, getPreparedProvider } from "ethereum/controller/signers/alchemy-signer";
 import { polygonConfig } from "ethereum/polygon/config/polygon-config";
 import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { BigNumber, ethers } from "ethers";
 import { fetchFromApi, HttpMethod } from "lib/http";
 import { Address } from "wallet/types/wallet";
-import { getPreparedPolygonMpcSigner, getPreparedPolygonProvider } from "../signers/polygon-alchemy-signer";
 
 export const gaslessPolygonOneTimeApprove = async (address: Address, user: User, token: PolygonERC20Token) => {
-  const mpcSigner = getPreparedPolygonMpcSigner(address, user);
+  const mpcSigner = getPreparedMpcSigner(address, user, polygonConfig);
 
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress?network=" + polygonConfig.chain);
 
-  // Let api send ether to use in approval call
+  // Let api send matic to use in approval call
   const { transaction } = await fetchFromApi<GaslessTransactionResponse>("/gasless/approve", {
     method: HttpMethod.POST,
     body: {
@@ -45,7 +45,7 @@ export const checkPolygonPaymastersAllowance = async (
   token: PolygonERC20Token,
   address: string
 ): Promise<BigNumber> => {
-  const provider = getPreparedPolygonProvider();
+  const provider = getPreparedProvider(polygonConfig);
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress?network=" + polygonConfig.chain);
   const allowanceResponce: BigNumber = await new ethers.Contract(token.polygonAddress, usdcAbi, provider).allowance(

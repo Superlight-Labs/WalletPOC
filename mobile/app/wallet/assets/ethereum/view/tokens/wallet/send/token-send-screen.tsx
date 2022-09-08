@@ -1,16 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { config } from "ethereum/config/ethereum-config";
 import { ERC20Token } from "ethereum/config/tokens";
-import {
-  checkPaymastersAllowance,
-  gaslessOneTimeApprove,
-} from "ethereum/controller/gasless/ethereum-gasless-expensiv-utils";
-import { gaslessTransfer, gaslessTransferWithAuthorization } from "ethereum/controller/gasless/ethereum-gasless-utils";
-import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
+import { gaslessTransfer, gaslessTransferWithAuthorization } from "ethereum/controller/gasless/gasless-transfer";
+import { checkPaymastersAllowance, gaslessApproveUnlimited } from "ethereum/controller/gasless/pseudo-gasless-approve";
+import useEthereumSigner from "ethereum/hooks/useEthereumSigner";
 import { EthereumWallet } from "ethereum/types/ethereum";
-import { BigNumber, ethers } from "ethers";
-import { EthereumService } from "packages/blockchain-api-client/src";
-import React, { useCallback, useEffect, useState } from "react";
+import { BigNumber } from "ethers";
+import React, { useCallback, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useRecoilValue } from "recoil";
 import { NavigationRoutes } from "shared/types/navigation";
@@ -24,13 +19,10 @@ const TokenSendScreen = ({ route }: Props) => {
   const [wallet, setWallet] = useState<EthereumWallet>(route.params.wallet);
   const [address, setAddress] = useState<Address>(route.params.wallet.external.addresses[0]);
   const user = useRecoilValue<AuthState>(authState);
-
+  const signer = useEthereumSigner();
+  console.log(signer);
   const [toAddress, setToAddress] = useState<string>("0x49e749dc596ebb62b724262928d0657f8950a7d7");
   const [tokensToSend, setTokenToSend] = useState<string>("");
-
-  useEffect(() => {
-    setSigner(new MPCSigner(wallet.external.addresses[0], user).connect(ethers.getDefaultProvider(config.chain)));
-  }, []);
 
   const handleTokenToSend = (value: string) => {
     let lengthDecimals = 0;
@@ -38,8 +30,6 @@ const TokenSendScreen = ({ route }: Props) => {
     if (lengthDecimals <= token.decimals) setTokenToSend(value);
   };
 
-  const [signer, setSigner] = useState<MPCSigner>();
-  const [service] = useState(new EthereumService("TEST"));
   const sendTransactionValidation = useCallback(async () => {
     Alert.alert("Confirm your transaction", "Sending " + tokensToSend + " " + token.symbol + " to " + toAddress, [
       {
@@ -55,17 +45,18 @@ const TokenSendScreen = ({ route }: Props) => {
   const sendTransaction = useCallback(async (to: string, value: string) => {
     try {
       if (token.ethereum.hasPermit) {
-        const result = await gaslessTransferWithAuthorization(address, user, to, value, token);
+        console.log("diese");
+        const result = await gaslessTransferWithAuthorization(signer, to, value, token);
       } else {
-        const allowance: BigNumber = await checkPaymastersAllowance(token, address.address);
+        const allowance: BigNumber = await checkPaymastersAllowance(token, signer);
         //check if unlimited is not set yet
         if (allowance.eq(0)) {
-          const approval = await gaslessOneTimeApprove(address, user, token);
+          const approval = await gaslessApproveUnlimited(signer, token);
           console.log("Unlimited amount approved: ", approval);
-          const transfer = await gaslessTransfer(address, to, value, token);
+          const transfer = await gaslessTransfer(signer, to, value, token);
           console.log("Sent transfer: ", transfer);
         } else {
-          const transfer = await gaslessTransfer(address, to, value, token);
+          const transfer = await gaslessTransfer(signer, to, value, token);
           console.log("Sent transfer: ", transfer);
         }
       }

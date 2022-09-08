@@ -13,19 +13,17 @@ export default function usePolygonSigner() {
   const [signer, setSignerLocal] = useRecoilState(polygonSignerState);
   const address = useEthereumAddress();
   const user = useRecoilValue<User>(authState);
-
-  function setSigner() {
-    if (!signer)
-      setSignerLocal(
-        new MPCSigner(address, user, polygonConfig).connect(
-          new ethers.providers.AlchemyProvider(polygonConfig.chain, alchemyProviderKey)
-        )
-      );
-  }
+  const cacheSigner =
+    signer ||
+    new MPCSigner(address, user, polygonConfig).connect(
+      new ethers.providers.AlchemyProvider(polygonConfig.chain, alchemyProviderKey)
+    );
 
   useEffect(() => {
-    setSigner();
+    if (!signer) {
+      setSignerLocal(cacheSigner);
+    }
   }, []);
 
-  return signer;
+  return cacheSigner;
 }

@@ -12,19 +12,16 @@ export default function useEthereumSigner() {
   const [signer, setSignerLocal] = useRecoilState(ethereumSignerState);
   const address = useEthereumAddress();
   const user = useRecoilValue<User>(authState);
-
-  function setSigner() {
-    if (!signer)
-      setSignerLocal(
-        new MPCSigner(address, user, config).connect(
-          new ethers.providers.AlchemyProvider(config.chain, alchemyProviderKey)
-        )
-      );
-  }
+  const cacheSigner =
+    signer ||
+    new MPCSigner(address, user, config).connect(
+      new ethers.providers.AlchemyProvider(config.chain, alchemyProviderKey)
+    );
 
   useEffect(() => {
-    setSigner();
+    if (!signer) {
+    }
   }, []);
 
-  return signer;
+  return cacheSigner;
 }

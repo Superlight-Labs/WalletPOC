@@ -19,7 +19,7 @@ export const gaslessPermit = async (signer: MPCSigner, value: string, token: ERC
   const tokenContract = new ethers.Contract(token[signer.getNetwork()].address, abi, signer);
 
   //fetch apis tank address
-  const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress");
+  const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress?network=" + signer.getChain());
 
   // Create the approval request - api address will be permitted on token contract
   const approve = {
@@ -116,50 +116,4 @@ const getPermitDigest = (
 
 const PERMIT_TYPEHASH = keccak256(
   toUtf8Bytes("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
-);
-
-const getTransferDigest = (
-  name: string,
-  address: string,
-  chainId: number,
-  approve: {
-    from: string;
-    to: string;
-    value: BigNumberish;
-  },
-  nonce: BigNumberish,
-  validAfter: BigNumberish,
-  validBefore: BigNumberish
-) => {
-  const DOMAIN_SEPARATOR = getDomainSeparator(name, address, chainId);
-  return keccak256(
-    solidityPack(
-      ["bytes1", "bytes1", "bytes32", "bytes32"],
-      [
-        "0x19",
-        "0x01",
-        DOMAIN_SEPARATOR,
-        keccak256(
-          defaultAbiCoder.encode(
-            ["bytes32", "address", "address", "uint256", "uint256", "uint256", "bytes32"],
-            [
-              TRANSFER_WITH_AUTHORIZATION_TYPEHASH,
-              approve.from,
-              approve.to,
-              approve.value,
-              validAfter,
-              validBefore,
-              nonce,
-            ]
-          )
-        ),
-      ]
-    )
-  );
-};
-
-const TRANSFER_WITH_AUTHORIZATION_TYPEHASH = keccak256(
-  toUtf8Bytes(
-    "TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
-  )
 );

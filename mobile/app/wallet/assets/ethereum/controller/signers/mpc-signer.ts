@@ -29,23 +29,23 @@ export class MPCSigner extends Signer {
     this.config = config;
   }
 
-  getNetwork(): Network {
+  getNetwork = (): Network => {
     return this.config?.network || "ethereum";
-  }
+  };
 
-  getChainIdentifier(): number {
+  getChainIdentifier = (): number => {
     return this.config?.chainId || 1;
-  }
+  };
 
-  getChain(): string {
+  getChain = (): string => {
     return this.config?.chain || "mainnet";
-  }
+  };
 
-  getAddress(): Promise<string> {
+  getAddress = (): Promise<string> => {
     return Promise.resolve(this.address.address);
-  }
+  };
 
-  async signHashedMessage(message: string | Bytes): Promise<any> {
+  signHashedMessage = async (message: string | Bytes): Promise<any> => {
     if (typeof message === "string") {
       //message = toUtf8Bytes(message);
       message = message.split("0x")[1];
@@ -55,6 +55,7 @@ export class MPCSigner extends Signer {
 
     const context = await signEcdsa(
       this.user.devicePublicKey,
+
       this.user.id,
       this.address.keyShare.id,
       this.address.keyShare.keyShare,
@@ -77,9 +78,9 @@ export class MPCSigner extends Signer {
 
     const signatureRVS = splitSignature(sig);
     return { r: signatureRVS.r, v: signatureRVS.v, s: signatureRVS.s };
-  }
+  };
 
-  async signMessage(message: string | Bytes): Promise<string> {
+  signMessage = async (message: string | Bytes): Promise<string> => {
     if (typeof message === "string") {
       //message = toUtf8Bytes(message);
       message = message.split("0x")[1];
@@ -89,6 +90,7 @@ export class MPCSigner extends Signer {
 
     const context = await signEcdsa(
       this.user.devicePublicKey,
+
       this.user.id,
       this.address.keyShare.id,
       this.address.keyShare.keyShare,
@@ -110,9 +112,9 @@ export class MPCSigner extends Signer {
     );
 
     return joinSignature(sig);
-  }
+  };
 
-  async signTransaction(transaction: TransactionRequest): Promise<string> {
+  signTransaction = async (transaction: TransactionRequest): Promise<string> => {
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: "Authenticate to verify your Device WalletPOC",
       cancelLabel: "cancel",
@@ -141,6 +143,7 @@ export class MPCSigner extends Signer {
 
       const context = await signEcdsa(
         this.user.devicePublicKey,
+
         this.user.id,
         this.address.keyShare.id,
         this.address.keyShare.keyShare,
@@ -164,22 +167,22 @@ export class MPCSigner extends Signer {
 
       return serialize(<UnsignedTransaction>tx, sig);
     });
-  }
+  };
 
-  connect(provider: Provider): MPCSigner {
+  connect = (provider: Provider): MPCSigner => {
     defineReadOnly(this, "provider", provider || null);
     return this;
-  }
+  };
 
-  getProvider(): Provider {
+  getProvider = (): Provider => {
     return this.provider || getDefaultProvider(config.chain);
-  }
+  };
 
-  getAddressObj(): Address {
+  getAddressObj = (): Address => {
     return this.address;
-  }
+  };
 
-  getUser(): User {
+  getUser = (): User => {
     return this.user;
-  }
+  };
 }

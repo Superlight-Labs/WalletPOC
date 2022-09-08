@@ -1,7 +1,6 @@
 import { RevertError } from "@0x/utils";
 import { GaslessTransactionResponse } from "api-types/gasless";
 import { User } from "api-types/user";
-import { getPreparedMpcSigner, getPreparedProvider } from "ethereum/controller/signers/alchemy-signer";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { polygonConfig } from "ethereum/polygon/config/polygon-config";
 import { ecrecover, importPublic } from "ethereumjs-util";

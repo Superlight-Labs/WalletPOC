@@ -1,12 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import {
-  checkPolygonPaymastersAllowance,
-  gaslessPolygonOneTimeApprove,
-} from "ethereum/polygon/controller/gasless/polygon-gasless-expensiv-utils";
-import {
-  gaslessPolygonTransfer,
-  gaslessPolygonTransferWithAuthorization,
-} from "ethereum/polygon/controller/gasless/polygon-gasless-utils";
+import { gaslessTransfer, gaslessTransferWithAuthorization } from "ethereum/controller/gasless/gasless-transfer";
+import { checkPaymastersAllowance, gaslessApproveUnlimited } from "ethereum/controller/gasless/pseudo-gasless-approve";
+import usePolygonSigner from "ethereum/hooks/usePolygonSigner";
 import { styles as polygonStyles } from "ethereum/polygon/view/ethereum-polygon-styles";
 import { BigNumber } from "ethers";
 import React, { useCallback, useState } from "react";
@@ -70,31 +65,39 @@ const PolygonTokenSendScreen = ({ route }: Props) => {
       },
     ]);
   }, [wallet, user, tokensToSend, toAddress]);
-
-  const sendTransaction = useCallback(async (to: string, value: string) => {
-    try {
-      if (token.hasPermit) {
-        const result = await gaslessPolygonTransferWithAuthorization(address, user, to, value, token);
-      } else {
-        const allowance: BigNumber = await checkPolygonPaymastersAllowance(token, address.address);
-        //check if unlimited is not set yet
-        if (allowance.eq(0)) {
-          const approval = await gaslessPolygonOneTimeApprove(address, user, token);
-          console.log("Unlimited amount approved: ", approval);
-          const transfer = await gaslessPolygonTransfer(address, to, value, token);
-          console.log("Sent transfer: ", transfer);
+  const signer = usePolygonSigner();
+  const sendTransaction = useCallback(
+    async (to: string, value: string) => {
+      if (!signer) return;
+      try {
+        if (token.polygon.hasPermit) {
+          console.log("with auth");
+          const result = await gaslessTransferWithAuthorization(signer, to, value, token);
         } else {
-          const transfer = await gaslessPolygonTransfer(address, to, value, token);
-          console.log("Sent transfer: ", transfer);
+          console.log("allowance");
+          const allowance: BigNumber = await checkPaymastersAllowance(token, signer);
+          //check if unlimited is not set yet
+          if (allowance.eq(0)) {
+            console.log("no allowance");
+            const approval = await gaslessApproveUnlimited(signer, token);
+            console.log("Unlimited amount approved: ", approval);
+            const transfer = await gaslessTransfer(signer, to, value, token);
+            console.log("Sent transfer: ", transfer);
+          } else {
+            console.log("got allowance");
+            const transfer = await gaslessTransfer(signer, to, value, token);
+            console.log("Sent transfer: ", transfer);
+          }
         }
-      }
 
-      Alert.alert("Successfully sent.");
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Unable to broadcast transaction");
-    }
-  }, []);
+        Alert.alert("Successfully sent.");
+      } catch (err) {
+        console.log(err);
+        Alert.alert("Unable to broadcast transaction");
+      }
+    },
+    [signer, token]
+  );
 
   return (
     <View style={styles.container}>

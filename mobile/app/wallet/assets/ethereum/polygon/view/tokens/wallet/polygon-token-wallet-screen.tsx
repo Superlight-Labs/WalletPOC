@@ -11,7 +11,7 @@ type Props = NativeStackScreenProps<NavigationRoutes, "PolygonTokenWalletScreen"
 const PolygonTokenWalletScreen = ({ route, navigation }: Props) => {
   const { token, address, polygonClient, wallet } = route.params;
 
-  const childErc20 = polygonClient.erc20(token.polygonAddress, false);
+  const childErc20 = polygonClient.erc20(token.polygon.address, false);
 
   return (
     <ScrollView style={styles.scrollview}>

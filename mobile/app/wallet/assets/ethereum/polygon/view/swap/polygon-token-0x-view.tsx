@@ -1,8 +1,6 @@
 import { Picker } from "@react-native-picker/picker";
 import { ERC20Token, erc20Tokens } from "ethereum/config/tokens";
-import { getPreparedMpcSigner } from "ethereum/controller/signers/alchemy-signer";
-import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
-import { polygonConfig } from "ethereum/polygon/config/polygon-config";
+import usePolygonSigner from "ethereum/hooks/usePolygonSigner";
 import { metaTxTest, swapGaslessPolygonWithQuote } from "ethereum/polygon/controller/gasless/polygon-gasless-0x-utils";
 import { approveGaslessPolygonAmount } from "ethereum/polygon/controller/gasless/polygon-gasless-swap-utils";
 import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
@@ -31,9 +29,8 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
   const [selectedInputTokenIndex, setSelectedInputTokenIndex] = useState<number>(0);
   const [selectedOutputTokenIndex, setSelectedOutputTokenIndex] = useState<number>(0);
 
-  const [signer, setSigner] = useState<MPCSigner>();
+  const signer = usePolygonSigner();
   useEffect(() => {
-    setSigner(getPreparedMpcSigner(address, user, polygonConfig));
     updateBalance(erc20Tokens[0]);
   }, []);
 
@@ -120,7 +117,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
       "You should get " +
         ethers.utils.formatUnits(
           quote.buyAmount,
-          erc20Tokens.filter((token) => token != erc20Tokens[selectedInputTokenIndex])[selectedOutputTokenIndex].polygon
+          erc20Tokens.filter((token) => token != erc20Tokens[selectedInputTokenIndex])[selectedOutputTokenIndex]
             .decimals
         ) +
         " " +

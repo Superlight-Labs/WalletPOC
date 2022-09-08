@@ -5,7 +5,6 @@ import { User } from "api-types/user";
 import { BitcoinWallet } from "bitcoin/types/bitcoin";
 import { ERC20Token } from "ethereum/config/tokens";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
-import { PolygonERC20Token } from "ethereum/polygon/config/tokens";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import { EthereumService } from "packages/blockchain-api-client/src";
 import { BitcoinTransaction } from "packages/blockchain-api-client/src/blockchains/bitcoin/types";
@@ -39,10 +38,10 @@ type NavigationRoutes = {
   PolygonTokenWalletScreen: {
     wallet: EthereumWallet;
     address: Address;
-    token: PolygonERC20Token;
+    token: ERC20Token;
     polygonClient: POSClient;
   };
-  PolygonTokenSendScreen: { wallet: EthereumWallet; childErc20: ERC20; token: PolygonERC20Token };
+  PolygonTokenSendScreen: { wallet: EthereumWallet; childErc20: ERC20; token: ERC20Token };
 
   PolygonBridgeScreen: { address: Address; posClient: POSClient; plasmaClient: PlasmaClient };
 

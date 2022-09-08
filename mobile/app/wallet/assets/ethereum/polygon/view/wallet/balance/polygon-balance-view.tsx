@@ -1,4 +1,5 @@
 import { findContractAddressBySymbol } from "ethereum/config/tokens";
+import usePolygonSigner from "ethereum/hooks/usePolygonSigner";
 import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
 import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
@@ -12,6 +13,7 @@ type PolygonBalanceProps = {
 export const PolygonBalanceView = ({ address }: PolygonBalanceProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [balance, setBalance] = useState<string>("0");
+  const signer = usePolygonSigner();
 
   useEffect(() => {
     updateBalanceFunction();
@@ -19,7 +21,7 @@ export const PolygonBalanceView = ({ address }: PolygonBalanceProps) => {
 
   const updateBalanceFunction = async () => {
     setLoading(true);
-    const balance = await getPolygonErc20Balance(address, findContractAddressBySymbol("WMATIC")!);
+    const balance = await getPolygonErc20Balance(signer, findContractAddressBySymbol("WMATIC")!);
     setBalance(balance);
     setLoading(false);
   };

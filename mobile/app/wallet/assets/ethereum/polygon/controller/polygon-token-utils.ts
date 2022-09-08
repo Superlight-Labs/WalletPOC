@@ -1,15 +1,12 @@
 import { POSClient } from "@maticnetwork/maticjs";
 import { ERC20 } from "@maticnetwork/maticjs/dist/ts/pos/erc20";
 import { usdcAbi } from "ethereum/config/abi/usdc-abi";
-import { config } from "ethereum/config/ethereum-config";
 import { ERC20Token, findContractAddressBySymbol } from "ethereum/config/tokens";
-import { getPreparedProvider } from "ethereum/controller/signers/alchemy-signer";
+import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";
 import { EthereumProviderEnum } from "packages/blockchain-api-client/src/blockchains/ethereum/ethereum-factory";
 import { Alert } from "react-native";
-import { Address } from "wallet/types/wallet";
-import { polygonConfig } from "../config/polygon-config";
 
 export const depositToken = async (
   polygonClient: POSClient,
@@ -50,11 +47,11 @@ const doErc20Deposit = async (parentErc20: ERC20, amount: number, userAddress: s
   Alert.alert("Deposit successful");
 };
 
-export const getEthereumTokenBalance = async (token: ERC20Token, userAddress: Address): Promise<string> => {
+export const getEthereumTokenBalance = async (token: ERC20Token, signer: MPCSigner): Promise<string> => {
   if (token.ethereum.address === findContractAddressBySymbol("ETH")?.ethereum.address)
-    return getEthereumBalance(userAddress.address);
+    return getEthereumBalance(signer.getAddressObj().address);
 
-  return getEthereumErc20Balance(userAddress, token);
+  return getEthereumErc20Balance(signer, token);
 };
 
 const getEthereumBalance = async (address: string): Promise<string> => {
@@ -73,16 +70,14 @@ const getEthereumBalance = async (address: string): Promise<string> => {
 //   return balance;
 // };
 
-export const getEthereumErc20Balance = async (address: Address, token: ERC20Token): Promise<string> => {
-  const provider = getPreparedProvider(config);
-  const tokenContract = new ethers.Contract(token.ethereum.address, usdcAbi, provider);
-  const balance = await tokenContract.balanceOf(address.address);
+export const getEthereumErc20Balance = async (signer: MPCSigner, token: ERC20Token): Promise<string> => {
+  const tokenContract = new ethers.Contract(token.ethereum.address, usdcAbi, signer);
+  const balance = await tokenContract.balanceOf(signer.getAddressObj());
   return balance.toString();
 };
 
-export const getPolygonErc20Balance = async (address: Address, token: ERC20Token): Promise<string> => {
-  const provider = getPreparedProvider(polygonConfig);
-  const tokenContract = new ethers.Contract(token.polygon.address, usdcAbi, provider);
-  const balance = await tokenContract.balanceOf(address.address);
+export const getPolygonErc20Balance = async (signer: MPCSigner, token: ERC20Token): Promise<string> => {
+  const tokenContract = new ethers.Contract(token.polygon.address, usdcAbi, signer);
+  const balance = await tokenContract.balanceOf(signer.getAddressObj().address);
   return balance.toString();
 };

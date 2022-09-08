@@ -1,10 +1,8 @@
 import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasless";
-import { config } from "ethereum/config/ethereum-config";
 import { ERC20Token } from "ethereum/config/tokens";
 import { BigNumber, ethers } from "ethers";
 import { fetchFromApi, HttpMethod } from "lib/http";
 import { usdcAbi } from "../../config/abi/usdc-abi";
-import { getPreparedProvider } from "../signers/alchemy-signer";
 import { MPCSigner } from "../signers/mpc-signer";
 
 export const gaslessApproveUnlimited = async (signer: MPCSigner, token: ERC20Token) => {
@@ -39,13 +37,14 @@ export const gaslessApproveUnlimited = async (signer: MPCSigner, token: ERC20Tok
  * @returns
  */
 export const checkPaymastersAllowance = async (token: ERC20Token, signer: MPCSigner): Promise<BigNumber> => {
-  const provider = getPreparedProvider(config);
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress?network=" + signer.getChain());
+
   const allowanceResponce: BigNumber = await new ethers.Contract(
     token[signer.getNetwork()].address,
     usdcAbi,
-    provider
+    signer
   ).allowance(signer.getAddressObj().address, tankAddress.address);
+
   return allowanceResponce;
 };

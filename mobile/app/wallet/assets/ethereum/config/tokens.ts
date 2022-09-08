@@ -49,8 +49,8 @@ const erc20TestnetTokens: ERC20Token[] = [
     polygon: {
       address: "0x0fa8781a83e46826621b3bc094ea2a0212e71b23",
       isToken: true,
-      hasPermit: true,
-      hasTransferWithAuthorization: true,
+      hasPermit: false,
+      hasTransferWithAuthorization: false,
     },
     decimals: 6,
   },
@@ -93,7 +93,7 @@ const erc20TestnetTokens: ERC20Token[] = [
     symbol: "WMATIC",
     ethereum: {
       address: "0x499d11E0b6eAC7c0593d8Fb292DCBbF815Fb29Ae",
-      isToken: false,
+      isToken: true,
       hasPermit: false,
       hasTransferWithAuthorization: false,
     },

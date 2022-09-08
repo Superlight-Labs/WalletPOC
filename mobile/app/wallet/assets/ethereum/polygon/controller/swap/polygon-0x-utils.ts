@@ -12,7 +12,7 @@ export const getPolygonSwapQuote = async (
   tokenTo: ERC20Token,
   myAddress: string,
   amount: string
-): Promise<ZeroExSwapQuote> => {
+): Promise<ZeroExSwapQuote | undefined> => {
   const service = new EthereumSwappingService("TEST", "Polygon");
   const toAddress = tokenTo.polygon.isToken ? tokenTo.polygon.address : tokenTo.symbol;
   const fromAddress = tokenFrom.polygon.isToken ? tokenFrom.polygon.address : tokenFrom.symbol;
@@ -28,7 +28,11 @@ export const getPolygonSwapQuote = async (
     "&buyTokenPercentageFee=" +
     swapFeePercentage;
   console.log("params:", params);
-  return await service.getSwapQuote(params, EthereumSwappingProviderEnum.ZeroEx);
+  try {
+    return await service.getSwapQuote(params, EthereumSwappingProviderEnum.ZeroEx);
+  } catch (err) {
+    return undefined;
+  }
 };
 
 export const swapPolygonWithQuote = async (quote: ZeroExSwapQuote, address: string, signer: MPCSigner) => {

@@ -1,7 +1,13 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ERC20Token } from "ethereum/config/tokens";
-import { gaslessTransfer, gaslessTransferWithAuthorization } from "ethereum/controller/gasless/gasless-transfer";
-import { checkPaymastersAllowance, gaslessApproveUnlimited } from "ethereum/controller/gasless/pseudo-gasless-approve";
+import {
+  gaslessTransfer,
+  gaslessTransferWithAuthorization,
+} from "ethereum/controller/gasless/transfer/gasless-transfer";
+import {
+  checkPaymastersAllowance,
+  gaslessApproveUnlimited,
+} from "ethereum/controller/gasless/transfer/pseudo-gasless-approve";
 import useEthereumSigner from "ethereum/hooks/useEthereumSigner";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import { BigNumber } from "ethers";

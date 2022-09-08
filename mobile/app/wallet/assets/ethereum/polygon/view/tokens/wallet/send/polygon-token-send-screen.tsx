@@ -1,6 +1,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { gaslessTransfer, gaslessTransferWithAuthorization } from "ethereum/controller/gasless/gasless-transfer";
-import { checkPaymastersAllowance, gaslessApproveUnlimited } from "ethereum/controller/gasless/pseudo-gasless-approve";
+import {
+  gaslessTransfer,
+  gaslessTransferWithAuthorization,
+} from "ethereum/controller/gasless/transfer/gasless-transfer";
+import {
+  checkPaymastersAllowance,
+  gaslessApproveUnlimited,
+} from "ethereum/controller/gasless/transfer/pseudo-gasless-approve";
 import usePolygonSigner from "ethereum/hooks/usePolygonSigner";
 import { styles as polygonStyles } from "ethereum/polygon/view/ethereum-polygon-styles";
 import { BigNumber } from "ethers";

@@ -8,7 +8,7 @@ import {
   GaslessGetRequest,
   GaslessMetaTransactionRequest,
   GaslessPermitRequest,
-  GaslessTransactionRequest,
+  GaslessSwapRequest,
   GaslessTransactionResponse,
   GaslessTransferRequest,
   GaslessTransferWithAuthorizationRequest,
@@ -41,6 +41,22 @@ export const gaslessApprove = (request: GaslessApproveRequest): ResultAsync<Gasl
   });
 };
 
+export const gaslessSwap = (request: GaslessSwapRequest): ResultAsync<GaslessTransactionResponse, RouteError> => {
+  const tx = {
+    to: request.receiver,
+    // Convert currency unit from ether to wei
+    value: BigNumber.from(request.zeroExQuote.estimatedGas).mul(request.zeroExQuote.gasPrice).toString(),
+  };
+  return ResultAsync.fromPromise(getPaymaster(request.network).sendTransaction(tx), (e) =>
+    other("Err while sending ether for swap", e as Error)
+  ).map(async (transaction) => {
+    console.log("Ether sent for swap transaction: ", transaction);
+    await transaction.wait();
+    console.log("Transaction confirmed");
+    return { transaction };
+  });
+};
+
 export const relayGaslessPermit = (
   request: GaslessPermitRequest
 ): ResultAsync<GaslessTransactionResponse, RouteError> => {
@@ -57,18 +73,6 @@ export const relayGaslessPermit = (
     (e) => other("Err while relaying gasless permit", e as Error)
   ).map((transaction) => {
     console.log("Permit transaction: ", transaction);
-    return { transaction };
-  });
-};
-
-export const relayGaslessTransaction = (
-  request: GaslessTransactionRequest
-): ResultAsync<GaslessTransactionResponse, RouteError> => {
-  console.log("trans: ", request.transaction);
-  return ResultAsync.fromPromise(getPaymaster(request.network).sendTransaction(request.transaction), (e) =>
-    other("Err while relaying gasless transaction", e as Error)
-  ).map((transaction) => {
-    console.log("Broadcast transaction: ", transaction);
     return { transaction };
   });
 };

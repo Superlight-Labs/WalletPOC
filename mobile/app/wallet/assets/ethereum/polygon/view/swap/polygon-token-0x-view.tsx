@@ -1,7 +1,8 @@
 import { Picker } from "@react-native-picker/picker";
 import { ERC20Token, erc20Tokens } from "ethereum/config/tokens";
+import { gaslessSwapWithQuote } from "ethereum/controller/gasless/swap/gasless-0x";
+import { swapWithQuote } from "ethereum/controller/swap/0x-utils";
 import usePolygonSigner from "ethereum/hooks/usePolygonSigner";
-import { metaTxTest, swapGaslessPolygonWithQuote } from "ethereum/polygon/controller/gasless/polygon-gasless-0x-utils";
 import { approveGaslessPolygonAmount } from "ethereum/polygon/controller/gasless/polygon-gasless-swap-utils";
 import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
 import { getPolygonSwapQuote } from "ethereum/polygon/controller/swap/polygon-0x-utils";
@@ -11,7 +12,7 @@ import { ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";
 import { ZeroExSwapQuote } from "packages/blockchain-api-client/src/provider/0x/ethereum/0x-ethereum-types";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Button, Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Modal, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useRecoilValue } from "recoil";
 import { authState, AuthState } from "state/atoms";
 import { Address } from "wallet/types/wallet";
@@ -28,6 +29,8 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
 
   const [selectedInputTokenIndex, setSelectedInputTokenIndex] = useState<number>(0);
   const [selectedOutputTokenIndex, setSelectedOutputTokenIndex] = useState<number>(0);
+
+  const [gaslessEnabled, setGaslessEnabled] = useState<boolean>(true);
 
   const signer = usePolygonSigner();
   useEffect(() => {
@@ -88,7 +91,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
 
     let tokenAddr: string[] = [];
     tokenAddr.push(token.polygon.address);
-    const tokenBalance: string = await getPolygonErc20Balance(address, token);
+    const tokenBalance: string = await getPolygonErc20Balance(signer, token);
     setAvailableBalance(ethers.utils.formatUnits(tokenBalance, token.decimals));
 
     setLoadingBalance(false);
@@ -102,7 +105,8 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
     try {
       const quote = await getPolygonSwapQuote(inputToken, outputToken, address.address, inputAmountWei.toString());
       console.log(quote);
-      setQuote(quote);
+      if (!quote) console.log("Not enough liquidity");
+      else setQuote(quote);
     } catch (err) {
       console.log(err);
       setQuoteErr(true);
@@ -161,8 +165,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
             !(await approveGaslessPolygonAmount(
               erc20Tokens[selectedInputTokenIndex],
               inputAmountWei.sub(allowedAmount),
-              address,
-              user,
+              signer,
               quote.allowanceTarget
             ))
           )
@@ -176,7 +179,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
     }
 
     try {
-      const swapped = await swapGaslessPolygonWithQuote(quote, address.address, signer!);
+      const swapped = gaslessEnabled ? await gaslessSwapWithQuote(quote, signer) : swapWithQuote(quote, signer);
       console.log(swapped);
       Alert.alert(
         "Successfully swapped!",
@@ -215,7 +218,6 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
 
   return (
     <View style={styles.container}>
-      <Button title="test meta tx" onPress={() => metaTxTest(address, user)} />
       {renderApprovalModal()}
       <Text style={styles.heading}>Swap Polygon with 0x</Text>
       <View style={styles.pickerArea}>
@@ -227,7 +229,10 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
           onValueChange={(itemValue) => updateSelectedInputToken(itemValue)}
         >
           {erc20Tokens.map((token, index) => {
-            return <Picker.Item key={token.name} label={token.name} value={index} />;
+            return (
+              token.polygon.address != "0x0" &&
+              token.ethereum.address != "ETH" && <Picker.Item key={token.name} label={token.name} value={index} />
+            );
           })}
         </Picker>
         <TextInput
@@ -254,7 +259,10 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
           {erc20Tokens
             .filter((token) => token != erc20Tokens[selectedInputTokenIndex])
             .map((token, index) => {
-              return <Picker.Item key={token.name} label={token.name} value={index} />;
+              return (
+                token.polygon.address != "0x0" &&
+                token.ethereum.address != "ETH" && <Picker.Item key={token.name} label={token.name} value={index} />
+              );
             })}
         </Picker>
         <TextInput
@@ -283,6 +291,16 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
       >
         <Text style={styles.actionButtonText}>Swap</Text>
       </TouchableOpacity>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-end", marginTop: 12 }}>
+        <Text style={{ fontSize: 17, marginRight: 12 }}>Gasless</Text>
+        <Switch
+          trackColor={{ false: "red", true: "green" }}
+          thumbColor={gaslessEnabled ? "#f4f3f4" : "#f4f3f4"}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={() => setGaslessEnabled(!gaslessEnabled)}
+          value={gaslessEnabled}
+        />
+      </View>
     </View>
   );
 };

@@ -28,12 +28,12 @@ export const getSwapQuote = async (
   return await service.getSwapQuote(params, EthereumSwappingProviderEnum.ZeroEx);
 };
 
-export const swapWithQuote = async (quote: ZeroExSwapQuote, address: string, signer: MPCSigner) => {
+export const swapWithQuote = async (quote: ZeroExSwapQuote, signer: MPCSigner) => {
   const transaction = {
     data: quote.data,
     to: quote.to,
     value: quote.value,
-    from: address,
+    from: signer.getAddressObj().address,
     gasPrice: quote.gasPrice,
   };
   return await signer.sendTransaction(transaction);

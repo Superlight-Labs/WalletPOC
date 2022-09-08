@@ -1,9 +1,10 @@
 import { Picker } from "@react-native-picker/picker";
 import { ERC20Token, erc20Tokens } from "ethereum/config/tokens";
 import { getBalanceFromEthereumTokenBalance, weiToEth } from "ethereum/controller/ethereum-utils";
-import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
+import { gaslessSwapWithQuote } from "ethereum/controller/gasless/swap/gasless-0x";
 import { getSwapQuote, swapWithQuote } from "ethereum/controller/swap/0x-utils";
 import { approveAmount, checkAllowance } from "ethereum/controller/swap/swap-utils";
+import useEthereumSigner from "ethereum/hooks/useEthereumSigner";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import { ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";
@@ -11,7 +12,7 @@ import { EthereumProviderEnum } from "packages/blockchain-api-client/src/blockch
 import { EthereumBalance, EthereumTokenBalances } from "packages/blockchain-api-client/src/blockchains/ethereum/types";
 import { ZeroExSwapQuote } from "packages/blockchain-api-client/src/provider/0x/ethereum/0x-ethereum-types";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Modal, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useRecoilValue } from "recoil";
 import { authState, AuthState } from "state/atoms";
 import { Address } from "wallet/types/wallet";
@@ -29,13 +30,10 @@ const Token0xView = ({ wallet, address }: Props) => {
   const [selectedInputTokenIndex, setSelectedInputTokenIndex] = useState<number>(0);
   const [selectedOutputTokenIndex, setSelectedOutputTokenIndex] = useState<number>(0);
 
-  const [signer, setSigner] = useState<MPCSigner>();
+  const [gaslessEnabled, setGaslessEnabled] = useState<boolean>(true);
+
+  const signer = useEthereumSigner();
   useEffect(() => {
-    setSigner(
-      new MPCSigner(wallet.external.addresses[0], user).connect(
-        new ethers.providers.AlchemyProvider("goerli", "ahl42ynne2Kd8FosnoYBtCW3ssoCtIu0")
-      )
-    );
     updateBalance(erc20Tokens[0]);
   }, []);
 
@@ -188,7 +186,7 @@ const Token0xView = ({ wallet, address }: Props) => {
     }
 
     try {
-      const swapped = await swapWithQuote(quote, address.address, signer!);
+      const swapped = gaslessEnabled ? await gaslessSwapWithQuote(quote, signer) : swapWithQuote(quote, signer);
       console.log(swapped);
       Alert.alert(
         "Successfully swapped!",
@@ -294,6 +292,16 @@ const Token0xView = ({ wallet, address }: Props) => {
       >
         <Text style={styles.actionButtonText}>Swap</Text>
       </TouchableOpacity>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-end", marginTop: 12 }}>
+        <Text style={{ fontSize: 17, marginRight: 12 }}>Gasless</Text>
+        <Switch
+          trackColor={{ false: "red", true: "green" }}
+          thumbColor={gaslessEnabled ? "#f4f3f4" : "#f4f3f4"}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={() => setGaslessEnabled(!gaslessEnabled)}
+          value={gaslessEnabled}
+        />
+      </View>
     </View>
   );
 };

@@ -4,7 +4,7 @@ import { ERC20Token } from "ethereum/config/tokens";
 import { BigNumberish, ethers } from "ethers";
 import { defaultAbiCoder, keccak256, solidityPack, toUtf8Bytes } from "ethers/lib/utils";
 import { fetchFromApi, HttpMethod } from "lib/http";
-import { MPCSigner } from "../signers/mpc-signer";
+import { MPCSigner } from "../../signers/mpc-signer";
 
 /**
  * Runs an gasless permit call on the token's contract

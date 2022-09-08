@@ -1,11 +1,11 @@
 import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasless";
 import { ERC20Token } from "ethereum/config/tokens";
+import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { BigNumber, ethers } from "ethers";
 import { fetchFromApi, HttpMethod } from "lib/http";
 import { usdcAbi } from "../../../config/abi/usdc-abi";
-import { MPCSigner } from "../../signers/mpc-signer";
 
-export const gaslessApproveUnlimited = async (signer: MPCSigner, token: ERC20Token) => {
+export const gaslessApprovePaymasterUnlimited = async (signer: MPCSigner, token: ERC20Token) => {
   //fetch apis tank address
   const tankAddress = await fetchFromApi<TankAddressResponse>("/gasless/tankAddress?network=" + signer.getChain());
 

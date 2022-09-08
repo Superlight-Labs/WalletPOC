@@ -5,7 +5,7 @@ import {
 } from "ethereum/controller/gasless/transfer/gasless-transfer";
 import {
   checkPaymastersAllowance,
-  gaslessApproveUnlimited,
+  gaslessApprovePaymasterUnlimited,
 } from "ethereum/controller/gasless/transfer/pseudo-gasless-approve";
 import usePolygonSigner from "ethereum/hooks/usePolygonSigner";
 import { styles as polygonStyles } from "ethereum/polygon/view/ethereum-polygon-styles";
@@ -85,7 +85,7 @@ const PolygonTokenSendScreen = ({ route }: Props) => {
           //check if unlimited is not set yet
           if (allowance.eq(0)) {
             console.log("no allowance");
-            const approval = await gaslessApproveUnlimited(signer, token);
+            const approval = await gaslessApprovePaymasterUnlimited(signer, token);
             console.log("Unlimited amount approved: ", approval);
             const transfer = await gaslessTransfer(signer, to, value, token);
             console.log("Sent transfer: ", transfer);

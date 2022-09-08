@@ -1,10 +1,10 @@
 import { GaslessTransactionResponse } from "api-types/gasless";
 import { usdcAbi } from "ethereum/config/abi/usdc-abi";
 import { ERC20Token } from "ethereum/config/tokens";
+import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { defaultAbiCoder, keccak256, randomBytes, solidityPack, toUtf8Bytes } from "ethers/lib/utils";
 import { fetchFromApi, HttpMethod } from "lib/http";
-import { MPCSigner } from "../signers/mpc-signer";
 
 /**
  * Transfers erc20 Token value from -> to (permit or approveUnlimited has to be called beforehand)

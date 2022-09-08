@@ -1,12 +1,10 @@
 import { Picker } from "@react-native-picker/picker";
 import { ERC20Token, erc20Tokens } from "ethereum/config/tokens";
-import { gaslessSwapWithQuote } from "ethereum/controller/gasless/swap/gasless-0x";
-import { swapWithQuote } from "ethereum/controller/swap/0x-utils";
+import { gaslessApproveContract, gaslessSwapWithQuote } from "ethereum/controller/gasless/swap/gasless-0x";
+import { getSwapQuote, swapWithQuote } from "ethereum/controller/swap/0x-utils";
+import { checkAllowance } from "ethereum/controller/swap/swap-utils";
 import usePolygonSigner from "ethereum/hooks/usePolygonSigner";
-import { approveGaslessPolygonAmount } from "ethereum/polygon/controller/gasless/polygon-gasless-swap-utils";
 import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
-import { getPolygonSwapQuote } from "ethereum/polygon/controller/swap/polygon-0x-utils";
-import { checkPolygonAllowance } from "ethereum/polygon/controller/swap/polygon-swap-utils";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import { ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";
@@ -103,7 +101,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
   const updateQuote = async (inputToken: ERC20Token, outputToken: ERC20Token, inputAmount: string) => {
     const inputAmountWei = ethers.utils.parseUnits(inputAmount, inputToken.decimals);
     try {
-      const quote = await getPolygonSwapQuote(inputToken, outputToken, address.address, inputAmountWei.toString());
+      const quote = await getSwapQuote(inputToken, outputToken, inputAmountWei.toString());
       console.log(quote);
       if (!quote) console.log("Not enough liquidity");
       else setQuote(quote);
@@ -152,17 +150,12 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
 
     //check if uniswap has allowance for enough value - else approve new amount
     if (erc20Tokens[selectedInputTokenIndex].polygon.isToken) {
-      const allowedAmount = await checkPolygonAllowance(
-        erc20Tokens[selectedInputTokenIndex],
-        address.address,
-        signer!.provider!,
-        quote.allowanceTarget
-      );
+      const allowedAmount = await checkAllowance(erc20Tokens[selectedInputTokenIndex], signer, quote.allowanceTarget);
       if (!allowedAmount.gte(inputAmountWei)) {
         setApprovalModalVisible(true);
         try {
           if (
-            !(await approveGaslessPolygonAmount(
+            !(await gaslessApproveContract(
               erc20Tokens[selectedInputTokenIndex],
               inputAmountWei.sub(allowedAmount),
               signer,

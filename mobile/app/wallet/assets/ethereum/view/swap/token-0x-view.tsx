@@ -111,7 +111,7 @@ const Token0xView = ({ wallet, address }: Props) => {
   const updateQuote = async (inputToken: ERC20Token, outputToken: ERC20Token, inputAmount: string) => {
     const inputAmountWei = ethers.utils.parseUnits(inputAmount, inputToken.decimals);
     try {
-      const quote = await getSwapQuote(inputToken, outputToken, address.address, inputAmountWei.toString());
+      const quote = await getSwapQuote(inputToken, outputToken, inputAmountWei.toString());
       console.log(quote);
       setQuote(quote);
     } catch (err) {
@@ -159,12 +159,7 @@ const Token0xView = ({ wallet, address }: Props) => {
 
     //check if uniswap has allowance for enough value - else approve new amount
     if (erc20Tokens[selectedInputTokenIndex].ethereum.isToken) {
-      const allowedAmount = await checkAllowance(
-        erc20Tokens[selectedInputTokenIndex],
-        address.address,
-        signer!.provider!,
-        quote.allowanceTarget
-      );
+      const allowedAmount = await checkAllowance(erc20Tokens[selectedInputTokenIndex], signer, quote.allowanceTarget);
       if (!allowedAmount.gte(inputAmountWei)) {
         setApprovalModalVisible(true);
         try {

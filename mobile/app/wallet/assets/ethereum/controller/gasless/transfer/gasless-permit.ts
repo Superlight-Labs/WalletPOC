@@ -1,10 +1,10 @@
 import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasless";
 import { abi } from "ethereum/config/general-abi";
 import { ERC20Token } from "ethereum/config/tokens";
+import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { BigNumberish, ethers } from "ethers";
 import { defaultAbiCoder, keccak256, solidityPack, toUtf8Bytes } from "ethers/lib/utils";
 import { fetchFromApi, HttpMethod } from "lib/http";
-import { MPCSigner } from "../../signers/mpc-signer";
 
 /**
  * Runs an gasless permit call on the token's contract

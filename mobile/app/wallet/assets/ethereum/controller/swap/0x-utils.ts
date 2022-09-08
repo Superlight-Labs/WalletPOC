@@ -7,10 +7,16 @@ import {
 import { ZeroExSwapQuote } from "packages/blockchain-api-client/src/provider/0x/ethereum/0x-ethereum-types";
 import { MPCSigner } from "../signers/mpc-signer";
 
+/**
+ * gets a swap quote from 0x
+ * @param tokenFrom
+ * @param tokenTo
+ * @param amount
+ * @returns
+ */
 export const getSwapQuote = async (
   tokenFrom: ERC20Token,
   tokenTo: ERC20Token,
-  myAddress: string,
   amount: string
 ): Promise<ZeroExSwapQuote> => {
   const service = new EthereumSwappingService("TEST", "Ethereum");
@@ -28,6 +34,12 @@ export const getSwapQuote = async (
   return await service.getSwapQuote(params, EthereumSwappingProviderEnum.ZeroEx);
 };
 
+/**
+ * Swaps a 0x quote
+ * @param quote
+ * @param signer
+ * @returns
+ */
 export const swapWithQuote = async (quote: ZeroExSwapQuote, signer: MPCSigner) => {
   const transaction = {
     data: quote.data,

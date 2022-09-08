@@ -1,12 +1,11 @@
 import "@ethersproject/shims";
 import { Picker } from "@react-native-picker/picker";
 import { SwapRoute } from "@uniswap/smart-order-router";
-import { config } from "ethereum/config/ethereum-config";
 import { ERC20Token, erc20Tokens } from "ethereum/config/tokens";
 import { getBalanceFromEthereumTokenBalance } from "ethereum/controller/ethereum-utils";
-import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { approveAmount, checkAllowance } from "ethereum/controller/swap/swap-utils";
 import { findRouteExactInput, swapWithRoute } from "ethereum/controller/swap/uniswap-utils";
+import useEthereumSigner from "ethereum/hooks/useEthereumSigner";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import { ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";
@@ -40,13 +39,8 @@ const TokenUniswapView = ({ wallet, address }: Props) => {
   const [selectedInputTokenIndex, setSelectedInputTokenIndex] = useState<number>(0);
   const [selectedOutputTokenIndex, setSelectedOutputTokenIndex] = useState<number>(0);
 
-  const [signer, setSigner] = useState<MPCSigner>();
+  const signer = useEthereumSigner();
   useEffect(() => {
-    setSigner(
-      new MPCSigner(wallet.external.addresses[0], user).connect(
-        new ethers.providers.AlchemyProvider(config.chain, "ahl42ynne2Kd8FosnoYBtCW3ssoCtIu0")
-      )
-    );
     updateBalance(erc20TokensLocal[0]);
   }, []);
 
@@ -171,8 +165,7 @@ const TokenUniswapView = ({ wallet, address }: Props) => {
     //check if uniswap has allowance for enough value - else approve new amount
     const allowedAmount = await checkAllowance(
       erc20TokensLocal[selectedInputTokenIndex],
-      address.address,
-      signer!.provider!,
+      signer,
       V3_SWAP_ROUTER_ADDRESS
     );
     if (!allowedAmount.gte(inputAmountWei)) {

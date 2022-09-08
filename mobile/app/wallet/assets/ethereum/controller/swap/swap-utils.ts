@@ -1,5 +1,5 @@
-import { Provider } from "@ethersproject/abstract-provider";
-import { abi as ERC20ABI } from "@uniswap/v2-core/build/ERC20.json";
+import { usdcAbi } from "ethereum/config/abi/usdc-abi";
+import { abi } from "ethereum/config/general-abi";
 import { ERC20Token } from "ethereum/config/tokens";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { MPCSigner } from "../signers/mpc-signer";
@@ -19,7 +19,7 @@ export const approveAmount = async (
   signer: MPCSigner,
   contractAddress: string
 ): Promise<boolean> => {
-  const approvalResponse = await new ethers.Contract(token.ethereum.address, ERC20ABI, signer).approve(
+  const approvalResponse = await new ethers.Contract(token[signer.getNetwork()].address, abi, signer).approve(
     contractAddress,
     amount.toString()
   );
@@ -31,20 +31,19 @@ export const approveAmount = async (
 /**
  * Checks how much value is approved for token on this address
  * @param token
- * @param address
- * @param provider
+ * @param signer
  * @param contractAddress contract address for which the amount should be approved
  * @returns
  */
 export const checkAllowance = async (
   token: ERC20Token,
-  address: string,
-  provider: Provider,
+  signer: MPCSigner,
   contractAddress: string
 ): Promise<BigNumber> => {
-  const allowanceResponce: BigNumber = await new ethers.Contract(token.ethereum.address, ERC20ABI, provider).allowance(
-    address,
-    contractAddress
-  );
+  const allowanceResponce: BigNumber = await new ethers.Contract(
+    token[signer.getNetwork()].address,
+    usdcAbi,
+    signer
+  ).allowance(signer.getAddressObj().address, contractAddress);
   return allowanceResponce;
 };

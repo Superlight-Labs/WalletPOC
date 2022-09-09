@@ -1,8 +1,9 @@
 import { Provider, TransactionRequest } from "@ethersproject/abstract-provider";
+import { Signature, SignatureLike } from "@ethersproject/bytes";
 import { serialize, UnsignedTransaction } from "@ethersproject/transactions";
 import { User } from "api-types/user";
 import { Config, config, Network } from "ethereum/config/ethereum-config";
-import { Bytes, getDefaultProvider, Signer } from "ethers";
+import { Bytes, ethers, getDefaultProvider, Signer } from "ethers";
 import {
   defineReadOnly,
   getAddress,
@@ -16,7 +17,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import { signEcdsa } from "lib/mpc";
 import { getBinSignature } from "react-native-blockchain-crypto-mpc";
 import { Address } from "wallet/types/wallet";
-import { getSignatureWithRecoveryCode } from "../ethereum-utils";
+
 export class MPCSigner extends Signer {
   private address: Address;
   private user: User;
@@ -186,3 +187,23 @@ export class MPCSigner extends Signer {
     return this.user;
   };
 }
+
+/**
+ * Workaround to fix a problem in unbound-crypto-mpc
+ *
+ * @param signature Signature with recoveryParam: 0
+ * @param msgHash Message before signing
+ * @param address Address we are expecting
+ * @returns Recovery Code that leads from the Signature to the correct Public Key / Address
+ */
+export const getSignatureWithRecoveryCode = (
+  signature: SignatureLike,
+  msgHash: Buffer,
+  address: string
+): SignatureLike => {
+  const recoveredAddress = ethers.utils.recoverAddress(msgHash, signature);
+
+  if (recoveredAddress === address) return signature;
+
+  return { ...(signature as Signature), recoveryParam: 1 };
+};

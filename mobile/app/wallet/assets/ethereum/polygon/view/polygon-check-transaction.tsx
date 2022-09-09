@@ -1,7 +1,7 @@
 import { POSClient } from "@maticnetwork/maticjs";
 import React, { useCallback, useState } from "react";
 import { Alert, Button, TextInput, View } from "react-native";
-import { styles } from "./ethereum-polygon-styles";
+import { styles } from "./polygon-styles";
 
 type Props = {
   polygonClient: POSClient;

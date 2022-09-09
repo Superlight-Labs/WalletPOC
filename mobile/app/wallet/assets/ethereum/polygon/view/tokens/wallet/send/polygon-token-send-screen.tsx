@@ -8,7 +8,7 @@ import {
   gaslessApprovePaymasterUnlimited,
 } from "ethereum/controller/gasless/transfer/pseudo-gasless-approve";
 import usePolygonSigner from "ethereum/hooks/usePolygonSigner";
-import { styles as polygonStyles } from "ethereum/polygon/view/ethereum-polygon-styles";
+import { styles as polygonStyles } from "ethereum/polygon/view/polygon-styles";
 import { BigNumber } from "ethers";
 import React, { useCallback, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";

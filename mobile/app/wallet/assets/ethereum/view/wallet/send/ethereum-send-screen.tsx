@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { buildRawTransaction } from "ethereum/controller/ethereum-transaction-utils";
+import { buildRawTransaction } from "ethereum/controller/ethereum-transaction";
 import { gWeiToEth, gWeiToWei } from "ethereum/controller/ethereum-utils";
 import { EthereumWalletsState, ethereumWalletsState } from "ethereum/state/ethereum-atoms";
 import { useAddMempoolTransaction } from "ethereum/state/ethereum-wallet-state-utils";

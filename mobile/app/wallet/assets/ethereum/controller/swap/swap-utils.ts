@@ -1,5 +1,5 @@
+import { abi } from "ethereum/config/abi/general-abi";
 import { usdcAbi } from "ethereum/config/abi/usdc-abi";
-import { abi } from "ethereum/config/general-abi";
 import { ERC20Token } from "ethereum/config/tokens";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { MPCSigner } from "../signers/mpc-signer";

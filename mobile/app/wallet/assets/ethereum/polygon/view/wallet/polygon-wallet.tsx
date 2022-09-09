@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 14 },
     shadowOpacity: 0.2,
     shadowRadius: 20,
-    marginTop: 32,
+    marginBottom: 12,
   },
   headingArea: {
     flexDirection: "row",

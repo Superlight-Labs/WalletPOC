@@ -1,10 +1,10 @@
 import { Picker } from "@react-native-picker/picker";
 import { ERC20Token, erc20Tokens } from "ethereum/config/tokens";
+import { getTokenBalance } from "ethereum/controller/ethereum-balance";
 import { gaslessApproveContract, gaslessSwapWithQuote } from "ethereum/controller/gasless/swap/gasless-0x";
 import { getSwapQuote, swapWithQuote } from "ethereum/controller/swap/0x-utils";
 import { checkAllowance } from "ethereum/controller/swap/swap-utils";
 import usePolygonSigner from "ethereum/hooks/usePolygonSigner";
-import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
 import { EthereumWallet } from "ethereum/types/ethereum";
 import { ethers } from "ethers";
 import { EthereumService } from "packages/blockchain-api-client/src";
@@ -89,7 +89,7 @@ const PolygonToken0xView = ({ wallet, address }: Props) => {
 
     let tokenAddr: string[] = [];
     tokenAddr.push(token.polygon.address);
-    const tokenBalance: string = await getPolygonErc20Balance(signer, token);
+    const tokenBalance: string = await getTokenBalance(token, signer);
     setAvailableBalance(ethers.utils.formatUnits(tokenBalance, token.decimals));
 
     setLoadingBalance(false);

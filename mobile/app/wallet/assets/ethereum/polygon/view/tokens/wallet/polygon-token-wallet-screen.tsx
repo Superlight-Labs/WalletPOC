@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { NavigationRoutes } from "shared/types/navigation";
-import { styles as polygonStyles } from "../../ethereum-polygon-styles";
+import { styles as polygonStyles } from "../../polygon-styles";
 import { TokenBalanceView } from "./balance/polygon-token-balance-view";
 import TokenTransactionsView from "./transaction/polygon-token-transactions-view";
 

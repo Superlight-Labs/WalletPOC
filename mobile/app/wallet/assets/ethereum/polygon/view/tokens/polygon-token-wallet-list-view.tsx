@@ -7,7 +7,7 @@ import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { NavigationRoutes } from "shared/types/navigation";
 import { Address } from "wallet/types/wallet";
-import { styles } from "../ethereum-polygon-styles";
+import { styles } from "../polygon-styles";
 
 type Props = NativeStackScreenProps<NavigationRoutes, "TokenWalletScreen">;
 

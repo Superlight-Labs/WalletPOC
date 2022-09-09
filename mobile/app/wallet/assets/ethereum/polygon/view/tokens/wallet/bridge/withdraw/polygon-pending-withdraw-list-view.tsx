@@ -1,7 +1,7 @@
 import { POSClient } from "@maticnetwork/maticjs";
 import { PlasmaClient } from "@maticnetwork/maticjs-plasma";
 import { initialPolygonState, polygonState } from "ethereum/polygon/state/polygon-atoms";
-import { styles } from "ethereum/polygon/view/ethereum-polygon-styles";
+import { styles } from "ethereum/polygon/view/polygon-styles";
 import React, { useEffect } from "react";
 import { Button, Text, View } from "react-native";
 import { useRecoilState } from "recoil";

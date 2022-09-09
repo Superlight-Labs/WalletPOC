@@ -1,6 +1,6 @@
 import { findContractAddressBySymbol } from "ethereum/config/tokens";
+import { getTokenBalance } from "ethereum/controller/ethereum-balance";
 import usePolygonSigner from "ethereum/hooks/usePolygonSigner";
-import { getPolygonErc20Balance } from "ethereum/polygon/controller/polygon-token-utils";
 import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -21,7 +21,7 @@ export const PolygonBalanceView = ({ address }: PolygonBalanceProps) => {
 
   const updateBalanceFunction = async () => {
     setLoading(true);
-    const balance = await getPolygonErc20Balance(signer, findContractAddressBySymbol("WMATIC")!);
+    const balance = await getTokenBalance(findContractAddressBySymbol("WMATIC")!, signer);
     setBalance(balance);
     setLoading(false);
   };

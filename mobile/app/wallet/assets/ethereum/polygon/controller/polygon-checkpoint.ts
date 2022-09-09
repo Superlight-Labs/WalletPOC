@@ -41,7 +41,7 @@ export function checkDepositStatus(userAccount: string, pendingTransactions: Pen
           if (userAddress.toLowerCase() === userAccount.toLowerCase()) {
             const matching = pendingTransactions.find(
               (transaction) =>
-                transaction.token.ethereumAddress.toLowerCase() === rootTokenAddress.toLowerCase() &&
+                transaction.token.ethereum.address.toLowerCase() === rootTokenAddress.toLowerCase() &&
                 amount === transaction.amount
             );
             matching && observer.next({ ...matching, checkpointed: true });

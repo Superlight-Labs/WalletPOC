@@ -1,5 +1,5 @@
 import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasless";
-import { abi } from "ethereum/config/general-abi";
+import { abi } from "ethereum/config/abi/general-abi";
 import { ERC20Token } from "ethereum/config/tokens";
 import { MPCSigner } from "ethereum/controller/signers/mpc-signer";
 import { ethers } from "ethers";

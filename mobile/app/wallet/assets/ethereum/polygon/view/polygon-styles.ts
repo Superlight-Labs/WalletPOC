@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 20,
     paddingBottom: 24,
-    margin: 12,
+    marginBottom: 12,
   },
   input: {
     backgroundColor: "#f7f7f7",

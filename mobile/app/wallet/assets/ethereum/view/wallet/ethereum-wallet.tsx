@@ -8,11 +8,10 @@ import { EthereumService } from "packages/blockchain-api-client/src";
 import { EthereumProviderEnum } from "packages/blockchain-api-client/src/blockchains/ethereum/ethereum-factory";
 import { EthereumTransaction } from "packages/blockchain-api-client/src/blockchains/ethereum/types";
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRecoilValue } from "recoil";
 import { NavigationRoutes } from "shared/types/navigation";
 import { authState } from "state/atoms";
-import { createCircleAddress } from "wallet/assets/fiat-management/controller/circle-account-utils";
 import { useUpdateAccount } from "wallet/state/wallet-state-utils";
 import { Transaction } from "wallet/types/wallet";
 import { EthereumBalanceView } from "./balance/ethereum-balance-view";
@@ -106,7 +105,6 @@ const EthereumWalletView = ({ wallet, index, navigation, signer }: EthereumWalle
   const user = useRecoilValue(authState);
   return (
     <View style={styles.container}>
-      <Button title="CircleTest" onPress={() => createCircleAddress(user)} />
       <View style={styles.headingArea}>
         <Image
           style={styles.icon}

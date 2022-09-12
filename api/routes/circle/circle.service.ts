@@ -1,80 +1,87 @@
+import logger from "@lib/logger";
 import { isRouteError, other, RouteError, thirdPartyError } from "@lib/route/error";
 import crypto from "crypto";
 import { okAsync, ResultAsync } from "neverthrow";
+import { HttpMethod } from "../endpoints";
 import { User } from "../user/user";
-import { CircleAddress, CircleAddressRequest, CircleWallet } from "./circle";
-import { fetchFromCircle, HttpMethod } from "./circle-config";
-import { readCircleWallet, readCircleWalletAddress, saveCircleAddress, saveCircleWallet } from "./circle.repository";
+import { CircleAccount, CircleCard, CircleCreateCardResponse, CirclePublicKey, CreateCircleCard } from "./circle";
+import { fetchFromCircle } from "./circle-endpoint";
+import { readCircleAccount, readCircleCard, saveCircleAccount, saveCircleCard } from "./circle.repository";
 
-export const getOrCreateCircleWallet = (user: User): ResultAsync<CircleWallet, RouteError> => {
-  const readWallet = ResultAsync.fromPromise(readCircleWallet(user), (e) =>
-    other("Error while reading CircleWallets from Database", e)
+export const getOrCreateCircleAccount = (user: User): ResultAsync<CircleAccount, RouteError> => {
+  const readAccount = ResultAsync.fromPromise(readCircleAccount(user), (e) =>
+    other("Error while reading circleAccounts from Database", e)
   );
 
-  return readWallet.andThen((walletOrNotFound) => {
-    if (isRouteError(walletOrNotFound)) return createCircleWallet(user);
+  return readAccount.andThen((accountOrNotFound) => {
+    logger.info({ accountOrNotFound }, "Account or not found");
+    if (isRouteError(accountOrNotFound)) return createCircleAccount(user);
 
-    return okAsync(walletOrNotFound);
+    return okAsync(accountOrNotFound);
   });
 };
 
-const createCircleWallet = (user: User): ResultAsync<CircleWallet, RouteError> => {
-  const circleWalletPromise: Promise<any> = fetchFromCircle("wallets", {
-    method: HttpMethod.POST,
-    body: JSON.stringify({ idempotencyKey: crypto.randomUUID(), description: "Vest Wallet Connector" }),
-  });
-
-  return ResultAsync.fromPromise(circleWalletPromise, (e) =>
-    thirdPartyError("Circle Api Create Wallet Error", e)
-  ).andThen((wallet) =>
-    ResultAsync.fromPromise(saveCircleWallet(user, wallet.walletId, wallet.entityId), (e) =>
-      other("Error while Saving CircleWallet", e)
-    )
-  );
+const createCircleAccount = (user: User): ResultAsync<CircleAccount, RouteError> => {
+  return ResultAsync.fromPromise(saveCircleAccount(user), (e) => other("Error while Saving CircleAccount", e));
 };
 
-export const getOrCreateCircleAddress = (
-  createAddressReq: CircleAddressRequest,
+export const getOrCreateCircleCard = (
+  createAddressReq: CreateCircleCard,
   user: User
-): ResultAsync<CircleAddress, RouteError> => {
-  const circleWallet = getOrCreateCircleWallet(user);
+): ResultAsync<CircleCard, RouteError> => {
+  const circleAccount = getOrCreateCircleAccount(user);
 
-  return circleWallet.andThen((cw) => getOrCreateCircleAddressFromCircleWallet(cw, createAddressReq, user));
+  return circleAccount.andThen((ca) => getOrCreateCircleCardFromCircleAccount(ca, createAddressReq, user));
 };
 
-const getOrCreateCircleAddressFromCircleWallet = (
-  circleWallet: CircleWallet,
-  createAddressReq: CircleAddressRequest,
+const getOrCreateCircleCardFromCircleAccount = (
+  circleAccount: CircleAccount,
+  createCard: CreateCircleCard,
   user: User
-) => {
-  const { currency, chain } = createAddressReq;
-
-  const readAddress = ResultAsync.fromPromise(readCircleWalletAddress(circleWallet, currency, chain), (e) =>
+): ResultAsync<CircleCard, RouteError> => {
+  const readCard = ResultAsync.fromPromise(readCircleCard(circleAccount), (e) =>
     other("Error while reading CircleAddress from Database", e)
   );
 
-  return readAddress.andThen((addressOrNotFound) => {
-    if (isRouteError(addressOrNotFound)) return createCircleAddress(circleWallet, createAddressReq, user);
+  return readCard.andThen((addressOrNotFound) => {
+    if (isRouteError(addressOrNotFound)) return createCircleCard(circleAccount, createCard, user);
 
     return okAsync(addressOrNotFound);
   });
 };
 
-const createCircleAddress = (circleWallet: CircleWallet, createAddressReq: CircleAddressRequest, user: User) => {
-  const newCircleAddressPromise: Promise<any> = fetchFromCircle("wallets/" + circleWallet?.walletId + "/addresses", {
+const createCircleCard = (
+  circleAccount: CircleAccount,
+  createCard: CreateCircleCard,
+  user: User
+): ResultAsync<CircleCard, RouteError> => {
+  const body = {
+    ...createCard,
+    idempotencyKey: crypto.randomUUID(),
+    metadata: {
+      ...createCard.metadata,
+      ipAddress: "127.0.0.1",
+      sessionId: crypto.createHash("sha256").update(user.id).digest("base64"),
+    },
+  };
+
+  logger.info({ body });
+  const newCircleAddressPromise: Promise<CircleCreateCardResponse> = fetchFromCircle("/cards", {
     method: HttpMethod.POST,
-    body: JSON.stringify({
-      idempotencyKey: crypto.randomUUID(),
-      currency: createAddressReq.currency,
-      chain: createAddressReq.chain,
-    }),
+    body,
   });
 
   return ResultAsync.fromPromise(newCircleAddressPromise, (e) =>
     thirdPartyError("Circle Api Create Address Error", e)
-  ).andThen((circleAddress) =>
-    ResultAsync.fromPromise(saveCircleAddress(user, circleWallet, circleAddress), (e) =>
+  ).andThen((circleCard) =>
+    ResultAsync.fromPromise(saveCircleCard(user, circleAccount, circleCard.id), (e) =>
       other("Error while Saving CircleAddress", e)
     )
   );
+};
+
+export const getPublicKey = (): ResultAsync<CirclePublicKey, RouteError> => {
+  const circlePublicKey = fetchFromCircle<CirclePublicKey>("/encryption/public");
+
+  return ResultAsync.fromPromise(circlePublicKey, (e) => thirdPartyError("Circle Api get Public Key Error", e));
 };

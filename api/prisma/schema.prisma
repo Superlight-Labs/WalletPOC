@@ -8,10 +8,10 @@ generator client {
 }
 
 model User {
-    id              String        @default(uuid())
+    id              String         @default(uuid())
     devicePublicKey String
-    keyShares       MpcKeyShare[] @relation("KeySharesForUser")
-    circleWallet    CircleWallet? @relation("CircleWalletForUser")
+    keyShares       MpcKeyShare[]  @relation("KeySharesForUser")
+    circleWallet    CircleAccount? @relation("CircleAccountForUser")
 
     @@unique([id, devicePublicKey])
 }
@@ -35,26 +35,20 @@ model AccountAddressToTatumId {
     tatumId        String
 }
 
-model CircleWallet {
-    user                User   @relation("CircleWalletForUser", fields: [userId, userDevicePublicKey], references: [id, devicePublicKey])
+model CircleAccount {
+    user                User   @relation("CircleAccountForUser", fields: [userId, userDevicePublicKey], references: [id, devicePublicKey])
     userId              String
     userDevicePublicKey String
 
-    walletId  String          @unique
-    entityId  String
-    addresses CircleAddress[] @relation("CircleAddressForCircleWallet")
+    id    String       @id @default(uuid())
+    cards CircleCard[] @relation("CircleAccountForCircleCard")
 
     @@unique([userId, userDevicePublicKey])
 }
 
-model CircleAddress {
-    circleWallet CircleWallet @relation("CircleAddressForCircleWallet", fields: [walletId], references: [walletId])
-    walletId     String
+model CircleCard {
+    circleAccount CircleAccount @relation("CircleAccountForCircleCard", fields: [accountId], references: [id])
+    accountId     String
 
-    addressId String @id @default(uuid())
-    address   String
-    currency  String
-    chain     String
-
-    @@unique([walletId, addressId])
+    cardId String @id
 }

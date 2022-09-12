@@ -57,10 +57,13 @@ export const setNonceRoute = <T>(handler: NonceRouteHandler<T>) => {
   };
 };
 
-export const authenticatedRoute = <T>(handlder: AuthenticatedRouteHandler<T>) => {
+export const authenticatedRoute = <T>(handler: AuthenticatedRouteHandler<T>) => {
   return (req: FastifyRequest, res: FastifyReply) => {
     const authResult = authenticate(req);
 
-    authResult.map((user) => wrapHandler(handlder(req, user), res));
+    wrapHandler(
+      authResult.andThen((user) => handler(req, user)),
+      res
+    );
   };
 };

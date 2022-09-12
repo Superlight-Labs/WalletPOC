@@ -1,9 +1,9 @@
 import { invalidAuthentication, other, RouteError } from "@lib/route/error";
-import crypto from "crypto";
 import { FastifyRequest } from "fastify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { User } from "../../routes/user/user";
 import { readUser } from "../../routes/user/user.repository";
+import { verifySignature } from "./crypto";
 import { getSafeResultAsync } from "./neverthrow";
 
 export const buildPubKey = (encoded: string) => {
@@ -37,28 +37,18 @@ export const authenticate = (req: FastifyRequest): ResultAsync<User, RouteError>
     (e) => other("Error while reading User from Database", e)
   );
 
-  return readUserResult.andThen((user) => verifySignature(user, nonce, devicesignature as string));
+  return readUserResult.andThen((user) => verifyUserSignature(user, nonce, devicesignature as string));
 };
 
-const verifySignature = (user: User, nonce: string, deviceSignature: string): ResultAsync<User, RouteError> => {
-  const verifier = crypto.createVerify("SHA256").update(nonce as string, "utf-8");
+const verifyUserSignature = (user: User, nonce: string, deviceSignature: string): ResultAsync<User, RouteError> => {
+  const valid = verifySignature(user.devicePublicKey, nonce, deviceSignature);
 
-  const result = verifier.verify(
-    {
-      key: buildPubKey(user.devicePublicKey),
-      format: "pem",
-      type: "pkcs1",
-    },
-    Buffer.from(deviceSignature as string, "base64")
-  );
-
-  if (result) return okAsync(user);
+  if (valid) return okAsync(user);
 
   return errAsync(invalidAuthentication("Signature invalid"));
 };
 
 const isAuthRequestValid = (deviceSignature: string, devicePublicKey: string, userid: string, nonce: string | null) => {
-  console.log({ devicePublicKey, deviceSignature, userid, nonce });
   return (
     isNonceValid(nonce) &&
     isDeviceSignatureValid(deviceSignature) &&

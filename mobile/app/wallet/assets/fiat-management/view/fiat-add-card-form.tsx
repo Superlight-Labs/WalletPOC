@@ -1,13 +1,21 @@
-import React from "react";
+import { CirclePublicKey, CreateCircleCard } from "api-types/circle";
+import { User } from "api-types/user";
+import { fetchFromApiAuthenticated } from "lib/http";
+import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { Button, ScrollView, View } from "react-native";
+import { SetterOrUpdater, useSetRecoilState } from "recoil";
+import { apiLoadingState } from "state/atoms";
 import ControlledTextInput from "../../../../views/components/controlled-text-input";
+import { pgpEncrypt } from "../controller/circle-crypto-utils";
+import { FiatManagementState } from "../state/fiat-management-atoms";
 import { styles } from "./payment/fiat-payment-styles";
 
 export type CardFormInputs = {
   cardNumber: string;
   cvv: string;
-  expiry: string;
+  expiryMonth: string;
+  expiryYear: string;
   description: string;
   channel: string;
   holderName: string;
@@ -23,7 +31,8 @@ export type CardFormInputs = {
 const exampleData = {
   cardNumber: "4007400000000007",
   cvv: "123",
-  expiry: new Date("January 1, 2025").toDateString(),
+  expiryMonth: "1",
+  expiryYear: "2025",
   holderName: "Customer 0001",
   district: "VIE",
   address: "Test Address",
@@ -35,7 +44,14 @@ const exampleData = {
   description: "Example Test Card",
 };
 
-const FiatAddCardForm = () => {
+type Props = {
+  user: User;
+  setCard: SetterOrUpdater<FiatManagementState>;
+};
+
+const FiatAddCardForm = ({ user, setCard }: Props) => {
+  const setSnackbar = useSetRecoilState(apiLoadingState);
+
   const {
     control,
     handleSubmit,
@@ -47,7 +63,61 @@ const FiatAddCardForm = () => {
     },
   });
 
-  const onSubmit = (data: any) => console.log(data);
+  const onSubmit = useCallback(
+    async (data: CardFormInputs) => {
+      setSnackbar({ status: "Loading", message: "Saving Card, please wait..." });
+
+      try {
+        const publicKey = await fetchFromApiAuthenticated<CirclePublicKey>("/circle/get-public-key", user);
+
+        const cardDetails = {
+          number: data.cardNumber.replace(/\s/g, ""),
+          cvv: data.cvv,
+        };
+        console.log("heya", cardDetails);
+
+        const encryptedData = await pgpEncrypt(cardDetails, publicKey);
+
+        console.log("heya", encryptedData);
+
+        const payload: CreateCircleCard = {
+          expMonth: parseInt(data.expiryMonth),
+          expYear: parseInt(data.expiryYear),
+          keyId: publicKey.keyId,
+          encryptedData,
+          billingDetails: {
+            line1: data.address,
+            city: data.city,
+            district: data.district,
+            postalCode: data.postalCode,
+            country: data.countryCode,
+            name: data.holderName,
+          },
+          metadata: {
+            phoneNumber: data.phone,
+            email: data.email,
+          },
+        };
+
+        // fetchFromApiAuthenticated<CircleCard>("/circle/create-card", user, {
+        //   method: HttpMethod.POST,
+        //   body: payload,
+        // })
+        //   .then((result) => {
+        //     setSnackbar({ status: "Success", message: `Card with id "${result.cardId}" created!` });
+        //     setCard({ cardId: result.cardId });
+        //   })
+        //   .catch((reason) => {
+        //     setSnackbar({ status: "Error", message: reason.error });
+        //   });
+      } catch (err: any) {
+        console.error(err, "Error while saving card");
+
+        if (typeof err.error === "string") setSnackbar({ status: "Error", message: err.error });
+      }
+    },
+    [user, setSnackbar, setCard]
+  );
 
   return (
     <>
@@ -55,6 +125,8 @@ const FiatAddCardForm = () => {
         <View style={{ marginBottom: 40 }}>
           <ControlledTextInput name="cardNumber" control={control} error={errors.cardNumber} />
           <ControlledTextInput name="cvv" control={control} error={errors.cvv} />
+          <ControlledTextInput name="expiryMonth" control={control} error={errors.expiryMonth} />
+          <ControlledTextInput name="expiryYear" control={control} error={errors.expiryYear} />
           <ControlledTextInput name="description" control={control} error={errors.description} />
           <ControlledTextInput name="channel" control={control} error={errors.channel} />
           <ControlledTextInput name="holderName" control={control} error={errors.holderName} />

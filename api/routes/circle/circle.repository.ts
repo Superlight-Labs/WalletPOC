@@ -1,13 +1,11 @@
 import { notFound, RouteError } from "@lib/route/error";
 import { client } from "@server";
 import { User } from "../user/user";
-import { CircleAddress, CircleWallet } from "./circle";
+import { CircleAccount, CircleCard } from "./circle";
 
-export const saveCircleWallet = (user: User, walletId: string, entityId: string): Promise<CircleWallet> => {
-  return client.circleWallet.create({
+export const saveCircleAccount = (user: User): Promise<CircleAccount> => {
+  return client.circleAccount.create({
     data: {
-      walletId,
-      entityId,
       user: {
         connect: {
           id_devicePublicKey: {
@@ -17,34 +15,36 @@ export const saveCircleWallet = (user: User, walletId: string, entityId: string)
         },
       },
     },
+    include: {
+      cards: true,
+    },
   });
 };
 
-export const saveCircleAddress = (
-  user: User,
-  circleWallet: CircleWallet,
-  circleAddress: CircleAddress
-): Promise<CircleAddress> => {
-  return client.circleAddress.create({
+export const saveCircleCard = (user: User, account: CircleAccount, cardId: string): Promise<CircleCard> => {
+  return client.circleCard.create({
     data: {
-      address: circleAddress.address,
-      currency: circleAddress.currency,
-      chain: circleAddress.chain,
-      circleWallet: {
+      cardId,
+      circleAccount: {
         connect: {
-          walletId: circleWallet.walletId,
+          id: account.id,
+          userId_userDevicePublicKey: {
+            userId: user.id,
+            userDevicePublicKey: user.devicePublicKey,
+          },
         },
       },
     },
   });
 };
 
-export const readCircleWallet = async (user: User): Promise<CircleWallet | RouteError> => {
-  const wallet = await client.circleWallet.findFirst({
+export const readCircleAccount = async (user: User): Promise<CircleAccount | RouteError> => {
+  const wallet = await client.circleAccount.findFirst({
     where: {
       userId: user.id,
       userDevicePublicKey: user.devicePublicKey,
     },
+    include: { cards: true },
   });
 
   if (!wallet) return notFound();
@@ -52,20 +52,14 @@ export const readCircleWallet = async (user: User): Promise<CircleWallet | Route
   return wallet;
 };
 
-export const readCircleWalletAddress = async (
-  circleWallet: CircleWallet,
-  currency: string,
-  chain: string
-): Promise<CircleAddress | RouteError> => {
-  const circleAddress = await client.circleAddress.findFirst({
+export const readCircleCard = async (account: CircleAccount): Promise<CircleCard | RouteError> => {
+  const circleCard = await client.circleCard.findFirst({
     where: {
-      walletId: circleWallet.walletId,
-      currency: currency,
-      chain: chain,
+      accountId: account.id,
     },
   });
 
-  if (!circleAddress) return notFound();
+  if (!circleCard) return notFound();
 
-  return circleAddress;
+  return circleCard;
 };

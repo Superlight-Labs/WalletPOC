@@ -1,29 +1,51 @@
 import { authenticatedRoute } from "@lib/route/handlers";
 import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
 import { User } from "../user/user";
-import { CircleAddressRequest } from "./circle";
-import { getOrCreateCircleAddress, getOrCreateCircleWallet } from "./circle.service";
+import { CircleCard, CirclePublicKey, CreateCircleCard } from "./circle";
+import { getOrCreateCircleCard, getPublicKey } from "./circle.service";
 
-const postCircleCreateWallet = authenticatedRoute<any>((req: FastifyRequest, user: User) => {
-  return getOrCreateCircleWallet(user);
-});
+const getCirclePublicKey = authenticatedRoute<CirclePublicKey>(getPublicKey);
 
-const postCircleCreateAddress = authenticatedRoute<any>((req: FastifyRequest, user: User) => {
-  return getOrCreateCircleAddress(req.body as CircleAddressRequest, user);
-});
+const postCreateCircleCard = authenticatedRoute<CircleCard>((req: FastifyRequest, user: User) =>
+  getOrCreateCircleCard(req.body as CreateCircleCard, user)
+);
 
 const registerCircleRoutes = (server: FastifyInstance) => {
-  server.post("/circle/create-wallet", postCircleCreateWallet);
-  server.post("/circle/create-address", { schema: circleCreateAddressSchema }, postCircleCreateAddress);
+  server.get("/circle/get-public-key", getCirclePublicKey);
+  server.post("/circle/create-card", { schema: circleCreateCardSchema }, postCreateCircleCard);
 };
 
-const circleCreateAddressSchema: FastifySchema = {
+const circleCreateCardSchema: FastifySchema = {
   body: {
     type: "object",
-    required: ["currency", "chain"],
+    required: ["encryptedData", "expMonth", "expYear", "keyId"],
     properties: {
-      currency: { type: "string" },
-      chain: { type: "string" },
+      encryptedData: { type: "string", maxLength: 96, minLength: 96 },
+      keyId: { type: "string", maxLength: 100, minLength: 2 },
+      expMonth: { type: "integer" },
+      expYear: { type: "integer" },
+
+      billingDetails: {
+        type: "object",
+        properties: {
+          city: { type: "string", maxLength: 100, minLength: 2 },
+          country: { type: "string", maxLength: 100, minLength: 2 },
+          district: { type: "string", maxLength: 100, minLength: 2 },
+          line1: { type: "string", maxLength: 100, minLength: 2 },
+          line2: { type: "string", maxLength: 100, minLength: 2 },
+          name: { type: "string", maxLength: 100, minLength: 2 },
+          postalCode: { type: "string", maxLength: 50, minLength: 2 },
+        },
+      },
+      metadata: {
+        type: "object",
+        properties: {
+          email: { type: "string", minLength: 3, maxLength: 150 },
+          phoneNumber: { type: "string", minLength: 3, maxLength: 50 },
+          sessionId: { type: "string", minLength: 10, maxLength: 100 },
+          ipAddress: { type: "string", minLength: 3, maxLength: 40 },
+        },
+      },
     },
   },
 };

@@ -1,17 +1,15 @@
 import { abi as ERC20ABI } from "@uniswap/v2-core/build/ERC20.json";
 import { GaslessTransactionResponse, TankAddressResponse } from "api-types/gasless";
 import { User } from "api-types/user";
-import { alchemyProviderKey, config } from "ethereum/config/ethereum-config";
+import { randomBytes } from "crypto";
+import { config } from "ethereum/config/ethereum-config";
 import { ERC20Token } from "ethereum/config/token-constants";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { defaultAbiCoder, keccak256, solidityPack, toUtf8Bytes } from "ethers/lib/utils";
 import { fetchFromApi, HttpMethod } from "lib/http";
 import { Address } from "wallet/types/wallet";
-import { MPCSigner } from "../zksync/signer";
-import { randomBytes } from "crypto";
-import { usdcAbi } from "./usdc-abi";
 import { getPreparedMpcSigner } from "../signers/alchemy-signer";
-
+import { usdcAbi } from "./usdc-abi";
 /**
  * Runs an gasless permit call on the token's contract
  * @param address
@@ -135,6 +133,7 @@ export const gaslessTransferWithAuthorization = async (
   let nonce;
   do {
     nonce = BigNumber.from(randomBytes(32));
+
     isNonceUsed = await tokenContractMpcSigner.authorizationState(from.address, nonce);
   } while (isNonceUsed);
 

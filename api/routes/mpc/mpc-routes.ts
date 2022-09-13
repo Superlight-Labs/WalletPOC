@@ -24,10 +24,6 @@ const registerMcpRoutes = (server: FastifyInstance): void => {
       req["user"] = userResult.value;
     });
 
-    privatePlugin.addHook("onError", async (request, reply, error) => {
-      request.log.error({ request: request.body, error }, "Error on MPC Route");
-    });
-
     registerPrivateMpcRoutes(privatePlugin);
   });
 };

@@ -1,4 +1,6 @@
 import { invalidAuthentication, other, RouteError } from "@lib/route/error";
+import { createDecipheriv } from "crypto";
+import { logger } from "ethers";
 import { FastifyRequest } from "fastify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { User } from "../../routes/user/user";
@@ -22,11 +24,12 @@ export const isNonceValid = (nonce: string | null) => nonce && nonce.length === 
 export const authenticate = (req: FastifyRequest): ResultAsync<User, RouteError> => {
   const { devicesignature, devicepublickey, userid } = req.headers;
 
+  logger.info({ cook: req.cookies, devicesignature });
   const signedNonce = req.cookies["authnonce"];
   const nonce = req.unsignCookie(signedNonce || "").value || "";
 
   if (!isAuthRequestValid(devicesignature as string, devicepublickey as string, userid as string, nonce)) {
-    throw new Error("Invalid Request to Mpc Endpoint");
+    return errAsync(invalidAuthentication("Invalid Request to Secured Endpoint"));
   }
 
   const readUserResult = getSafeResultAsync(
@@ -62,3 +65,19 @@ const isDeviceSignatureValid = (deviceSignature: string | null) => deviceSignatu
 const isDevicePublicKeyValid = (devicePublicKey: string | null) => devicePublicKey && devicePublicKey.length === 124;
 
 const isUserIdValid = (userId: string | null) => userId && userId.length === 36;
+
+const algorithm = "aes256";
+const inputEncoding = "utf8";
+const outputEncoding = "hex";
+
+export const decryptCipher = (key: string, cipherText: string) => {
+  const components = cipherText.split(":");
+  const iv_from_ciphertext = Buffer.from(components.shift() || "", outputEncoding);
+  const decipher = createDecipheriv(algorithm, key, iv_from_ciphertext);
+  let deciphered = decipher.update(components.join(":"), outputEncoding, inputEncoding);
+  deciphered += decipher.final(inputEncoding);
+
+  console.log("deciphered", deciphered);
+
+  return deciphered;
+};

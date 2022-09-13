@@ -10,21 +10,7 @@ export enum HttpMethod {
 }
 
 export const fetchFromApi = async <T>(path: string, params?: HttpParams): Promise<T> => {
-  const { nonce } = await fetchFrom<CreateNonceResponse>(getApiUrl("http") + "/getNonce");
-  const deviceSignature = await signWithDeviceKeyNoAuth(nonce);
-
-  const paramsWithSignature = {
-    ...params,
-    args: {
-      ...params?.args,
-      headers: {
-        ...params?.args?.headers,
-        deviceSignature,
-      },
-    },
-  };
-
-  return fetchFrom(getApiUrl("http") + path, paramsWithSignature);
+  return fetchFrom(getApiUrl("http") + path, params);
 };
 
 export const fetchFromApiAuthenticated = async <T>(path: string, user: User, params?: HttpParams): Promise<T> => {
@@ -65,6 +51,7 @@ const fetchFrom = async <T>(url: string, params?: HttpParams): Promise<T> => {
   const { body, method, args } = params || {};
 
   const response = await fetch(url, {
+    ...args,
     method: determineMethod(body, method),
     body: JSON.stringify(body),
     headers: {

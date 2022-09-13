@@ -35,6 +35,8 @@ export const nonceRoute = <T>(handler: NonceRouteHandler<T>) => {
 
     const nonce = req.unsignCookie(signedNonce || "").value || "";
 
+    logger.info({ cookies: req.cookies }, "where are my cookies");
+
     // Crypto.randomBytes(16)  encoded as base64 string results in 24 characters
     if (!isNonceValid(nonce)) {
       wrapHandler(invalidAuthRequest, res);
@@ -45,12 +47,20 @@ export const nonceRoute = <T>(handler: NonceRouteHandler<T>) => {
   };
 };
 
-export const setNonceRoute = <T>(handler: NonceRouteHandler<T>) => {
-  return (req: FastifyRequest, res: FastifyReply) => {
-    const nonce = crypto.randomBytes(16).toString("base64");
+type NonceOptions = {
+  nonceLength: number;
+  cookieName: string;
+};
 
-    res.setCookie("authnonce", nonce, {
+export const setNonceRoute = <T>(handler: NonceRouteHandler<T>, options?: NonceOptions) => {
+  const { nonceLength = 16, cookieName = "authnonce" } = options || {};
+  return (req: FastifyRequest, res: FastifyReply) => {
+    const nonce = crypto.randomBytes(nonceLength).toString("base64");
+
+    res.setCookie(cookieName, nonce, {
       signed: true,
+      path: "/",
+      httpOnly: true,
     });
 
     wrapHandler(handler(req, nonce), res);

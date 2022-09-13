@@ -35,20 +35,10 @@ type ShareActionMPCHandler<T> = (
 ) => void;
 
 export const authenticatedCreateShareMpc =
-  <MPCResult>(
-    path: string,
-    createShareMPCHandler: CreateShareMPCHandler<MPCResult>,
-    requireLocalAuth = true
-  ) =>
-  async (
-    devicePublicKey: string,
-    userId: string,
-    genericSecret?: string
-  ): Promise<MPCResult> => {
+  <MPCResult>(path: string, createShareMPCHandler: CreateShareMPCHandler<MPCResult>, requireLocalAuth = true) =>
+  async (devicePublicKey: string, userId: string, genericSecret?: string): Promise<MPCResult> => {
     const { nonce } = await fetchFromApi<CreateNonceResponse>("/getNonce");
-    const deviceSignature = requireLocalAuth
-      ? await signWithDeviceKey(nonce)
-      : await signWithDeviceKeyNoAuth(nonce);
+    const deviceSignature = requireLocalAuth ? await signWithDeviceKey(nonce) : await signWithDeviceKeyNoAuth(nonce);
 
     const ws = new WebSocket(getApiUrl("ws") + path, undefined, {
       headers: {
@@ -64,11 +54,7 @@ export const authenticatedCreateShareMpc =
   };
 
 export const authenticatedShareActionMpc =
-  <MPCResult>(
-    path: string,
-    shareActionMpcHandler: ShareActionMPCHandler<MPCResult>,
-    requireLocalAuth = true
-  ) =>
+  <MPCResult>(path: string, shareActionMpcHandler: ShareActionMPCHandler<MPCResult>, requireLocalAuth = true) =>
   async (
     devicePublicKey: string,
     userId: string,
@@ -77,9 +63,7 @@ export const authenticatedShareActionMpc =
     ...data: string[]
   ): Promise<MPCResult> => {
     const { nonce } = await fetchFromApi<CreateNonceResponse>("/getNonce");
-    const deviceSignature = requireLocalAuth
-      ? await signWithDeviceKey(nonce)
-      : await signWithDeviceKeyNoAuth(nonce);
+    const deviceSignature = requireLocalAuth ? await signWithDeviceKey(nonce) : await signWithDeviceKeyNoAuth(nonce);
     const ws = new WebSocket(getApiUrl("ws") + path, undefined, {
       headers: {
         userId,
@@ -93,9 +77,7 @@ export const authenticatedShareActionMpc =
     });
   };
 
-export const getServerShareId = (
-  message: WebSocketMessageEvent
-): string | undefined => {
+export const getServerShareId = (message: WebSocketMessageEvent): string | undefined => {
   try {
     const msg = JSON.parse(message.data);
 
@@ -105,9 +87,7 @@ export const getServerShareId = (
   }
 };
 
-export const isSignatureDone = (
-  message: WebSocketMessageEvent
-): string | undefined => {
+export const isSignatureDone = (message: WebSocketMessageEvent): string | undefined => {
   try {
     const msg = JSON.parse(message.data);
 

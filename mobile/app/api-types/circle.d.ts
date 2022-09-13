@@ -2,7 +2,7 @@ export type CirclePublicKey = { keyId: string; publicKey: string };
 
 export type CreateCircleCard = {
   idempotencyKey?: string;
-  keyId: string;
+  keyId?: string;
   encryptedData: string;
   billingDetails: {
     name: string;

@@ -1,4 +1,5 @@
 import { authenticatedRoute } from "@lib/route/handlers";
+import { decryptCipher } from "@lib/utils/auth";
 import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
 import { User } from "../user/user";
 import { CircleCard, CirclePublicKey, CreateCircleCard } from "./circle";
@@ -6,9 +7,17 @@ import { getOrCreateCircleCard, getPublicKey } from "./circle.service";
 
 const getCirclePublicKey = authenticatedRoute<CirclePublicKey>(getPublicKey);
 
-const postCreateCircleCard = authenticatedRoute<CircleCard>((req: FastifyRequest, user: User) =>
-  getOrCreateCircleCard(req.body as CreateCircleCard, user)
-);
+const postCreateCircleCard = authenticatedRoute<CircleCard>((req: FastifyRequest, user: User) => {
+  const signedNonce = req.cookies["pgpsecret"];
+  const secret = req.unsignCookie(signedNonce || "").value || "";
+
+  const createCircleCard = req.body as CreateCircleCard;
+  console.log(secret, createCircleCard);
+  return getOrCreateCircleCard(
+    { ...createCircleCard, encryptedData: decryptCipher(secret, createCircleCard.encryptedData) },
+    user
+  );
+});
 
 const registerCircleRoutes = (server: FastifyInstance) => {
   server.get("/circle/get-public-key", getCirclePublicKey);

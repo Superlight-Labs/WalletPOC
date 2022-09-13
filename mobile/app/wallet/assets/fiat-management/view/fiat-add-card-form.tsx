@@ -1,6 +1,7 @@
-import { CirclePublicKey, CreateCircleCard } from "api-types/circle";
+import { CreateNonceResponse } from "api-types/auth";
+import { CircleCard, CirclePublicKey, CreateCircleCard } from "api-types/circle";
 import { User } from "api-types/user";
-import { fetchFromApiAuthenticated } from "lib/http";
+import { fetchFromApi, fetchFromApiAuthenticated, HttpMethod } from "lib/http";
 import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { Button, ScrollView, View } from "react-native";
@@ -68,23 +69,21 @@ const FiatAddCardForm = ({ user, setCard }: Props) => {
       setSnackbar({ status: "Loading", message: "Saving Card, please wait..." });
 
       try {
-        const publicKey = await fetchFromApiAuthenticated<CirclePublicKey>("/circle/get-public-key", user);
-
         const cardDetails = {
           number: data.cardNumber.replace(/\s/g, ""),
           cvv: data.cvv,
         };
-        console.log("heya", cardDetails);
+        const { nonce } = await fetchFromApi<CreateNonceResponse>("/auth/get-pgp-secret");
+        const { keyId } = await fetchFromApiAuthenticated<CirclePublicKey>("/circle/get-public-key", user);
 
-        const encryptedData = await pgpEncrypt(cardDetails, publicKey);
-
-        console.log("heya", encryptedData);
+        const key = Buffer.from(nonce, "base64");
+        const encryptedData = await pgpEncrypt(cardDetails, key);
 
         const payload: CreateCircleCard = {
           expMonth: parseInt(data.expiryMonth),
           expYear: parseInt(data.expiryYear),
-          keyId: publicKey.keyId,
           encryptedData,
+          keyId,
           billingDetails: {
             line1: data.address,
             city: data.city,
@@ -99,17 +98,17 @@ const FiatAddCardForm = ({ user, setCard }: Props) => {
           },
         };
 
-        // fetchFromApiAuthenticated<CircleCard>("/circle/create-card", user, {
-        //   method: HttpMethod.POST,
-        //   body: payload,
-        // })
-        //   .then((result) => {
-        //     setSnackbar({ status: "Success", message: `Card with id "${result.cardId}" created!` });
-        //     setCard({ cardId: result.cardId });
-        //   })
-        //   .catch((reason) => {
-        //     setSnackbar({ status: "Error", message: reason.error });
-        //   });
+        fetchFromApiAuthenticated<CircleCard>("/circle/create-card", user, {
+          method: HttpMethod.POST,
+          body: payload,
+        })
+          .then((result) => {
+            setSnackbar({ status: "Success", message: `Card with id "${result.cardId}" created!` });
+            setCard({ cardId: result.cardId });
+          })
+          .catch((reason) => {
+            setSnackbar({ status: "Error", message: reason.error });
+          });
       } catch (err: any) {
         console.error(err, "Error while saving card");
 

@@ -5,6 +5,8 @@ import config from "@lib/config";
 import { PrismaClient } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import logger from "./lib/logger";
+import { CirclePublicKey } from "./routes/circle/circle";
+import { fetchFromCircle } from "./routes/circle/circle-endpoint";
 import { registerRoutes } from "./routes/register-routes";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -38,6 +40,10 @@ export const client: PrismaClient = new PrismaClient({
 });
 
 registerRoutes(server);
+
+// TODO - this could be stored in the DB and needs some kind of re-fetching mechanism
+export let circlePublicKey: CirclePublicKey;
+fetchFromCircle<CirclePublicKey>("/encryption/public").then((pub) => (circlePublicKey = pub));
 
 server.all("*", (request, reply) => {
   reply.status(404).send({ error: "Route does not exist" });

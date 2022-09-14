@@ -1,5 +1,5 @@
 import logger from "@lib/logger";
-import fetch from "@lib/utils/fetch";
+import fetch, { RequestInit } from "@lib/utils/fetch";
 import { HttpParams } from "../endpoints";
 import { CircleResponse } from "./circle";
 
@@ -9,7 +9,7 @@ export const cirlceKey =
 const baseUrl = "https://api-sandbox.circle.com/v1";
 
 export const fetchFromCircle = async <T>(path: string, params?: HttpParams): Promise<T> => {
-  const paramsWithApiKey = {
+  const paramsWithApiKey: RequestInit = {
     ...params,
     headers: {
       ...params?.args?.headers,
@@ -17,6 +17,7 @@ export const fetchFromCircle = async <T>(path: string, params?: HttpParams): Pro
       Accept: "application/json",
       "Content-Type": "application/json",
     },
+    body: JSON.stringify(params?.body),
   };
 
   const res = await fetch(baseUrl + path, paramsWithApiKey);

@@ -1,10 +1,13 @@
 import logger from "@lib/logger";
 import { isRouteError, other, RouteError, thirdPartyError } from "@lib/route/error";
+import { decryptCipher } from "@lib/utils/auth";
+import { pgpEncrypt } from "@lib/utils/crypto";
+import { circlePublicKey } from "@server";
 import crypto from "crypto";
 import { okAsync, ResultAsync } from "neverthrow";
 import { HttpMethod } from "../endpoints";
 import { User } from "../user/user";
-import { CircleAccount, CircleCard, CircleCreateCardResponse, CirclePublicKey, CreateCircleCard } from "./circle";
+import { CircleAccount, CircleCard, CircleCreateCardResponse, CreateCircleCard } from "./circle";
 import { fetchFromCircle } from "./circle-endpoint";
 import { readCircleAccount, readCircleCard, saveCircleAccount, saveCircleCard } from "./circle.repository";
 
@@ -27,24 +30,26 @@ const createCircleAccount = (user: User): ResultAsync<CircleAccount, RouteError>
 
 export const getOrCreateCircleCard = (
   createAddressReq: CreateCircleCard,
-  user: User
+  user: User,
+  secret: string
 ): ResultAsync<CircleCard, RouteError> => {
   const circleAccount = getOrCreateCircleAccount(user);
 
-  return circleAccount.andThen((ca) => getOrCreateCircleCardFromCircleAccount(ca, createAddressReq, user));
+  return circleAccount.andThen((ca) => getOrCreateCircleCardFromCircleAccount(ca, createAddressReq, user, secret));
 };
 
 const getOrCreateCircleCardFromCircleAccount = (
   circleAccount: CircleAccount,
   createCard: CreateCircleCard,
-  user: User
+  user: User,
+  secret: string
 ): ResultAsync<CircleCard, RouteError> => {
   const readCard = ResultAsync.fromPromise(readCircleCard(circleAccount), (e) =>
     other("Error while reading CircleAddress from Database", e)
   );
 
   return readCard.andThen((addressOrNotFound) => {
-    if (isRouteError(addressOrNotFound)) return createCircleCard(circleAccount, createCard, user);
+    if (isRouteError(addressOrNotFound)) return createCircleCard(circleAccount, createCard, user, secret);
 
     return okAsync(addressOrNotFound);
   });
@@ -53,35 +58,51 @@ const getOrCreateCircleCardFromCircleAccount = (
 const createCircleCard = (
   circleAccount: CircleAccount,
   createCard: CreateCircleCard,
-  user: User
+  user: User,
+  secret: string
 ): ResultAsync<CircleCard, RouteError> => {
-  const body = {
+  const { encryptedData } = createCard;
+
+  const decryptedCardInfo = decryptCipher(Buffer.from(secret, "base64"), encryptedData);
+
+  const pgpEncryptData = ResultAsync.fromPromise(pgpEncrypt(decryptedCardInfo, circlePublicKey), (e) =>
+    other("Error while encrypting Card Details", e)
+  );
+
+  return pgpEncryptData
+    .map((encryptedData) => getCirclePayload(createCard, encryptedData))
+    .andThen(postCardToCircle)
+    .andThen((circleCard) => processCircleCardResponse(circleAccount, circleCard, user));
+};
+
+const getCirclePayload = (createCard: CreateCircleCard, encryptedData: string): CreateCircleCard => {
+  return {
     ...createCard,
     idempotencyKey: crypto.randomUUID(),
+    keyId: circlePublicKey.keyId,
+    encryptedData,
     metadata: {
       ...createCard.metadata,
       ipAddress: "127.0.0.1",
-      sessionId: crypto.createHash("sha256").update(user.id).digest("base64"),
+      sessionId: crypto.createHash("sha256").update(encryptedData).digest("base64"),
     },
   };
+};
 
-  logger.info({ body });
+const postCardToCircle = (body: CreateCircleCard): ResultAsync<CircleCreateCardResponse, RouteError> => {
   const newCircleAddressPromise: Promise<CircleCreateCardResponse> = fetchFromCircle("/cards", {
     method: HttpMethod.POST,
     body,
   });
 
-  return ResultAsync.fromPromise(newCircleAddressPromise, (e) =>
-    thirdPartyError("Circle Api Create Address Error", e)
-  ).andThen((circleCard) =>
-    ResultAsync.fromPromise(saveCircleCard(user, circleAccount, circleCard.id), (e) =>
-      other("Error while Saving CircleAddress", e)
-    )
+  return ResultAsync.fromPromise(newCircleAddressPromise, (e) => thirdPartyError("Circle Api Create Address Error", e));
+};
+
+const processCircleCardResponse = (
+  circleAccount: CircleAccount,
+  circleCard: CircleCreateCardResponse,
+  user: User
+): ResultAsync<CircleCard, RouteError> =>
+  ResultAsync.fromPromise(saveCircleCard(user, circleAccount, circleCard.id), (e) =>
+    other("Error while Saving CircleAddress", e)
   );
-};
-
-export const getPublicKey = (): ResultAsync<CirclePublicKey, RouteError> => {
-  const circlePublicKey = fetchFromCircle<CirclePublicKey>("/encryption/public");
-
-  return ResultAsync.fromPromise(circlePublicKey, (e) => thirdPartyError("Circle Api get Public Key Error", e));
-};

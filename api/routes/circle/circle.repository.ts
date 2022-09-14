@@ -27,7 +27,6 @@ export const saveCircleCard = (user: User, account: CircleAccount, cardId: strin
       cardId,
       circleAccount: {
         connect: {
-          id: account.id,
           userId_userDevicePublicKey: {
             userId: user.id,
             userDevicePublicKey: user.devicePublicKey,

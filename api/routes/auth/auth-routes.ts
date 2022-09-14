@@ -12,7 +12,7 @@ const getPgpSecret = setNonceRoute<CreateNonceResponse>(
 );
 
 const registerAuthRoutes = (server: FastifyInstance) => {
-  server.get("/getNonce", getNonce);
+  server.get("/auth/get-nonce", getNonce);
   server.get("/auth/get-pgp-secret", getPgpSecret);
 };
 

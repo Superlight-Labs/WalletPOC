@@ -1,5 +1,5 @@
 import { CreateNonceResponse } from "api-types/auth";
-import { CircleCard, CirclePublicKey, CreateCircleCard } from "api-types/circle";
+import { CircleCard, CreateCircleCard } from "api-types/circle";
 import { User } from "api-types/user";
 import { fetchFromApi, fetchFromApiAuthenticated, HttpMethod } from "lib/http";
 import React, { useCallback } from "react";
@@ -8,7 +8,7 @@ import { Button, ScrollView, View } from "react-native";
 import { SetterOrUpdater, useSetRecoilState } from "recoil";
 import { apiLoadingState } from "state/atoms";
 import ControlledTextInput from "../../../../views/components/controlled-text-input";
-import { pgpEncrypt } from "../controller/circle-crypto-utils";
+import { encryptCircleData } from "../controller/circle-crypto-utils";
 import { FiatManagementState } from "../state/fiat-management-atoms";
 import { styles } from "./payment/fiat-payment-styles";
 
@@ -69,34 +69,9 @@ const FiatAddCardForm = ({ user, setCard }: Props) => {
       setSnackbar({ status: "Loading", message: "Saving Card, please wait..." });
 
       try {
-        const cardDetails = {
-          number: data.cardNumber.replace(/\s/g, ""),
-          cvv: data.cvv,
-        };
-        const { nonce } = await fetchFromApi<CreateNonceResponse>("/auth/get-pgp-secret");
-        const { keyId } = await fetchFromApiAuthenticated<CirclePublicKey>("/circle/get-public-key", user);
+        const payload = await buildCreateCardPayload(data);
 
-        const key = Buffer.from(nonce, "base64");
-        const encryptedData = await pgpEncrypt(cardDetails, key);
-
-        const payload: CreateCircleCard = {
-          expMonth: parseInt(data.expiryMonth),
-          expYear: parseInt(data.expiryYear),
-          encryptedData,
-          keyId,
-          billingDetails: {
-            line1: data.address,
-            city: data.city,
-            district: data.district,
-            postalCode: data.postalCode,
-            country: data.countryCode,
-            name: data.holderName,
-          },
-          metadata: {
-            phoneNumber: data.phone,
-            email: data.email,
-          },
-        };
+        console.log(payload);
 
         fetchFromApiAuthenticated<CircleCard>("/circle/create-card", user, {
           method: HttpMethod.POST,
@@ -141,6 +116,37 @@ const FiatAddCardForm = ({ user, setCard }: Props) => {
       <Button title="Save Card" onPress={handleSubmit(onSubmit)} />
     </>
   );
+};
+
+const buildCreateCardPayload = async (data: CardFormInputs): Promise<CreateCircleCard> => {
+  const cardDetails = {
+    number: data.cardNumber.replace(/\s/g, ""),
+    cvv: data.cvv,
+  };
+  const { nonce } = await fetchFromApi<CreateNonceResponse>("/auth/get-pgp-secret");
+
+  const key = Buffer.from(nonce, "base64");
+  const encryptedData = await encryptCircleData(cardDetails, key);
+
+  const payload: CreateCircleCard = {
+    expMonth: parseInt(data.expiryMonth),
+    expYear: parseInt(data.expiryYear),
+    encryptedData,
+    billingDetails: {
+      line1: data.address,
+      city: data.city,
+      district: data.district,
+      postalCode: data.postalCode,
+      country: data.countryCode,
+      name: data.holderName,
+    },
+    metadata: {
+      phoneNumber: data.phone,
+      email: data.email,
+    },
+  };
+
+  return payload;
 };
 
 export default FiatAddCardForm;

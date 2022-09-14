@@ -15,7 +15,7 @@ export const fetchFromApi = async <T>(path: string, params?: HttpParams): Promis
 
 export const fetchFromApiAuthenticated = async <T>(path: string, user: User, params?: HttpParams): Promise<T> => {
   const { id: userId, devicePublicKey } = user;
-  const { nonce } = await fetchFrom<CreateNonceResponse>(getApiUrl("http") + "/getNonce");
+  const { nonce } = await fetchFrom<CreateNonceResponse>(getApiUrl("http") + "/auth/get-nonce");
   const deviceSignature = await signWithDeviceKeyNoAuth(nonce);
 
   const paramsWithSignature = {

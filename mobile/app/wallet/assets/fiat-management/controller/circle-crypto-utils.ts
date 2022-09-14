@@ -5,7 +5,7 @@ const inputEncoding = "utf8";
 const outputEncoding = "hex";
 const iv = randomBytes(16);
 
-export async function pgpEncrypt(dataToEncrypt: object, key: Buffer) {
+export async function encryptCircleData(dataToEncrypt: object, key: Buffer) {
   const clear = JSON.stringify(dataToEncrypt);
 
   const cipher = createCipheriv(algorithm, key, iv);

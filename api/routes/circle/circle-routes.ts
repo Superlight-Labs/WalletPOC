@@ -1,39 +1,30 @@
 import { authenticatedRoute } from "@lib/route/handlers";
-import { decryptCipher } from "@lib/utils/auth";
 import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
 import { User } from "../user/user";
-import { CircleCard, CirclePublicKey, CreateCircleCard } from "./circle";
-import { getOrCreateCircleCard, getPublicKey } from "./circle.service";
-
-const getCirclePublicKey = authenticatedRoute<CirclePublicKey>(getPublicKey);
+import { CircleCard, CreateCircleCard } from "./circle";
+import { getOrCreateCircleCard } from "./circle.service";
 
 const postCreateCircleCard = authenticatedRoute<CircleCard>((req: FastifyRequest, user: User) => {
   const signedNonce = req.cookies["pgpsecret"];
   const secret = req.unsignCookie(signedNonce || "").value || "";
 
   const createCircleCard = req.body as CreateCircleCard;
-  console.log(secret, createCircleCard);
-  return getOrCreateCircleCard(
-    { ...createCircleCard, encryptedData: decryptCipher(secret, createCircleCard.encryptedData) },
-    user
-  );
+
+  return getOrCreateCircleCard(createCircleCard, user, secret);
 });
 
 const registerCircleRoutes = (server: FastifyInstance) => {
-  server.get("/circle/get-public-key", getCirclePublicKey);
   server.post("/circle/create-card", { schema: circleCreateCardSchema }, postCreateCircleCard);
 };
 
 const circleCreateCardSchema: FastifySchema = {
   body: {
     type: "object",
-    required: ["encryptedData", "expMonth", "expYear", "keyId"],
+    required: ["encryptedData", "expMonth", "expYear"],
     properties: {
-      encryptedData: { type: "string", maxLength: 96, minLength: 96 },
-      keyId: { type: "string", maxLength: 100, minLength: 2 },
+      encryptedData: { type: "string", maxLength: 129, minLength: 129 },
       expMonth: { type: "integer" },
       expYear: { type: "integer" },
-
       billingDetails: {
         type: "object",
         properties: {

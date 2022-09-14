@@ -1,6 +1,5 @@
 import { invalidAuthentication, other, RouteError } from "@lib/route/error";
 import { createDecipheriv } from "crypto";
-import { logger } from "ethers";
 import { FastifyRequest } from "fastify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { User } from "../../routes/user/user";
@@ -24,7 +23,6 @@ export const isNonceValid = (nonce: string | null) => nonce && nonce.length === 
 export const authenticate = (req: FastifyRequest): ResultAsync<User, RouteError> => {
   const { devicesignature, devicepublickey, userid } = req.headers;
 
-  logger.info({ cook: req.cookies, devicesignature });
   const signedNonce = req.cookies["authnonce"];
   const nonce = req.unsignCookie(signedNonce || "").value || "";
 
@@ -70,14 +68,12 @@ const algorithm = "aes256";
 const inputEncoding = "utf8";
 const outputEncoding = "hex";
 
-export const decryptCipher = (key: string, cipherText: string) => {
+export const decryptCipher = (key: Buffer, cipherText: string): unknown => {
   const components = cipherText.split(":");
   const iv_from_ciphertext = Buffer.from(components.shift() || "", outputEncoding);
   const decipher = createDecipheriv(algorithm, key, iv_from_ciphertext);
   let deciphered = decipher.update(components.join(":"), outputEncoding, inputEncoding);
   deciphered += decipher.final(inputEncoding);
 
-  console.log("deciphered", deciphered);
-
-  return deciphered;
+  return JSON.parse(deciphered);
 };

@@ -1,8 +1,8 @@
 import { authenticatedRoute } from "@lib/route/handlers";
 import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
 import { User } from "../user/user";
-import { CircleCard, CreateCircleCard } from "./circle";
-import { getOrCreateCircleCard } from "./circle.service";
+import { CircleCard, CirclePayment, CreateCardPaymentPayload, CreateCircleCard } from "./circle";
+import { createCircleCardPayment, getOrCreateCircleCard } from "./circle.service";
 
 const postCreateCircleCard = authenticatedRoute<CircleCard>((req: FastifyRequest, user: User) => {
   const signedNonce = req.cookies["pgpsecret"];
@@ -13,8 +13,18 @@ const postCreateCircleCard = authenticatedRoute<CircleCard>((req: FastifyRequest
   return getOrCreateCircleCard(createCircleCard, user, secret);
 });
 
+const postCreateCirclePaymentCard = authenticatedRoute<CirclePayment>((req: FastifyRequest, user: User) => {
+  const signedNonce = req.cookies["pgpsecret"];
+  const secret = req.unsignCookie(signedNonce || "").value || "";
+
+  const createCircleCard = req.body as CreateCardPaymentPayload;
+
+  return createCircleCardPayment(createCircleCard, user, secret);
+});
+
 const registerCircleRoutes = (server: FastifyInstance) => {
   server.post("/circle/create-card", { schema: circleCreateCardSchema }, postCreateCircleCard);
+  server.post("/circle/create-card-payment", { schema: circleCreateCardPaymentSchema }, postCreateCirclePaymentCard);
 };
 
 const circleCreateCardSchema: FastifySchema = {
@@ -35,6 +45,32 @@ const circleCreateCardSchema: FastifySchema = {
           line2: { type: "string", maxLength: 100, minLength: 2 },
           name: { type: "string", maxLength: 100, minLength: 2 },
           postalCode: { type: "string", maxLength: 50, minLength: 2 },
+        },
+      },
+      metadata: {
+        type: "object",
+        properties: {
+          email: { type: "string", minLength: 3, maxLength: 150 },
+          phoneNumber: { type: "string", minLength: 3, maxLength: 50 },
+          sessionId: { type: "string", minLength: 10, maxLength: 100 },
+          ipAddress: { type: "string", minLength: 3, maxLength: 40 },
+        },
+      },
+    },
+  },
+};
+
+const circleCreateCardPaymentSchema: FastifySchema = {
+  body: {
+    type: "object",
+    required: ["encryptedData", "amount", "metadata"],
+    properties: {
+      encryptedData: { type: "string", maxLength: 65, minLength: 65 },
+      amount: {
+        type: "object",
+        properties: {
+          amount: { type: "string", maxLength: 100, minLength: 2 },
+          currency: { type: "string", maxLength: 5, minLength: 1 },
         },
       },
       metadata: {

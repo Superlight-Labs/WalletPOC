@@ -12,6 +12,13 @@ export interface CircleCard {
   accountId: string;
 }
 
+export interface CirclePayment {
+  id: string;
+  createDate: Date;
+  updateDate: Date;
+  status: "pending" | "confirmed" | "paid" | "failed";
+}
+
 export type CircleResponse<T> = {
   data: T;
 };
@@ -19,6 +26,11 @@ export type CircleResponse<T> = {
 export type CirclePublicKey = {
   keyId: string;
   publicKey: string;
+};
+
+export type CirclePayload = {
+  metadata: MetaData;
+  encryptedData: string;
 };
 
 export type CreateCircleCard = {
@@ -77,24 +89,43 @@ export type CreateCardResponse = {
 
 export interface BasePaymentPayload {
   idempotencyKey: string;
-  amount: {
-    amount: string;
-    currency: string;
-  };
-  source: {
-    id: string;
-    type: string;
-  };
+  amount: Amount;
+  source: Source;
   description: string;
   channel: string;
   metadata: MetaData;
 }
 
 export interface CreateCardPaymentPayload extends BasePaymentPayload {
-  verification?: string;
+  verification?: "cvv";
   autoCapture?: boolean;
   verificationSuccessUrl?: string;
   verificationFailureUrl?: string;
   keyId?: string;
-  encryptedData?: string;
+  encryptedData: string;
+}
+
+export interface CircleCardPaymentResponse {
+  id: string;
+  type: string;
+  status: "pending" | "confirmed" | "paid" | "failed";
+  description: string;
+  amount: Amount;
+  createDate: Date;
+  updateDate: Date;
+  merchantId: string;
+  merchantWalletId: string;
+  source: Source;
+  refunds: any[];
+  metadata: Metadata;
+}
+
+export interface Amount {
+  amount: string;
+  currency: string;
+}
+
+export interface Source {
+  id: string;
+  type: "card";
 }

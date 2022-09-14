@@ -2,12 +2,22 @@ import logger from "@lib/logger";
 import { isRouteError, other, RouteError, thirdPartyError } from "@lib/route/error";
 import { decryptCipher } from "@lib/utils/auth";
 import { pgpEncrypt } from "@lib/utils/crypto";
+import { getSafeResultAsync } from "@lib/utils/neverthrow";
 import { circlePublicKey } from "@server";
-import crypto from "crypto";
+import { createHash, randomUUID } from "crypto";
 import { okAsync, ResultAsync } from "neverthrow";
 import { HttpMethod } from "../endpoints";
 import { User } from "../user/user";
-import { CircleAccount, CircleCard, CircleCreateCardResponse, CreateCircleCard } from "./circle";
+import {
+  CircleAccount,
+  CircleCard,
+  CircleCardPaymentResponse,
+  CircleCreateCardResponse,
+  CirclePayload,
+  CirclePayment,
+  CreateCardPaymentPayload,
+  CreateCircleCard,
+} from "./circle";
 import { fetchFromCircle } from "./circle-endpoint";
 import { readCircleAccount, readCircleCard, saveCircleAccount, saveCircleCard } from "./circle.repository";
 
@@ -70,23 +80,9 @@ const createCircleCard = (
   );
 
   return pgpEncryptData
-    .map((encryptedData) => getCirclePayload(createCard, encryptedData))
+    .map((encryptedData) => <CreateCircleCard>addBoilerPlatePayloadData({ ...createCard, encryptedData }))
     .andThen(postCardToCircle)
     .andThen((circleCard) => processCircleCardResponse(circleAccount, circleCard, user));
-};
-
-const getCirclePayload = (createCard: CreateCircleCard, encryptedData: string): CreateCircleCard => {
-  return {
-    ...createCard,
-    idempotencyKey: crypto.randomUUID(),
-    keyId: circlePublicKey.keyId,
-    encryptedData,
-    metadata: {
-      ...createCard.metadata,
-      ipAddress: "127.0.0.1",
-      sessionId: crypto.createHash("sha256").update(encryptedData).digest("base64"),
-    },
-  };
 };
 
 const postCardToCircle = (body: CreateCircleCard): ResultAsync<CircleCreateCardResponse, RouteError> => {
@@ -106,3 +102,70 @@ const processCircleCardResponse = (
   ResultAsync.fromPromise(saveCircleCard(user, circleAccount, circleCard.id), (e) =>
     other("Error while Saving CircleAddress", e)
   );
+
+export const createCircleCardPayment = (
+  body: CreateCardPaymentPayload,
+  user: User,
+  secret: string
+): ResultAsync<CirclePayment, RouteError> => {
+  const account = getSafeResultAsync(readCircleAccount(user), (e) =>
+    other("Error while fetching Circle Account from DB")
+  );
+
+  return account
+    .andThen((account) => mapAccountWithDecryptedCipher(account, body, secret))
+    .map((payload) => <CreateCardPaymentPayload>addBoilerPlatePayloadData(payload))
+    .andThen(postCardPaymentToCircle)
+    .map(processCircleCardPaymentResponse);
+};
+
+const postCardPaymentToCircle = (
+  body: CreateCardPaymentPayload
+): ResultAsync<CircleCardPaymentResponse, RouteError> => {
+  const newCircleAddressPromise: Promise<CircleCardPaymentResponse> = fetchFromCircle("/payments", {
+    method: HttpMethod.POST,
+    body,
+  });
+
+  return ResultAsync.fromPromise(newCircleAddressPromise, (e) => thirdPartyError("Circle Api Create Payment Error", e));
+};
+
+const mapAccountWithDecryptedCipher = (
+  account: CircleAccount,
+  body: CreateCardPaymentPayload,
+  secret: string
+): ResultAsync<CreateCardPaymentPayload, RouteError> => {
+  const { encryptedData } = body;
+
+  const decryptedCardInfo = decryptCipher(Buffer.from(secret, "base64"), encryptedData);
+
+  const encryptCardData = ResultAsync.fromPromise(pgpEncrypt(decryptedCardInfo, circlePublicKey), (e) =>
+    other("Error while encrypting Card Details", e)
+  );
+
+  return encryptCardData.map((encryptedData) => ({
+    ...body,
+    encryptedData,
+    verification: "cvv",
+    source: { type: "card", id: account.cards[0].cardId },
+  }));
+};
+
+const processCircleCardPaymentResponse = (payment: CircleCardPaymentResponse): CirclePayment => {
+  const { status, id, createDate, updateDate } = payment;
+  logger.debug({ payment }, "Payment result from circle");
+  return { status, id, createDate, updateDate };
+};
+
+const addBoilerPlatePayloadData = <T>(createCard: CirclePayload): T => {
+  return {
+    ...createCard,
+    idempotencyKey: randomUUID(),
+    keyId: circlePublicKey.keyId,
+    metadata: {
+      ...createCard.metadata,
+      ipAddress: "127.0.0.1",
+      sessionId: createHash("sha256").update(createCard.encryptedData).digest("base64"),
+    },
+  } as T;
+};

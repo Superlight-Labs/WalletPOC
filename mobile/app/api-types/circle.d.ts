@@ -31,19 +31,31 @@ export interface CircleCard {
   accountId: string;
 }
 
+export interface CirclePayment {
+  id: string;
+  createDate: Date;
+  updateDate: Date;
+  status: "pending" | "confirmed" | "paid" | "failed";
+  amount?: Amount;
+}
+
 export interface BasePaymentPayload {
   idempotencyKey?: string;
-  amount: {
-    amount: string;
-    currency: string;
-  };
-  source?: {
-    id: string;
-    type: string;
-  };
+  amount: Amount;
+  source?: Source;
   description?: string;
   channel?: string;
   metadata: MetaData;
+}
+
+export interface Amount {
+  amount: string;
+  currency: string;
+}
+
+export interface Source {
+  id: string;
+  type: "card";
 }
 
 export interface CreateCardPaymentPayload extends BasePaymentPayload {

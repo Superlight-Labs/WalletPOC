@@ -1,12 +1,13 @@
-import { CreateCardPaymentPayload } from "api-types/circle";
+import { CirclePayment, CreateCardPaymentPayload } from "api-types/circle";
 import { User } from "api-types/user";
 import { fetchFromApiAuthenticated, HttpMethod } from "lib/http";
 import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { Button, ScrollView, View } from "react-native";
-import { useSetRecoilState } from "recoil";
+import { SetterOrUpdater, useSetRecoilState } from "recoil";
 import { apiLoadingState } from "state/atoms";
 import { encryptCircleData } from "wallet/assets/fiat-management/controller/circle-crypto-utils";
+import { FiatManagementState } from "wallet/assets/fiat-management/state/fiat-management-atoms";
 import ControlledTextInput from "../../../../../../views/components/controlled-text-input";
 import { styles } from "../../fiat-styles";
 
@@ -20,9 +21,10 @@ export type CardFormInputs = {
 
 type Props = {
   user: User;
+  setFiatState: SetterOrUpdater<FiatManagementState>;
 };
 
-const FiatCardForm = ({ user }: Props) => {
+const FiatCardForm = ({ user, setFiatState }: Props) => {
   const setSnackbar = useSetRecoilState(apiLoadingState);
 
   const {
@@ -39,22 +41,32 @@ const FiatCardForm = ({ user }: Props) => {
     },
   });
 
-  const onSubmit = useCallback(async (data: CardFormInputs) => {
-    setSnackbar({ status: "Loading", message: "Saving Card, please wait..." });
+  const onSubmit = useCallback(
+    async (data: CardFormInputs) => {
+      setSnackbar({ status: "Loading", message: "Saving Card, please wait..." });
 
-    const payload = await buildCreateCardPayload(data);
+      const payload = await buildCreateCardPayload(data);
 
-    fetchFromApiAuthenticated<any>("/circle/create-card-payment", user, {
-      method: HttpMethod.POST,
-      body: payload,
-    })
-      .then((result) => {
-        setSnackbar({ status: "Success", message: `Card initiated successfully` });
+      console.log({ payload });
+
+      fetchFromApiAuthenticated<CirclePayment>("/circle/create-card-payment", user, {
+        method: HttpMethod.POST,
+        body: payload,
       })
-      .catch((reason) => {
-        setSnackbar({ status: "Error", message: reason.error });
-      });
-  }, []);
+        .then((result) => {
+          setFiatState((current) => ({
+            ...current,
+            payments: [...current.payments, { ...result, amount: payload.amount }],
+          }));
+          setSnackbar({ status: "Success", message: `Card payment initiated successfully` });
+        })
+        .catch((reason) => {
+          console.error(reason);
+          setSnackbar({ status: "Error", message: reason.error });
+        });
+    },
+    [setSnackbar, setFiatState]
+  );
 
   return (
     <>
@@ -86,13 +98,10 @@ const buildCreateCardPayload = async (data: CardFormInputs): Promise<CreateCardP
 
   const payload: CreateCardPaymentPayload = {
     amount: amountDetail,
-    verification: "cvv",
     encryptedData,
     metadata: {
       phoneNumber: data.phoneNumber,
       email: data.email,
-      sessionId: "xxx",
-      ipAddress: "172.33.222.1",
     },
   };
 

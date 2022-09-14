@@ -78,7 +78,7 @@ const FiatAddCardForm = ({ user, setCard }: Props) => {
         })
           .then((result) => {
             setSnackbar({ status: "Success", message: `Card with id "${result.cardId}" created!` });
-            setCard({ cardId: result.cardId });
+            setCard({ cardId: result.cardId, payments: [] });
           })
           .catch((reason) => {
             setSnackbar({ status: "Error", message: reason.error });

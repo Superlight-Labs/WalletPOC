@@ -74,3 +74,27 @@ interface MetaData {
 export type CreateCardResponse = {
   id: string;
 };
+
+export interface BasePaymentPayload {
+  idempotencyKey: string;
+  amount: {
+    amount: string;
+    currency: string;
+  };
+  source: {
+    id: string;
+    type: string;
+  };
+  description: string;
+  channel: string;
+  metadata: MetaData;
+}
+
+export interface CreateCardPaymentPayload extends BasePaymentPayload {
+  verification?: string;
+  autoCapture?: boolean;
+  verificationSuccessUrl?: string;
+  verificationFailureUrl?: string;
+  keyId?: string;
+  encryptedData?: string;
+}

@@ -33,7 +33,7 @@ import EthereumSendScreen from "ethereum/view/wallet/send/ethereum-send-screen";
 import { EthereumSingleTransactionScreen } from "ethereum/view/wallet/transaction/ethereum-single-transaction-screen";
 import { apiLoadingState } from "state/atoms";
 import FiatManagementScreen from "wallet/assets/fiat-management/view/fiat-management-screen";
-import FiatCardPaymentScreen from "wallet/assets/fiat-management/view/payment/card/fiat-card-payment";
+import FiatCardPaymentScreen from "wallet/assets/fiat-management/view/payment/card/fiat-card-payment-screen";
 import Header from "./shared/header";
 import ErrorBoundary from "./views/components/error-boundry";
 import Snackbar from "./views/components/snackbar";

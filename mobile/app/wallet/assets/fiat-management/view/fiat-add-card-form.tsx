@@ -1,16 +1,15 @@
-import { CreateNonceResponse } from "api-types/auth";
 import { CircleCard, CreateCircleCard } from "api-types/circle";
 import { User } from "api-types/user";
-import { fetchFromApi, fetchFromApiAuthenticated, HttpMethod } from "lib/http";
+import { fetchFromApiAuthenticated, HttpMethod } from "lib/http";
 import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { Button, ScrollView, View } from "react-native";
+import { Button, ScrollView, Text, View } from "react-native";
 import { SetterOrUpdater, useSetRecoilState } from "recoil";
 import { apiLoadingState } from "state/atoms";
 import ControlledTextInput from "../../../../views/components/controlled-text-input";
 import { encryptCircleData } from "../controller/circle-crypto-utils";
 import { FiatManagementState } from "../state/fiat-management-atoms";
-import { styles } from "./payment/fiat-payment-styles";
+import { styles } from "./fiat-styles";
 
 export type CardFormInputs = {
   cardNumber: string;
@@ -96,6 +95,7 @@ const FiatAddCardForm = ({ user, setCard }: Props) => {
   return (
     <>
       <ScrollView style={{ ...styles.container, maxHeight: "60%" }}>
+        <Text style={styles.heading}>Add a Card to buy Crypto with</Text>
         <View style={{ marginBottom: 40 }}>
           <ControlledTextInput name="cardNumber" control={control} error={errors.cardNumber} />
           <ControlledTextInput name="cvv" control={control} error={errors.cvv} />
@@ -123,10 +123,8 @@ const buildCreateCardPayload = async (data: CardFormInputs): Promise<CreateCircl
     number: data.cardNumber.replace(/\s/g, ""),
     cvv: data.cvv,
   };
-  const { nonce } = await fetchFromApi<CreateNonceResponse>("/auth/get-pgp-secret");
 
-  const key = Buffer.from(nonce, "base64");
-  const encryptedData = await encryptCircleData(cardDetails, key);
+  const encryptedData = await encryptCircleData(cardDetails);
 
   const payload: CreateCircleCard = {
     expMonth: parseInt(data.expiryMonth),

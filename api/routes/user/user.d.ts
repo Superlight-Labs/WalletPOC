@@ -23,3 +23,8 @@ export interface VerifyUserRequest {
   deviceSignature: string;
   devicePublicKey: string;
 }
+
+export interface UpdateUserWalletByPathRequest {
+  path: string;
+  address: string;
+}

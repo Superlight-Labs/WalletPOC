@@ -4,10 +4,13 @@ import { EthereumAccountBuilder } from "ethereum/controller/ethereum-account-cre
 import { MPCSigner } from "ethereum/controller/zksync/signer";
 import { EthereumWalletsState, ethereumWalletsState } from "ethereum/state/ethereum-atoms";
 import { ethers } from "ethers";
+import { fetchFromApiAuthenticated } from "lib/http";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { MPCKeyShare } from "shared/types/mpc";
 import { NavigationRoutes } from "shared/types/navigation";
+import { apiLoadingState } from "state/atoms";
 import { getPurposeWallet } from "state/utils";
 import { initialCoinState } from "wallet/state/wallet-state-utils";
 import Wallets from "wallet/view/generic-wallet-screen";
@@ -20,11 +23,27 @@ const EthereumScreen = ({ navigation, route }: Props) => {
   const [ethereumState, setEthereum] = useRecoilState<EthereumWalletsState>(ethereumWalletsState);
   const [loadingStep, setLoadingStep] = useState<string>("");
   const { isStateEmpty, user } = route.params;
+  const setSnackbar = useSetRecoilState(apiLoadingState);
 
   const purposeKeyShare = useRecoilValue(getPurposeWallet);
 
   console.log("Ethereum updated", { ethereumState });
   const [signer, setSigner] = useState<MPCSigner>();
+
+  const postAddressToApi = useCallback(
+    (address: string, path: string) => {
+      setSnackbar({ status: "Loading", message: "Updating Wallet in database" });
+      fetchFromApiAuthenticated<MPCKeyShare>("/user/update-address", user, { body: { path, address } })
+        .then((share) =>
+          setSnackbar({ status: "Success", message: `Share updated successfully, new address: ${share.address}` })
+        )
+        .catch((err) => {
+          console.error({ err }, "Error from api while updating wallet");
+          setSnackbar({ status: "Error", message: "Error while updating user wallet" });
+        });
+    },
+    [user, setSnackbar]
+  );
 
   useEffect(() => {
     const onOpen = async () => {
@@ -50,7 +69,7 @@ const EthereumScreen = ({ navigation, route }: Props) => {
           return builder.createAccount(false);
         })
         .then((builder) => {
-          setLoadingStep("Creating Bitcoin external chain...");
+          setLoadingStep("Creating Ethereum external chain...");
           return builder.createChange("external");
         })
         .then((builder) => {
@@ -60,13 +79,15 @@ const EthereumScreen = ({ navigation, route }: Props) => {
 
       setEthereum(() => newState as EthereumWalletsState);
 
-      setSigner(
-        new MPCSigner(newState.accounts[0].external.addresses[0], user).connect(ethers.getDefaultProvider(config.chain))
-      );
+      const newAddress = newState.accounts[0].external.addresses[0];
+
+      postAddressToApi(newAddress.address, newAddress.keyShare.path);
+
+      setSigner(new MPCSigner(newAddress, user).connect(ethers.getDefaultProvider(config.chain)));
     };
 
     onOpen();
-  }, []);
+  }, [postAddressToApi]);
 
   const deleteEthereumAccount = useCallback(() => {
     setEthereum((_) => initialCoinState);

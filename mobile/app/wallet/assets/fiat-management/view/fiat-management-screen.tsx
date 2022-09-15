@@ -4,7 +4,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { NavigationRoutes } from "shared/types/navigation";
 import { authState } from "state/atoms";
-import { fiatStateAtom } from "../state/fiat-management-atoms";
+import { fiatStateAtom, initialFiatState } from "../state/fiat-management-atoms";
 import FiatAddCardForm from "./fiat-add-card-form";
 import { styles } from "./fiat-styles";
 
@@ -26,6 +26,10 @@ const FiatManagementScreen = ({ navigation }: Props) => {
           <Text style={styles.actionButtonText}>Buy Crypto with your Card</Text>
         </TouchableOpacity>
       )}
+
+      <TouchableOpacity style={styles.dangerButton} onPress={() => setFiatState(initialFiatState)}>
+        <Text style={styles.dangerButtonText}>Reset Fiat State</Text>
+      </TouchableOpacity>
     </View>
   );
 };

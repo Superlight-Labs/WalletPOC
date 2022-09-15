@@ -1,3 +1,4 @@
+import { config } from "@lib/config";
 import { fetchFrom, HttpMethod } from "@lib/fetch";
 import logger from "@lib/logger";
 import { Amount } from "./envelope";

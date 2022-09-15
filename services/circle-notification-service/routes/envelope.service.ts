@@ -37,7 +37,12 @@ const processNotification = async (message: CircleNotification) => {
 
   if (message.settlement === undefined) return;
 
-  await triggerPaymentToUser(message.settlement.id, calculateAmount(message.settlement));
+  try {
+    const amount = calculateAmount(message.settlement);
+    await triggerPaymentToUser(message.settlement.id, amount);
+  } catch (err) {
+    logger.error({ err }, "Error while calculating or smth");
+  }
 };
 
 const calculateAmount = (settlement: Settlement): Amount => {

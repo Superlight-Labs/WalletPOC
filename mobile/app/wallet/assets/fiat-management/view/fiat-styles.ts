@@ -38,8 +38,23 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#21bf73",
   },
+  dangerButton: {
+    height: 42,
+    width: "100%",
+    backgroundColor: "transparent",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: "#bf2123",
+  },
   actionButtonText: {
     color: "#21bf73",
+    fontSize: 16,
+  },
+  dangerButtonText: {
+    color: "#bf2123",
     fontSize: 16,
   },
   headerButton: {},

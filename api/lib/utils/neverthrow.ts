@@ -1,4 +1,4 @@
-import { isRouteError, notFound, RouteError } from "@lib/route/error";
+import { isRouteError, RouteError } from "@lib/route/error";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 export const getSafeResultAsync = <T>(
@@ -8,7 +8,7 @@ export const getSafeResultAsync = <T>(
   const unsafeResultAsync = ResultAsync.fromPromise(unsafe, error);
 
   return unsafeResultAsync.andThen((unsafeResult) => {
-    if (isRouteError(unsafeResult)) return errAsync(notFound());
+    if (isRouteError(unsafeResult)) return errAsync(unsafeResult);
 
     return okAsync(unsafeResult);
   });

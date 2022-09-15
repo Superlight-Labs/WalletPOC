@@ -11,7 +11,7 @@ export const registerRoutes = (server: FastifyInstance) => {
 const handlePostRequest = (req: FastifyRequest, res: FastifyReply) => {
   logger.info({ body: req.body }, "POST Request");
 
-  handleEnvelopePost(req.body)
+  handleEnvelopePost(JSON.parse(req.body as string))
     .then(() => res.send("POST request for " + req.url))
     .catch((err) => {
       if (!isCircleServiceError(err)) throw err;

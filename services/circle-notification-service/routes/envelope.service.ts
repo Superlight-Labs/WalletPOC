@@ -1,18 +1,20 @@
 import logger from "@lib/logger";
 import request from "request";
 import MessageValidator from "sns-validator";
+import { Amount, CircleNotification, Settlement } from "./envelope";
+import { triggerPaymentToUser } from "./envelope.endpoint";
 const validator = new MessageValidator();
 
 const circleArn = /^arn:aws:sns:.*:908968368384:(sandbox|prod)_platform-notifications-topic$/;
 
 export const handleEnvelopePost = async (envelope: any): Promise<void> => {
-  validator.validate(envelope, (err) => {
+  validator.validate(envelope, async (err) => {
     if (err) {
       logger.error({ err }, "Invalid Request Body");
       throw { code: 400, message: "Invalid Request body", type: "CircleServiceError" };
     }
 
-    logger.info({ envelope }, "Envelope validated successfully");
+    logger.info({ envelope }, "Message validated successfully");
 
     switch (envelope.Type) {
       case "SubscriptionConfirmation": {
@@ -20,7 +22,8 @@ export const handleEnvelopePost = async (envelope: any): Promise<void> => {
         break;
       }
       case "Notification": {
-        console.log(`Received message ${envelope.Message}`);
+        logger.info({ message: envelope.Message }, "Recieved message");
+        await processNotification(JSON.parse(envelope.Message));
         break;
       }
       default: {
@@ -28,6 +31,22 @@ export const handleEnvelopePost = async (envelope: any): Promise<void> => {
       }
     }
   });
+};
+
+const processNotification = async (message: CircleNotification) => {
+  if (message.settlement === undefined) return;
+
+  await triggerPaymentToUser(message.settlement.id, calculateAmount(message.settlement));
+};
+
+const calculateAmount = (settlement: Settlement): Amount => {
+  const { totalCredits, paymentFees } = settlement;
+
+  const brutto = Number.parseFloat(totalCredits.amount);
+  const fees = Number.parseFloat(paymentFees.amount);
+  const netto = brutto - fees;
+
+  return { amount: netto.toFixed(2), currency: totalCredits.currency };
 };
 
 const processSubscriptionConfirmation = (envelope: any) => {

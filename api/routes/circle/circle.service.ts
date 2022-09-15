@@ -1,3 +1,4 @@
+import config from "@lib/config";
 import logger from "@lib/logger";
 import { isRouteError, other, RouteError, thirdPartyError } from "@lib/route/error";
 import { decryptCipher } from "@lib/utils/auth";
@@ -5,21 +6,30 @@ import { pgpEncrypt } from "@lib/utils/crypto";
 import { getSafeResultAsync } from "@lib/utils/neverthrow";
 import { circlePublicKey } from "@server";
 import { createHash, randomUUID } from "crypto";
-import { okAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { HttpMethod } from "../endpoints";
 import { User } from "../user/user";
 import {
   CircleAccount,
   CircleCard,
-  CircleCardPaymentResponse,
   CircleCreateCardResponse,
   CirclePayload,
   CirclePayment,
+  CirclePaymentResponse,
+  CircleSettlement,
+  CircleTransferResponse,
   CreateCardPaymentPayload,
   CreateCircleCard,
+  CreateCircleSettlement,
 } from "./circle";
 import { fetchFromCircle } from "./circle-endpoint";
-import { readCircleAccount, readCircleCard, saveCircleAccount, saveCircleCard } from "./circle.repository";
+import {
+  readCircleAccount,
+  readCircleCard,
+  readUserByCardId,
+  saveCircleAccount,
+  saveCircleCard,
+} from "./circle.repository";
 
 export const getOrCreateCircleAccount = (user: User): ResultAsync<CircleAccount, RouteError> => {
   const readAccount = ResultAsync.fromPromise(readCircleAccount(user), (e) =>
@@ -119,10 +129,8 @@ export const createCircleCardPayment = (
     .map(processCircleCardPaymentResponse);
 };
 
-const postCardPaymentToCircle = (
-  body: CreateCardPaymentPayload
-): ResultAsync<CircleCardPaymentResponse, RouteError> => {
-  const newCircleAddressPromise: Promise<CircleCardPaymentResponse> = fetchFromCircle("/payments", {
+const postCardPaymentToCircle = (body: CreateCardPaymentPayload): ResultAsync<CirclePaymentResponse, RouteError> => {
+  const newCircleAddressPromise: Promise<CirclePaymentResponse> = fetchFromCircle("/payments", {
     method: HttpMethod.POST,
     body,
   });
@@ -151,7 +159,7 @@ const mapAccountWithDecryptedCipher = (
   }));
 };
 
-const processCircleCardPaymentResponse = (payment: CircleCardPaymentResponse): CirclePayment => {
+const processCircleCardPaymentResponse = (payment: CirclePaymentResponse): CirclePayment => {
   const { status, id, createDate, updateDate } = payment;
   logger.debug({ payment }, "Payment result from circle");
   return { status, id, createDate, updateDate };
@@ -169,3 +177,69 @@ const addBoilerPlatePayloadData = <T>(createCard: CirclePayload): T => {
     },
   } as T;
 };
+
+export const createSettlement = (createSettlement: CreateCircleSettlement) => {
+  const fetchPayments = ResultAsync.fromPromise(
+    fetchFromCircle<CirclePaymentResponse[]>(`/payments?settlementId=${createSettlement.id}`),
+    (e) => thirdPartyError("Circle API fetch Payments Error", e)
+  );
+
+  fetchPayments.andThen(checkPaymentResponse).andThen(findUserByPaymentCard).andThen(payoutToUser);
+};
+
+const checkPaymentResponse = (payments: CirclePaymentResponse[]): ResultAsync<CirclePaymentResponse, RouteError> => {
+  if (payments.length !== 1)
+    return errAsync(other("Invalid Payment Response from Circle Api, something is wrong here!"));
+
+  return okAsync(payments[0]);
+};
+
+const findUserByPaymentCard = (payment: CirclePaymentResponse) => {
+  const readUser = getSafeResultAsync(readUserByCardId(payment.source.id), (e) =>
+    other("Error while Reading User by Card Id", e)
+  );
+
+  return readUser.andThen(findUsdcAddress).map((address) => ({ ...payment, address }));
+};
+
+const findUsdcAddress = (user: User): ResultAsync<string, RouteError> => {
+  const ethereumAddressShare = user.keyShares.find((share) => share.path === config.ethereumAddressPath);
+
+  if (ethereumAddressShare?.address === undefined)
+    return errAsync(other("No matching Ethereum Address could be found"));
+
+  return okAsync(ethereumAddressShare.address);
+};
+
+const payoutToUser = (paymentAndAddress: PaymentAndAddress): ResultAsync<CircleSettlement, RouteError> => {
+  const requestBody = {
+    idempotencyKey: randomUUID(),
+    source: {
+      type: "wallet",
+      id: paymentAndAddress.merchantWalletId,
+    },
+    destination: {
+      address: paymentAndAddress.address,
+      chain: "MATIC",
+    },
+    amount: calculateAmount(paymentAndAddress),
+  };
+  const postPayout = ResultAsync.fromPromise(
+    fetchFromCircle<CircleTransferResponse>("/transfers", { method: HttpMethod.POST, body: requestBody }),
+    (e) => thirdPartyError("Error while triggering Circle Transfer", e)
+  );
+
+  return postPayout;
+};
+
+const calculateAmount = (payment: CirclePaymentResponse) => {
+  const { amount, fees: paymentFees } = payment;
+
+  const brutto = Number.parseFloat(amount.amount);
+  const fees = Number.parseFloat(paymentFees.amount);
+  const netto = brutto - fees;
+
+  return { amount: netto.toFixed(2), currency: amount.currency };
+};
+
+type PaymentAndAddress = CirclePaymentResponse & { address: string };

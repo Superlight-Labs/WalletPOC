@@ -62,3 +62,26 @@ export const readCircleCard = async (account: CircleAccount): Promise<CircleCard
 
   return circleCard;
 };
+
+export const readUserByCardId = async (cardId: string): Promise<User | RouteError> => {
+  const cardWithUser = await client.circleCard.findUnique({
+    where: {
+      cardId,
+    },
+    include: {
+      circleAccount: {
+        include: {
+          user: {
+            include: {
+              keyShares: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!cardWithUser) return notFound();
+
+  return cardWithUser.circleAccount.user;
+};

@@ -1,7 +1,8 @@
-import { authenticatedRoute } from "@lib/route/handlers";
+import { authenticatedRoute, route } from "@lib/route/handlers";
 import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
+import { okAsync } from "neverthrow";
 import { User } from "../user/user";
-import { CircleCard, CirclePayment, CreateCardPaymentPayload, CreateCircleCard } from "./circle";
+import { CircleCard, CirclePayment, CircleSettlement, CreateCardPaymentPayload, CreateCircleCard } from "./circle";
 import { createCircleCardPayment, getOrCreateCircleCard } from "./circle.service";
 
 const postCreateCircleCard = authenticatedRoute<CircleCard>((req: FastifyRequest, user: User) => {
@@ -22,9 +23,14 @@ const postCreateCirclePaymentCard = authenticatedRoute<CirclePayment>((req: Fast
   return createCircleCardPayment(createCircleCard, user, secret);
 });
 
+const postTriggerSettlement = route<CircleSettlement | null>((req: FastifyRequest) => {
+  return okAsync(null);
+});
+
 const registerCircleRoutes = (server: FastifyInstance) => {
   server.post("/circle/create-card", { schema: circleCreateCardSchema }, postCreateCircleCard);
   server.post("/circle/create-card-payment", { schema: circleCreateCardPaymentSchema }, postCreateCirclePaymentCard);
+  server.post("/circle/trigger-settlement", { schema: circleTriggerSettlementSchema }, postTriggerSettlement);
 };
 
 const circleCreateCardSchema: FastifySchema = {
@@ -86,4 +92,24 @@ const circleCreateCardPaymentSchema: FastifySchema = {
   },
 };
 
+const circleTriggerSettlementSchema: FastifySchema = {
+  body: {
+    type: "object",
+    required: ["settlementId", "amount"],
+    properties: {
+      amount: {
+        type: "object",
+        properties: {
+          amount: { type: "string", maxLength: 100, minLength: 2 },
+          currency: { type: "string", maxLength: 5, minLength: 1 },
+        },
+      },
+      metadata: {
+        type: "string",
+        maxLength: 36,
+        minLength: 36,
+      },
+    },
+  },
+};
 export default registerCircleRoutes;

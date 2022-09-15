@@ -19,6 +19,15 @@ export interface CirclePayment {
   status: "pending" | "confirmed" | "paid" | "failed";
 }
 
+export interface CircleSettlement {
+  id: string;
+}
+
+export interface CreateCircleSettlement {
+  id: string;
+  amount: Amount;
+}
+
 export type CircleResponse<T> = {
   data: T;
 };
@@ -105,12 +114,13 @@ export interface CreateCardPaymentPayload extends BasePaymentPayload {
   encryptedData: string;
 }
 
-export interface CircleCardPaymentResponse {
+export interface CirclePaymentResponse {
   id: string;
   type: string;
   status: "pending" | "confirmed" | "paid" | "failed";
   description: string;
   amount: Amount;
+  fees: Amount;
   createDate: Date;
   updateDate: Date;
   merchantId: string;
@@ -120,6 +130,12 @@ export interface CircleCardPaymentResponse {
   metadata: Metadata;
 }
 
+export interface CircleTransferResponse {
+  id: string;
+
+  // Many more but we dont need them all
+  // for completeness look at https://developers.circle.com/reference/accounts-transfers-create
+}
 export interface Amount {
   amount: string;
   currency: string;

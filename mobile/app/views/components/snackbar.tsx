@@ -30,7 +30,7 @@ const Snackbar = () => {
       return;
     }
 
-    setTimeout(() => setSnackbarState({ status: "Idle", message: "" }), 2000);
+    setTimeout(() => setSnackbarState({ status: "Idle", message: "" }), 5000);
   }, [snackbarState]);
 
   const backgroundColor = getSnackbarColor(snackbarState.status);

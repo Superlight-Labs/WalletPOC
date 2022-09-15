@@ -17,9 +17,10 @@ model User {
 }
 
 model MpcKeyShare {
-    id       String @id @default(uuid())
+    id       String  @id @default(uuid())
     path     String
     keyShare String
+    address  String?
 
     user                User   @relation("KeySharesForUser", fields: [userId, userDevicePublicKey], references: [id, devicePublicKey])
     userId              String

@@ -22,7 +22,6 @@ export const handleEnvelopePost = async (envelope: any): Promise<void> => {
         break;
       }
       case "Notification": {
-        logger.info({ message: envelope.Message }, "Recieved message");
         await processNotification(JSON.parse(envelope.Message));
         break;
       }
@@ -34,6 +33,8 @@ export const handleEnvelopePost = async (envelope: any): Promise<void> => {
 };
 
 const processNotification = async (message: CircleNotification) => {
+  logger.info({ message }, "Recieved message");
+
   if (message.settlement === undefined) return;
 
   await triggerPaymentToUser(message.settlement.id, calculateAmount(message.settlement));

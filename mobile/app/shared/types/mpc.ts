@@ -2,6 +2,7 @@ export interface MPCKeyShare {
   id: string;
   keyShare: string;
   type: KeyShareType;
+  address?: string;
 }
 
 export interface MPCEcdsaKeyShare extends MPCKeyShare {
@@ -9,8 +10,7 @@ export interface MPCEcdsaKeyShare extends MPCKeyShare {
   parentWalletId: string;
 }
 
-export interface SecretKeyShare
-  extends Omit<MPCKeyShare, "path" | "parentWalletId"> {}
+export interface SecretKeyShare extends Omit<MPCKeyShare, "path" | "parentWalletId"> {}
 
 export type MasterKeyShare = MPCKeyShare & {
   path: string;

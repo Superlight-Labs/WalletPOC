@@ -24,6 +24,7 @@
     "@types/node": "^18.7.15",
     "@types/ref-napi": "^3.0.4",
     "ajv": "^6.12.6",
+    "dotenv": "^16.0.2",
     "eslint-plugin-neverthrow": "^1.1.4",
     "ethers": "^5.7.0",
     "fastify": "^4.0.3",

@@ -1,5 +1,6 @@
 import { setNonceRoute } from "@lib/route/handlers";
-import { FastifyInstance, FastifyRequest } from "fastify";
+import { Server } from "@server";
+import { FastifyRequest } from "fastify";
 import { ResultAsync } from "neverthrow";
 import { CreateNonceResponse } from "./auth";
 
@@ -11,7 +12,7 @@ const getPgpSecret = setNonceRoute<CreateNonceResponse>(
   { nonceLength: 32, cookieName: "pgpsecret" }
 );
 
-const registerAuthRoutes = (server: FastifyInstance) => {
+const registerAuthRoutes = (server: Server) => {
   server.get("/auth/get-nonce", getNonce);
   server.get("/auth/get-pgp-secret", getPgpSecret);
 };

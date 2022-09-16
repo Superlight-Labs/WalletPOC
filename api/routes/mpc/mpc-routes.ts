@@ -1,6 +1,7 @@
 import { SocketStream } from "@fastify/websocket";
 import logger from "@lib/logger";
 import { authenticate } from "@lib/utils/auth";
+import { Server } from "@server";
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { User } from "../user/user";
 import { deriveBIP32 } from "./ecdsa/derive/deriveBIP32";
@@ -13,7 +14,7 @@ export type ActionStatus = "Init" | "Stepping";
 
 const route = "/mpc/ecdsa";
 
-const registerMcpRoutes = (server: FastifyInstance): void => {
+const registerMcpRoutes = (server: Server): void => {
   // Routes that need Authentication
   server.register(async function plugin(privatePlugin, opts) {
     privatePlugin.addHook("onRequest", async (req) => {

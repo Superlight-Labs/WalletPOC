@@ -178,23 +178,30 @@ const addBoilerPlatePayloadData = <T>(createCard: CirclePayload): T => {
   } as T;
 };
 
-export const createSettlement = (createSettlement: CreateCircleSettlement) => {
+export const createSettlement = (
+  createSettlement: CreateCircleSettlement
+): ResultAsync<CircleSettlement, RouteError> => {
   const fetchPayments = ResultAsync.fromPromise(
-    fetchFromCircle<CirclePaymentResponse[]>(`/payments?settlementId=${createSettlement.id}`),
+    fetchFromCircle<CirclePaymentResponse[]>(`/payments?settlementId=${createSettlement.settlementId}`),
     (e) => thirdPartyError("Circle API fetch Payments Error", e)
   );
 
-  fetchPayments.andThen(checkPaymentResponse).andThen(findUserByPaymentCard).andThen(payoutToUser);
+  return fetchPayments.andThen(checkPaymentResponse).andThen(findUserByPaymentCard).andThen(payoutToUser);
 };
 
 const checkPaymentResponse = (payments: CirclePaymentResponse[]): ResultAsync<CirclePaymentResponse, RouteError> => {
   if (payments.length !== 1)
     return errAsync(other("Invalid Payment Response from Circle Api, something is wrong here!"));
 
-  return okAsync(payments[0]);
+  const [payment] = payments;
+
+  if (payment.status !== "paid")
+    return errAsync(other("Invalid Payment Response from Circle Api Payment is not registered as paid!"));
+
+  return okAsync(payment);
 };
 
-const findUserByPaymentCard = (payment: CirclePaymentResponse) => {
+const findUserByPaymentCard = (payment: CirclePaymentResponse): ResultAsync<PaymentAndAddress, RouteError> => {
   const readUser = getSafeResultAsync(readUserByCardId(payment.source.id), (e) =>
     other("Error while Reading User by Card Id", e)
   );
@@ -219,11 +226,13 @@ const payoutToUser = (paymentAndAddress: PaymentAndAddress): ResultAsync<CircleS
       id: paymentAndAddress.merchantWalletId,
     },
     destination: {
+      type: "blockchain",
       address: paymentAndAddress.address,
       chain: "MATIC",
     },
     amount: calculateAmount(paymentAndAddress),
   };
+
   const postPayout = ResultAsync.fromPromise(
     fetchFromCircle<CircleTransferResponse>("/transfers", { method: HttpMethod.POST, body: requestBody }),
     (e) => thirdPartyError("Error while triggering Circle Transfer", e)

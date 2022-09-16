@@ -1,9 +1,16 @@
 import { authenticatedRoute, route } from "@lib/route/handlers";
-import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
-import { okAsync } from "neverthrow";
+import { Server } from "@server";
+import { FastifyRequest, FastifySchema } from "fastify";
 import { User } from "../user/user";
-import { CircleCard, CirclePayment, CircleSettlement, CreateCardPaymentPayload, CreateCircleCard } from "./circle";
-import { createCircleCardPayment, getOrCreateCircleCard } from "./circle.service";
+import {
+  CircleCard,
+  CirclePayment,
+  CircleSettlement,
+  CreateCardPaymentPayload,
+  CreateCircleCard,
+  CreateCircleSettlement,
+} from "./circle";
+import { createCircleCardPayment, createSettlement, getOrCreateCircleCard } from "./circle.service";
 
 const postCreateCircleCard = authenticatedRoute<CircleCard>((req: FastifyRequest, user: User) => {
   const signedNonce = req.cookies["pgpsecret"];
@@ -23,11 +30,11 @@ const postCreateCirclePaymentCard = authenticatedRoute<CirclePayment>((req: Fast
   return createCircleCardPayment(createCircleCard, user, secret);
 });
 
-const postTriggerSettlement = route<CircleSettlement | null>((req: FastifyRequest) => {
-  return okAsync(null);
+const postTriggerSettlement = route<CircleSettlement>((req: FastifyRequest) => {
+  return createSettlement(req.body as CreateCircleSettlement);
 });
 
-const registerCircleRoutes = (server: FastifyInstance) => {
+const registerCircleRoutes = (server: Server) => {
   server.post("/circle/create-card", { schema: circleCreateCardSchema }, postCreateCircleCard);
   server.post("/circle/create-card-payment", { schema: circleCreateCardPaymentSchema }, postCreateCirclePaymentCard);
   server.post("/circle/trigger-settlement", { schema: circleTriggerSettlementSchema }, postTriggerSettlement);
@@ -104,7 +111,7 @@ const circleTriggerSettlementSchema: FastifySchema = {
           currency: { type: "string", maxLength: 5, minLength: 1 },
         },
       },
-      metadata: {
+      settlementId: {
         type: "string",
         maxLength: 36,
         minLength: 36,

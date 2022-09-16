@@ -24,7 +24,7 @@ export interface CircleSettlement {
 }
 
 export interface CreateCircleSettlement {
-  id: string;
+  settlementId: string;
   amount: Amount;
 }
 

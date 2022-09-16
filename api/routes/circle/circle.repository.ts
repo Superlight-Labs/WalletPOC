@@ -83,5 +83,5 @@ export const readUserByCardId = async (cardId: string): Promise<User | RouteErro
 
   if (!cardWithUser) return notFound();
 
-  return cardWithUser.circleAccount.user;
+  return cardWithUser.circleAccount.user as User;
 };

@@ -1,5 +1,6 @@
 import { authenticatedRoute, nonceRoute, setNonceRoute } from "@lib/route/handlers";
-import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
+import { Server } from "@server";
+import { FastifyRequest, FastifySchema } from "fastify";
 import { CreateUserRequest, CreateUserResponse, UpdateUserWalletByPathRequest, User, VerifyUserRequest } from "./user";
 import { createUser, updateUserWalletAddress, verifyUser } from "./user.service";
 
@@ -15,7 +16,7 @@ const updateUserAddress = authenticatedRoute<any>((req: FastifyRequest, user: Us
   updateUserWalletAddress(user, req.body as UpdateUserWalletByPathRequest)
 );
 
-const registerUserRoutes = (server: FastifyInstance) => {
+const registerUserRoutes = (server: Server) => {
   server.post("/user/create", { schema: createUserSchema }, postCreateUser);
   server.post("/user/verify", { schema: verifyUserSchema }, postVerifyUser);
   server.post("/user/update-address", updateUserAddress);

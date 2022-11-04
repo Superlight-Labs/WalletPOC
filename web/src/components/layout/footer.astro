@@ -1,0 +1,16 @@
+---
+import {Icon} from 'astro-icon';
+import WaitlistButton from '../shared/waitlist-button';
+---
+
+<footer class="flex p-16 text-xs flex-col flex-1 bg-footer">
+  <div class="flex mb-8 flex-1 justify-between">
+    <Icon name="logomark" class="h-10" />
+
+    <WaitlistButton client:visible />
+  </div>
+  <div class="flex flex-1 flex-row space-x-24">
+    <a href="/" class="text-primary">© Superlight GmbH 2022</a><a href="/imprint">Imprint</a>
+    <a href="/privacy">Privacy</a>
+  </div>
+</footer>

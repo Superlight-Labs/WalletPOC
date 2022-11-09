@@ -42,7 +42,7 @@ export interface GaslessTransferWithAuthorizationRequest {
   value: string;
   validAfter: number;
   validBefore: number;
-  nonce: Array;
+  nonce: Array<any>;
   v: number;
   r: string;
   s: string;

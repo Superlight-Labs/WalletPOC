@@ -1,4 +1,4 @@
-import { notFound, other } from "@lib/error";
+import { other } from "@lib/route/error";
 import { client } from "./../../server";
 import { CreateTatumConnectionRequest, TatumConnection } from "./tatum";
 
@@ -14,9 +14,7 @@ export const persistAccountAddressToTatumIdCreation = async (
   return tatumConnection;
 };
 
-export const findAccountAddressToTatumId = async (
-  request: FindTatumConnection
-): Promise<TatumConnection> => {
+export const findAccountAddressToTatumId = async (request: FindTatumConnection): Promise<TatumConnection> => {
   const { accountAddress } = request;
 
   const tatumConnection = await client.accountAddressToTatumId.findFirst({

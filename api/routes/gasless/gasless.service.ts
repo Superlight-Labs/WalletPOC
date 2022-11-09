@@ -1,4 +1,4 @@
-import { other, RouteError } from "@lib/error";
+import { other, RouteError } from "@lib/route/error";
 import { BigNumber, ethers } from "ethers";
 import { toUtf8Bytes } from "ethers/lib/utils";
 import { ResultAsync } from "neverthrow";

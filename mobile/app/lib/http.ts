@@ -1,4 +1,5 @@
 import { CreateNonceResponse } from "api-types/auth";
+import { User } from "api-types/user";
 import { Platform } from "react-native";
 import { apiKeys } from "../wallet/assets/bitcoin/blockchain/endpoints";
 import { signWithDeviceKeyNoAuth } from "./auth";
@@ -9,7 +10,12 @@ export enum HttpMethod {
 }
 
 export const fetchFromApi = async <T>(path: string, params?: HttpParams): Promise<T> => {
-  const { nonce } = await fetchFrom<CreateNonceResponse>(getApiUrl("http") + "/getNonce");
+  return fetchFrom(getApiUrl("http") + path, params);
+};
+
+export const fetchFromApiAuthenticated = async <T>(path: string, user: User, params?: HttpParams): Promise<T> => {
+  const { id: userId, devicePublicKey } = user;
+  const { nonce } = await fetchFrom<CreateNonceResponse>(getApiUrl("http") + "/auth/get-nonce");
   const deviceSignature = await signWithDeviceKeyNoAuth(nonce);
 
   const paramsWithSignature = {
@@ -19,6 +25,8 @@ export const fetchFromApi = async <T>(path: string, params?: HttpParams): Promis
       headers: {
         ...params?.args?.headers,
         deviceSignature,
+        userId,
+        devicePublicKey,
       },
     },
   };
@@ -43,6 +51,7 @@ const fetchFrom = async <T>(url: string, params?: HttpParams): Promise<T> => {
   const { body, method, args } = params || {};
 
   const response = await fetch(url, {
+    ...args,
     method: determineMethod(body, method),
     body: JSON.stringify(body),
     headers: {
@@ -54,7 +63,7 @@ const fetchFrom = async <T>(url: string, params?: HttpParams): Promise<T> => {
   const content: T = await response.json();
 
   if (!response.ok) {
-    console.error("Error from API, possibly show snackbar", content);
+    throw content;
   }
 
   return content;

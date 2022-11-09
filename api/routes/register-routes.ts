@@ -1,14 +1,16 @@
-import { FastifyInstance } from "fastify";
+import { Server } from "@server";
 import registerAuthRoutes from "./auth/auth-routes";
-import registerMcpRoutes from "./mpc/mpc-routes";
-import registerUserRoutes from "./user/user-routes";
-import registerTatumRoutes from "./tatum/tatum-routes";
+import registerCircleRoutes from "./circle/circle-routes";
 import registerGaslessRoutes from "./gasless/gasless-routes";
+import registerMcpRoutes from "./mpc/mpc-routes";
+import registerTatumRoutes from "./tatum/tatum-routes";
+import registerUserRoutes from "./user/user-routes";
 
-export const registerRoutes = (server: FastifyInstance): void => {
+export const registerRoutes = (server: Server): void => {
   registerUserRoutes(server);
   registerMcpRoutes(server);
   registerAuthRoutes(server);
   registerTatumRoutes(server);
   registerGaslessRoutes(server);
+  registerCircleRoutes(server);
 };

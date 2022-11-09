@@ -3,14 +3,18 @@ import underPressure, { TYPE_HEAP_USED_BYTES, TYPE_RSS_BYTES } from "@fastify/un
 import websocketPlugin from "@fastify/websocket";
 import config from "@lib/config";
 import { PrismaClient } from "@prisma/client";
-import { FastifyInstance } from "fastify";
 import logger from "./lib/logger";
+import { CirclePublicKey } from "./routes/circle/circle";
+import { fetchFromCircle } from "./routes/circle/circle-endpoint";
 import { registerRoutes } from "./routes/register-routes";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fastify = require("fastify");
+import fastify from "fastify";
 
-const server: FastifyInstance = fastify({ logger });
+const server = fastify({ logger });
+
+export type Server = typeof server;
+
+logger.info({ config }, "Started up server with config");
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 server.register(websocketPlugin);
@@ -38,6 +42,10 @@ export const client: PrismaClient = new PrismaClient({
 });
 
 registerRoutes(server);
+
+// TODO - this could be stored in the DB and needs some kind of re-fetching mechanism
+export let circlePublicKey: CirclePublicKey;
+fetchFromCircle<CirclePublicKey>("/encryption/public").then((pub) => (circlePublicKey = pub));
 
 server.all("*", (request, reply) => {
   reply.status(404).send({ error: "Route does not exist" });

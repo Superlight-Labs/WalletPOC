@@ -1,4 +1,4 @@
-import { BitcoinBalance } from "packages/blockchain-api-client/src/blockchains/bitcoin/types";
+import { BitcoinBalance, BitcoinTransaction } from "packages/blockchain-api-client/src/blockchains/bitcoin/types";
 import { EthereumTransaction } from "packages/blockchain-api-client/src/blockchains/ethereum/types";
 import { AccountKeyShare, AddressKeyShare, ChangeKeyShare } from "shared/types/mpc";
 import { VirtualAccount } from "./virtual-wallet";

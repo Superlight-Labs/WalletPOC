@@ -24,3 +24,18 @@ export const authState = atom({
   default: initialAuthState,
   effects_UNSTABLE: [persistAtom],
 });
+
+export type LoadingState = {
+  status: "Loading" | "Error" | "Success" | "Idle";
+  message: string;
+};
+
+const initialApiLoadingState: LoadingState = {
+  status: "Idle",
+  message: "",
+};
+
+export const apiLoadingState = atom({
+  key: "ApiLoadingState",
+  default: initialApiLoadingState,
+});

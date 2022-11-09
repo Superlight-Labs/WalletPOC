@@ -6,6 +6,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Nunito', ...defaultTheme.fontFamily.sans],
+        serif: ['Source Serif 4', ...defaultTheme.fontFamily.serif],
       },
       colors: {
         primary: 'var(--color-primary)',
@@ -21,7 +22,6 @@ module.exports = {
         default: 'var(--color-background)',
         offset: 'var(--color-background-offset)',
         footer: 'var(--color-background-footer)',
-        button: 'var(--color-text)',
       },
       borderColor: {
         default: 'var(--color-border)',

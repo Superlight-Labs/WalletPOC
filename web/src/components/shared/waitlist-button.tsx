@@ -7,7 +7,7 @@ const WaitlistButton = () => {
   };
 
   return (
-    <button onClick={click} className="bg-button text-contrast px-8 fw py-2 font-bold rounded-full">
+    <button onClick={click} className="bg-white text-black px-12 fw py-2 font-bold rounded-full">
       Join the waitlist
     </button>
   );

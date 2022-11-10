@@ -1,5 +1,5 @@
   :root{
-    --color-primary: theme("colors.lime.400");
+    --color-primary: #83DEA8;
     --color-secondary: theme("colors.indigo.500");
     --color-text: theme("colors.gray.900");
     --color-text-offset: theme("colors.gray.600");

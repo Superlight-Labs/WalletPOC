@@ -12,7 +12,7 @@ const WaitlistForm = () => {
   };
 
   return (
-    <div className="flex justify-center p-12">
+    <div className="flex justify-center px-12">
       <label htmlFor="WaitlistForm" className="text-xs sr-only">
         Sign up here to join the Waitlist and keep updated
       </label>

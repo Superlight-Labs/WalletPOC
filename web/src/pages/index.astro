@@ -4,11 +4,14 @@ import Splash from '~/components/home/splash.astro';
 
 import Layout from '~/components/layout/layout.astro';
 import '~/styles/index.css';
-import WaitlistForm from '~/components/shared/waitlist-form';
+import Qualities from '~/components/home/qualities.astro';
 ---
 
 <Layout>
   <Header />
-  <Splash />
-  <main class="px-8 py-32 space-y-24"></main>
+
+  <main class="space-y-24 bg-white">
+    <Splash />
+    <Qualities />
+  </main>
 </Layout>

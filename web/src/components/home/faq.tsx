@@ -20,7 +20,12 @@ const faqItems = [
     children: <p>Tech stuff super toll</p>,
     isExpanded: false,
   },
-  {id: 'seid-bank', title: 'Seid ihr eine Bank?', isExpanded: false, children: <p>na sicha ned</p>},
+  {
+    id: 'seid-bank',
+    title: 'Seid ihr eine Bank?',
+    isExpanded: false,
+    children: <p>na sicha ned. Lorem ipsum dolores abridge</p>,
+  },
   {
     id: 'kann-iban-senden',
     title: 'Kann ich eine Kryptowährung auch an eine Iban senden?',
@@ -31,21 +36,27 @@ const faqItems = [
 
 const FAQ = () => {
   const [items, setItems] = useState(faqItems);
+  const [anyOpen, setAnyOpen] = useState(false);
 
   const clicked = (clickedIndex: number) => {
     setItems(faqItems.map((item, index) => ({...item, isExpanded: index === clickedIndex})));
+    setAnyOpen(clickedIndex !== -1);
   };
+
+  const list = (
+    <ul>
+      {items.map(({children, title, id, isExpanded}, index) => (
+        <FAQItem key={id + index} title={title} isExpanded={isExpanded} onClick={clicked} index={index} id={id}>
+          {children}
+        </FAQItem>
+      ))}
+    </ul>
+  );
 
   return (
     <section className=" px-2 md:px-44">
       <h2 className=" text-3xl mb-12">Frequently asked Questions</h2>
-      <ul>
-        {items.map(({children, title, id, isExpanded}, index) => (
-          <FAQItem title={title} isExpanded={isExpanded} onClick={clicked} index={index} id={id}>
-            {children}
-          </FAQItem>
-        ))}
-      </ul>
+      {list}
     </section>
   );
 };

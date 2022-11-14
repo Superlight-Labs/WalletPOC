@@ -4,6 +4,7 @@ interface Config {
   databaseUrl: string;
   cookieSecret: string;
   ethereumAddressPath: string;
+  mpcArch: string;
 }
 
 const initConfig = (): Config => {
@@ -13,6 +14,7 @@ const initConfig = (): Config => {
     databaseUrl: process.env.MAIN_DB_URL || "",
     cookieSecret: process.env.COOKIE_SECRET || "",
     ethereumAddressPath: process.env.ETHEREUM_ADDRESS_PATH || "",
+    mpcArch: process.env.MPC_ARCH || "",
   };
 };
 

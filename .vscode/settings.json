@@ -1,0 +1,4 @@
+{
+  "appService.defaultWebAppToDeploy": "/subscriptions/092766eb-c248-4999-acf0-4220d2428aff/appservices/subscriptions/092766eb-c248-4999-acf0-4220d2428aff/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/superlight-api-test",
+  "appService.deploySubpath": "api"
+}

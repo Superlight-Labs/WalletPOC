@@ -19,7 +19,7 @@
   "dependencies": {
     "@fastify/cookie": "^7.0.0",
     "@fastify/under-pressure": "^7.0.0",
-    "@fastify/websocket": "^6.0.1",
+    "@fastify/websocket": "^7.1.0",
     "@prisma/client": "^4.0.0",
     "@types/node": "^18.7.15",
     "@types/ref-napi": "^3.0.4",
@@ -50,5 +50,8 @@
     "tsc-alias": "^1.6.7",
     "tweetnacl": "^1.0.3",
     "typescript": "^4.6.4"
+  },
+  "prisma": {
+    "schema": "./prisma/schema.prisma"
   }
 }

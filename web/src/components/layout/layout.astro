@@ -3,6 +3,9 @@ import Footer from '~/components/layout/footer.astro';
 
 const {site} = Astro;
 const image = new URL('social.png', site);
+import i18next from 'i18next';
+
+import {HeadHrefLangs} from 'astro-i18next/components';
 const description = 'Superlight. Send, recieve and pay with Cryptocurrency. Without transactioncosts.';
 import '@fontsource/nunito/400.css';
 import '@fontsource/nunito/800.css';
@@ -10,7 +13,7 @@ import '@fontsource/nunito/200.css';
 import '@fontsource/source-serif-4/400.css';
 ---
 
-<html lang="en" class="h-full motion-safe:scroll-smooth">
+<html lang={i18next.language} class="h-full motion-safe:scroll-smooth">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
@@ -27,6 +30,7 @@ import '@fontsource/source-serif-4/400.css';
     <meta property="og:image" content={image} />
     <meta property="og:url" content={site} />
     <meta name="twitter:card" content="summary_large_image" />
+    <HeadHrefLangs />
   </head>
   <body class="h-full overflow-x-hidden text-base bg-default text-default selection:bg-secondary selection:text-white">
     <slot />

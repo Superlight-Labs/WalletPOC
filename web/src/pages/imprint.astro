@@ -1,10 +1,13 @@
 ---
-import Layout from '~/components/layout/layout.astro';
-import '~/styles/index.css';
+import { changeLanguage } from "i18next";
+import Layout from "~/components/layout/layout.astro";
+import "~/styles/index.css";
+
+changeLanguage("en");
 ---
 
 <Layout>
   <div class="px-8 py-32 space-y-24">
-    <span>This is imprint</span>
+    <span>This is imprint 3</span>
   </div>
 </Layout>

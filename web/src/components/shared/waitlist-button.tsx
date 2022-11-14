@@ -1,3 +1,5 @@
+import {t} from 'i18next';
+
 const WaitlistButton = () => {
   const click = () => {
     const form = document.querySelector('#WaitlistForm');
@@ -8,7 +10,7 @@ const WaitlistButton = () => {
 
   return (
     <button onClick={click} className="bg-white text-black px-12 fw py-2 font-bold rounded-full">
-      Join the waitlist
+      {t('waitlist.button')}
     </button>
   );
 };

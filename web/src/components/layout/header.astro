@@ -1,5 +1,6 @@
 ---
 import {Icon} from 'astro-icon';
+import LanguageSwitch from '../shared/language-switch';
 import WaitlistButton from '../shared/waitlist-button';
 ---
 
@@ -11,8 +12,10 @@ import WaitlistButton from '../shared/waitlist-button';
     <a href="#">Personal</a>
     <a href="#">Business</a>
   </div> -->
-  <div class="w-44 hidden sm:block"></div>
-  <a class="flex h-14 items-center gap-3 hover:!text-default" href="#">
+
+  <LanguageSwitch client:visible />
+  <!-- <div class="w-44 hidden sm:block"></div> -->
+  <a class="flex h-14 items-center" href="#">
     <h1 class="sr-only">Superlight</h1>
     <Icon name="logomark" class="h-10 sm:hidden lg:block block sm:h-12" />
     <Icon name="logo-solo" class="h-10 hidden sm:block lg:hidden sm:h-12" />

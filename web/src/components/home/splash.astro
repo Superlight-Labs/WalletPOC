@@ -4,6 +4,7 @@ import {Image} from '@astrojs/image/components';
 import iPhone from '~/assets/splash/iPhone.png';
 import WaitlistForm from '../shared/waitlist-form';
 import {Icon} from 'astro-icon';
+import {Trans} from 'astro-i18next/components';
 ---
 
 <section class="relative h-full bg-black text-white">
@@ -13,9 +14,11 @@ import {Icon} from 'astro-icon';
   </div>
   <div class="relative h-full flex flex-col items-center pt-52 flex-1 justify-start space-y-16 pb-32">
     <h2 class="text-center mx-2.5 text-8xl">
-      WIE EINE <span class="text-pink-400 font-thin font-serif">bank</span><br />
-      ABER BESSER IN<br />
-      <span class="text-primary font-thin font-serif">jedem</span> ASPEKT
+      <Trans i18nKey="splash.headline">
+        WIE EINE <span class="text-pink-400 font-thin font-serif">bank</span><br />
+        ABER BESSER IN<br />
+        <span class="text-primary font-thin font-serif">jedem</span> ASPEKT
+      </Trans>
     </h2>
     <div><WaitlistForm client:load /></div>
     <div class="mx-16">

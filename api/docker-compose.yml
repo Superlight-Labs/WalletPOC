@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  database:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=database
+      - POSTGRES_PASSWORD=database
+    ports:
+      - "5432:5432"
+    volumes:
+      - database:/var/lib/postgresql/data
+  api:
+    restart: always
+    build: .
+    command: ["npm", "start"]
+    depends_on:
+      - database
+    environment:
+      - POSTGRES_USER=database
+      - POSTGRES_PASSWORD=database
+      - MPC_ARCH=-intel
+      - MAIN_DB_URL=postgresql://main:main@0.0.0.0:5432/postgres
+      - COOKIE_SECRET="our-secure-cookie-secret"
+      - ETHEREUM_ADDRESS_PATH="m/44'/60'/0'/0/0"
+    ports:
+      - "8080:8080"
+volumes:
+  database:
+    driver: local

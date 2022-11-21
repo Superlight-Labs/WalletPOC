@@ -1,13 +1,22 @@
-import * as React from 'react';
+import * as React from "react";
+import { useEffect } from "react";
 
 const WaitlistForm = () => {
-  const [email, setEmail] = React.useState('');
+  const [email, setEmail] = React.useState("");
+
+  useEffect(() => {
+    fetch("/api/email", { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Test", data);
+      });
+  }, []);
 
   const changeValue = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   };
 
-  const handleSubmit: React.FormEventHandler = event => {
+  const handleSubmit: React.FormEventHandler = (event) => {
     event.preventDefault();
   };
 
@@ -19,7 +28,8 @@ const WaitlistForm = () => {
       <form
         id="WaitlistForm"
         onSubmit={handleSubmit}
-        className="sm:bg-stone-900 flex flex-col sm:flex-row rounded-full">
+        className="sm:bg-stone-900 flex flex-col sm:flex-row rounded-full"
+      >
         <input
           className=" bg-stone-900 text-slate-300 px-8 fw py-4 rounded-full mb-4 sm:mb-0"
           autoComplete="email"

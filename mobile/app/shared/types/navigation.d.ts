@@ -14,24 +14,28 @@ import { EthereumTransaction } from "packages/blockchain-api-client/src/blockcha
 type NavigationRoutes = {
   Home: undefined;
 
-  //Bitcoin Screens
+  // Bitcoin Screens
   BitcoinScreen: { isStateEmpty: boolean; user: User };
   BitcoinSendScreen: { account: BitcoinWallet };
   BitcoinReceiveScreen: { account: BitcoinWallet };
   BitcoinSingleTransactionScreen: { transaction: BitcoinTransaction; wallet: BitcoinWallet };
 
-  //Ethereum Screens
+  // Ethereum Screens
   EthereumScreen: { isStateEmpty: boolean; user: User };
   EthereumSendScreen: { signer?: MPCSigner; service?: EthereumService };
   EthereumReceiveScreen: { account: EthereumWallet };
   EthereumSingleTransactionScreen: { transaction: EthereumTransaction; wallet: EthereumWallet };
 
-  //Ethereum Token Screens
+  // Ethereum Token Screens
   TokenWalletScreen: { wallet: EthereumWallet; token: ERC20Token };
   TokenSendScreen: { wallet: EthereumWallet; token: ERC20Token };
   TokenSwapScreen: { wallet: EthereumWallet };
 
-  //Ethereum Polygon Screens
+  // Fiat Management
+  FiatManagementScreen: { address: string; user: User };
+  FiatCardPaymentScreen: undefined;
+
+  // Ethereum Polygon Screens
   EthereumPolygonScreen: { address: string; signer?: MPCSigner };
 
   PolygonTokenWalletScreen: { address: string; token: PolygonERC20Token; polygonClient: POSClient };
@@ -39,8 +43,6 @@ type NavigationRoutes = {
 
   PolygonBridgeScreen: { address: string; posClient: POSClient; plasmaClient: PlasmaClient };
 
-  //Ramp it on
-
+  // Ramp it on
   RampOn: { userAddress: string; token: string };
-
 };

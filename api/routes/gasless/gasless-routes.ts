@@ -1,5 +1,6 @@
-import { nonceRoute } from "@lib/route";
-import { FastifyInstance, FastifyRequest, FastifySchema } from "fastify";
+import { nonceRoute } from "@lib/route/handlers";
+import { Server } from "@server";
+import { FastifyRequest, FastifySchema } from "fastify";
 import {
   GaslessApproveRequest,
   GaslessPermitRequest,
@@ -12,10 +13,10 @@ import {
 import {
   fetchTankAddress,
   fetchTankBalance,
+  gaslessApprove,
   relayGaslessPermit,
   relayGaslessTransfer,
   relayGaslessTransferWithAuthorization,
-  gaslessApprove,
 } from "./gasless.service";
 
 const getTankBalance = async (): Promise<TankBalanceResponse> => {
@@ -42,7 +43,7 @@ const postRelayGaslessTransferWithAuthorization = nonceRoute<GaslessTransactionR
   return relayGaslessTransferWithAuthorization(req.body as GaslessTransferWithAuthorizationRequest);
 });
 
-const registerGaslessRoutes = (server: FastifyInstance) => {
+const registerGaslessRoutes = (server: Server) => {
   server.get("/gasless/tankBalance", getTankBalance);
   server.get("/gasless/tankAddress", getTankAddress);
   server.post("/gasless/approve", { schema: relayGaslessApproveSchema }, postRelayGaslessApprove);

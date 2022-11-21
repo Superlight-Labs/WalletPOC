@@ -1,9 +1,11 @@
+import { CircleWallet } from "../circle/circle";
 import { MpcKeyShare } from "./wallet";
 
 export interface User {
   id: string;
   devicePublicKey: string;
   keyShares: MpcKeyShare[];
+  circleWallet?: CircleWallet;
 }
 
 export interface CreateUserRequest {
@@ -20,4 +22,9 @@ export interface VerifyUserRequest {
   message: string;
   deviceSignature: string;
   devicePublicKey: string;
+}
+
+export interface UpdateUserWalletByPathRequest {
+  path: string;
+  address: string;
 }

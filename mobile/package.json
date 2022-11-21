@@ -37,6 +37,7 @@
     "jsbi": "^3.1.4",
     "process": "^0.11.10",
     "react": "17.0.2",
+    "react-hook-form": "^7.34.2",
     "react-native": "0.68.1",
     "react-native-blockchain-crypto-mpc": "^0.1.10",
     "react-native-crypto": "^2.2.0",
@@ -44,6 +45,7 @@
     "react-native-safe-area-context": "^4.2.5",
     "react-native-screens": "^3.13.1",
     "react-native-secure-encryption-module": "^0.0.7",
+    "react-native-webview": "11.18.1",
     "readable-stream": "^1.0.33",
     "recoil": "^0.7.4",
     "recoil-persist": "^4.2.0",
@@ -51,8 +53,7 @@
     "stream-browserify": "^1.0.0",
     "vm-browserify": "^0.0.4",
     "web3-eth-abi": "^1.7.5",
-    "zksync": "^0.13.1",
-    "react-native-webview": "11.18.1"
+    "zksync": "^0.13.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

@@ -8,6 +8,18 @@ import Elliptic from 'elliptic';
 import { FastifyRequest } from 'fastify';
 import { ResultAsync } from 'neverthrow';
 
+const backupKey = crypto.generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+  publicKeyEncoding: {
+    type: 'spki',
+    format: 'der',
+  },
+  privateKeyEncoding: {
+    type: 'pkcs8',
+    format: 'der',
+  },
+});
+
 const testMcp = route<string>((_req: FastifyRequest) => {
   testCrypto();
 
@@ -50,13 +62,15 @@ const testCrypto = () => {
   const k1 = c1.getNewShare();
   const k2 = c2.getNewShare();
   const publicKey = c1.getPublicKey();
-  logger.info('public key hey', publicKey.toString('hex'));
+  logger.info({ public: publicKey.toString('hex') }, 'public key');
 
   const key = ec.keyFromPublic(publicKey.slice(23));
 
-  logger.info('Sign');
   const data = Buffer.from('Hello world');
   const hash = crypto.createHash('SHA256').update(data).digest();
+
+  logger.info({ data, hash }, 'Sign');
+
   c1 = Context.createEcdsaSignContext(1, k1, hash, false);
   c2 = Context.createEcdsaSignContext(2, k2, hash, false);
   utils.run(c1, c2);
@@ -64,6 +78,23 @@ const testCrypto = () => {
   logger.info('Signature 2:', c2.getSignature().toString('hex'));
   const signature = new Signature(c1.getSignature());
   logger.info({ sig: key.verify(hash, signature) }, 'Signature');
+
+  c1 = Context.createBackupEcdsaKey(1, k1, backupKey.publicKey);
+  c2 = Context.createBackupEcdsaKey(2, k2, backupKey.publicKey);
+  utils.run(c1, c2);
+  const backup = c1.getBackup();
+  logger.info({ valid: utils.verifyEcdsaBackupKey(backupKey.publicKey, publicKey, backup) }, 'Backup verify');
+  const privateKey = utils.restoreEcdsaKey(backupKey.privateKey, publicKey, backup);
+  const key2 = ec.keyFromPrivate(privateKey.slice(33, 65));
+
+  logger.info(
+    { public: key2.getPublic('hex'), private: privateKey.toString('hex') },
+    'Exported/Backuped Public and Private Keys'
+  );
+
+  const verifyBackupPriv = key.verify(hash, key2.sign(hash));
+
+  logger.info({ valid: verifyBackupPriv }, 'Exported private key can sign and the old public key can valideate?');
 };
 
 export default testMcp;

@@ -1,28 +1,28 @@
 import { SocketStream } from "@fastify/websocket";
 import logger from "@lib/logger";
+import { authenticate } from "@lib/utils/auth";
+import { Server } from "@server";
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { User } from "../user/user";
-import { authenticate } from "./authentication";
 import { deriveBIP32 } from "./ecdsa/derive/deriveBIP32";
 import { generateEcdsaKey } from "./ecdsa/generateEcdsa";
 import { generateGenericSecret } from "./ecdsa/generateSecret";
 import { importGenericSecret } from "./ecdsa/importSecret";
 import { signWithEcdsaShare } from "./ecdsa/sign";
-import { verifyEcdsaSignature } from "./ecdsa/verify";
 
 export type ActionStatus = "Init" | "Stepping";
 
 const route = "/mpc/ecdsa";
 
-const registerMcpRoutes = (server: FastifyInstance): void => {
-  // Open Routes
-  server.post(route + "/verify", verifyEcdsaSignature);
-
+const registerMcpRoutes = (server: Server): void => {
   // Routes that need Authentication
   server.register(async function plugin(privatePlugin, opts) {
-    privatePlugin.addHook("onRequest", authenticate);
-    privatePlugin.addHook("onError", async (request, reply, error) => {
-      request.log.error({ request: request.body, error }, "Error on MPC Route");
+    privatePlugin.addHook("onRequest", async (req) => {
+      const userResult = await authenticate(req);
+
+      if (userResult.isErr()) throw userResult.error;
+
+      req["user"] = userResult.value;
     });
 
     registerPrivateMpcRoutes(privatePlugin);
@@ -31,63 +31,43 @@ const registerMcpRoutes = (server: FastifyInstance): void => {
 
 const registerPrivateMpcRoutes = (server: FastifyInstance) => {
   server.register(async function (server) {
-    server.get(
-      route + "/generateSecret",
-      { websocket: true },
-      (connection: SocketStream, req: FastifyRequest) => {
-        const user: User = req["user"];
-        generateGenericSecret(connection, user);
-      }
-    );
+    server.get(route + "/generateSecret", { websocket: true }, (connection: SocketStream, req: FastifyRequest) => {
+      const user: User = req["user"];
+      generateGenericSecret(connection, user);
+    });
   });
   server.register(async function (server) {
-    server.get(
-      route + "/import",
-      { websocket: true },
-      (connection: SocketStream, req: FastifyRequest) => {
-        const user: User = req["user"];
-        importGenericSecret(connection, user);
-      }
-    );
+    server.get(route + "/import", { websocket: true }, (connection: SocketStream, req: FastifyRequest) => {
+      const user: User = req["user"];
+      importGenericSecret(connection, user);
+    });
   });
   server.register(async function (server) {
-    server.get(
-      route + "/derive",
-      { websocket: true },
-      (connection: SocketStream, req: FastifyRequest) => {
-        const usage = server.memoryUsage();
-        logger.info(
-          {
-            ...usage,
-            heapUsed: usage.heapUsed / 1000000 + " MB",
-            rssBytes: usage.rssBytes / 1000000 + " MB",
-          },
-          "Staring Bip Derive - Monitoring Memory usage"
-        );
-        const user: User = req["user"];
-        deriveBIP32(connection, user);
-      }
-    );
+    server.get(route + "/derive", { websocket: true }, (connection: SocketStream, req: FastifyRequest) => {
+      const usage = server.memoryUsage();
+      logger.info(
+        {
+          ...usage,
+          heapUsed: usage.heapUsed / 1000000 + " MB",
+          rssBytes: usage.rssBytes / 1000000 + " MB",
+        },
+        "Staring Bip Derive - Monitoring Memory usage"
+      );
+      const user: User = req["user"];
+      deriveBIP32(connection, user);
+    });
   });
   server.register(async function (server) {
-    server.get(
-      route + "/generateEcdsa",
-      { websocket: true },
-      (connection: SocketStream, req: FastifyRequest) => {
-        const user: User = req["user"];
-        generateEcdsaKey(connection, user);
-      }
-    );
+    server.get(route + "/generateEcdsa", { websocket: true }, (connection: SocketStream, req: FastifyRequest) => {
+      const user: User = req["user"];
+      generateEcdsaKey(connection, user);
+    });
   });
   server.register(async function (server) {
-    server.get(
-      route + "/sign",
-      { websocket: true },
-      (connection: SocketStream, req: FastifyRequest) => {
-        const user: User = req["user"];
-        signWithEcdsaShare(connection, user);
-      }
-    );
+    server.get(route + "/sign", { websocket: true }, (connection: SocketStream, req: FastifyRequest) => {
+      const user: User = req["user"];
+      signWithEcdsaShare(connection, user);
+    });
   });
 };
 

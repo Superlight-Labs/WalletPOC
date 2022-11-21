@@ -79,7 +79,7 @@ const createNewProfile = async (devicePublicKey: string): Promise<User> => {
       devicePublicKey,
     },
     method: HttpMethod.POST,
-    args: { credentials: "include" },
+    args: { credentials: "include", headers: { deviceSignature } },
   });
 
   return {

@@ -8,17 +8,19 @@ generator client {
 }
 
 model User {
-    id              String        @default(uuid())
+    id              String         @default(uuid())
     devicePublicKey String
-    keyShares       MpcKeyShare[] @relation("KeySharesForUser")
+    keyShares       MpcKeyShare[]  @relation("KeySharesForUser")
+    circleWallet    CircleAccount? @relation("CircleAccountForUser")
 
     @@unique([id, devicePublicKey])
 }
 
 model MpcKeyShare {
-    id       String @id @default(uuid())
+    id       String  @id @default(uuid())
     path     String
     keyShare String
+    address  String?
 
     user                User   @relation("KeySharesForUser", fields: [userId, userDevicePublicKey], references: [id, devicePublicKey])
     userId              String
@@ -32,4 +34,22 @@ model AccountAddressToTatumId {
     accountAddress String @id
     //external id from tatum
     tatumId        String
+}
+
+model CircleAccount {
+    user                User   @relation("CircleAccountForUser", fields: [userId, userDevicePublicKey], references: [id, devicePublicKey])
+    userId              String
+    userDevicePublicKey String
+
+    id    String       @id @default(uuid())
+    cards CircleCard[] @relation("CircleAccountForCircleCard")
+
+    @@unique([userId, userDevicePublicKey])
+}
+
+model CircleCard {
+    circleAccount CircleAccount @relation("CircleAccountForCircleCard", fields: [accountId], references: [id])
+    accountId     String
+
+    cardId String @id
 }

@@ -59,24 +59,27 @@ This repository acts as a Proof of Concept for the application that is the final
 The Goals of the whole project, which are explained down below, are ambitious. To make sure our goals are within reach of the team and to make sure
 the existing ecosystem and technologies are matured enough, this Proof of Concept was built to implement each use-case in a minimal way.
  
-<p align="right"><a href="#readme-top">🔝</a></p> 
+<p align="right"><a href="#readme-top">🔝</a></p>
 
 ## 🚀 Unique Features
- 
+
 ### Free transactions
+
 Send, receive or do whatever you want with your stablecoins, for free. (Additional tokens included)
- 
+
 ### Fully banking compatible
+
 Don’t be cut off. Use SEPA and Wiretransfer, without owning Fiat.
 Debitcards are in the planning.
- 
+
 ### No Know-How required
+
 You don’t know anything about blockchains? That's not necessary. We abstract all the complicated stuff away.
- 
-<p align="right"><a href="#readme-top">🔝</a></p> 
+
+<p align="right"><a href="#readme-top">🔝</a></p>
 
 ## ✅ Goals of this Prototype
- 
+
 1. Fully non-custodial wallet
 2. High Security by relying on Multi Party Computation (Based on [Unbounds C++ MPC Library](https://github.com/unboundsecurity/blockchain-crypto-mpc))
 3. Use of known and established handling such as in mobile banking apps
@@ -84,42 +87,42 @@ You don’t know anything about blockchains? That's not necessary. We abstract a
 5. Complete gasless (free) transfers of stablecoins (including various other tokens)
 6. Full interoperability between the blockchain and traditional banking part - but without having to own FIAT (utilizing [Circle](https://www.circle.com/en/))
 7. Absolute transparency through building in public (open source github repository)
- 
-<p align="right"><a href="#readme-top">🔝</a></p> 
+
+<p align="right"><a href="#readme-top">🔝</a></p>
 
 ## ⚒️ Goals for the Future
- 
+
 1. Audit Security
 2. Streamline USDC/Polygon features via new UI
 3. Fully Leverage Paymaster to enable free transactions
 4. Fully interop between FIAT and Crypto by providing a Debit Card
- 
-<p align="right"><a href="#readme-top">🔝</a></p> 
+
+<p align="right"><a href="#readme-top">🔝</a></p>
 
 ## 🧱 Building Blocks
- 
+
 This Project is built as a Monorepo. The main parts of this Application each have a separate sub-directory. They could be moved to their own repository at any moment.
- 
+
 - [Mobile App](https://github.com/lauhon/WalletPOC/tree/master/mobile)
 - [Api](https://github.com/lauhon/WalletPOC/tree/master/api)
 - [Database](https://github.com/lauhon/WalletPOC/tree/master/database)
 - [Packages](https://github.com/lauhon/WalletPOC/tree/master/packages)
 - [Services](https://github.com/lauhon/WalletPOC/tree/master/services)
- 
- 
+
 <p align="right"><a href="#readme-top">🔝</a></p> 
  
 ## 📄 License
  
-This project is open source and it is granted to use it as reference to learn or build related products.
-At this point there is no defined License in play, this still needs to be defined.
- 
-<p align="right"><a href="#readme-top">🔝</a></p> 
+GNU AFFERO GENERAL PUBLIC LICENSE
+
+The GNU Affero General Public License is designed specifically to ensure that, in such cases, the modified source code becomes available to the community. It requires the operator of a network server to provide the source code of the modified version running there to the users of that server. Therefore, public use of a modified version, on a publicly accessible server, gives the public access to the source code of the modified version.
+
+<p align="right"><a href="#readme-top">🔝</a></p>
 
 ## 👋🏽 Contact
- 
+
 Please feel free to [open Issues](https://github.com/lauhon/WalletPOC/issues) if you want to point out bugs or problems or [start a discussion](https://github.com/lauhon/WalletPOC/discussions) to request features or just get in touch with us.
- 
+
 Any input or additions to our community are highly appreciated!
- 
+
 <p align="right"><a href="#readme-top">🔝</a></p>

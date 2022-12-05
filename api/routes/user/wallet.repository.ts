@@ -11,7 +11,7 @@ export const deleteWallet = (wallet: MpcKeyShare) => {
   });
 };
 
-export const createDerivedWallet = (user: User, share: string, path: string): Promise<MpcKeyShare> => {
+export const createDerivedWallet = async (user: User, share: string, path: string): Promise<MpcKeyShare> => {
   return client.mpcKeyShare.create({
     data: {
       keyShare: share,

@@ -212,7 +212,7 @@ const findUserByPaymentCard = (payment: CirclePaymentResponse): ResultAsync<Paym
 const findUsdcAddress = (user: User): ResultAsync<string, RouteError> => {
   const ethereumAddressShare = user.keyShares.find((share) => share.path === config.ethereumAddressPath);
 
-  if (ethereumAddressShare?.address === undefined)
+  if (!ethereumAddressShare || ethereumAddressShare.address === null)
     return errAsync(other("No matching Ethereum Address could be found"));
 
   return okAsync(ethereumAddressShare.address);
